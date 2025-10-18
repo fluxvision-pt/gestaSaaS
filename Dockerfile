@@ -40,23 +40,27 @@ FROM node:18-alpine AS production
 
 WORKDIR /app
 
-# Instala apenas dependências de produção do backend
+# Instala dependências de sistema necessárias
+RUN apk add --no-cache dumb-init
+
+# Cria usuário não-root para segurança
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001 -G nodejs
+
+# Copia e instala apenas dependências de produção do backend
 COPY backend/package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
 # Copia o backend buildado
 COPY --from=backend-build /app/backend/dist ./dist
-COPY --from=backend-build /app/backend/node_modules ./node_modules
 
 # Copia o frontend buildado para ser servido pelo backend
 COPY --from=frontend-build /app/frontend/dist ./public
 
-# Copia arquivos de configuração necessários
-COPY backend/.env.example ./.env
+# Muda ownership dos arquivos para o usuário não-root
+RUN chown -R nestjs:nodejs /app
 
-# Cria usuário não-root para segurança
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nestjs -u 1001
+# Muda para usuário não-root
 USER nestjs
 
 # Expõe a porta da aplicação
@@ -66,5 +70,10 @@ EXPOSE 3000
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Comando para iniciar a aplicação
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/api/v1/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+
+# Comando para iniciar a aplicação usando dumb-init
+ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "dist/main"]

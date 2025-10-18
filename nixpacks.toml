@@ -1,8 +1,0 @@
-[build]
-# Força o uso do Dockerfile ao invés de detecção automática
-dockerfile = "Dockerfile"
-
-[variables]
-# Variáveis de ambiente para o build
-NODE_ENV = "production"
-PORT = "3000"

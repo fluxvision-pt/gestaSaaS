@@ -16,6 +16,7 @@ import { KmModule } from './modules/km/km.module';
 import { RelatoriosModule } from './modules/relatorios/relatorios.module';
 import { ConfiguracoesModule } from './modules/configuracoes/configuracoes.module';
 import { AuditoriaModule } from './modules/auditoria/auditoria.module';
+import { HealthModule } from './health/health.module';
 
 // Guards
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
@@ -88,6 +89,7 @@ import { Auditoria } from './modules/auditoria/entities/auditoria.entity';
     }),
 
     // Módulos da aplicação
+    HealthModule,
     AuthModule,
     TenancyModule,
     UsuariosModule,
