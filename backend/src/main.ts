@@ -32,7 +32,7 @@ async function bootstrap() {
   app.use(compression());
 
   // CORS
-  const allowedOrigins = configService.get('ALLOWLIST_ORIGINS')?.split(',') || ['http://localhost:3000'];
+  const allowedOrigins = configService.get('ALLOWLIST_ORIGINS')?.split(',') || ['http://localhost:3001'];
   app.enableCors({
     origin: allowedOrigins,
     credentials: true,
@@ -79,7 +79,7 @@ async function bootstrap() {
   await app.listen(3001, '0.0.0.0');
 
   console.log(`🚀 Gesta SaaS Backend rodando na porta ${port}`);
-  console.log(`📚 Documentação disponível em http://localhost:${port}/api/docs`);
+  console.log(`📚 Documentação disponível em https://app.fluxvision.cloud/api/docs`);
   console.log(`🌐 Servidor acessível via IP público na porta ${port}`);
 }
 
