@@ -24,11 +24,8 @@ import type {
 // Configuração base da API
 // ==========================
 
-// Detecta automaticamente se está em localhost ou produção
-const defaultBaseURL =
-  window.location.origin.includes('localhost')
-    ? 'http://localhost:3001/api/v1'
-    : `${window.location.origin}/api/v1`;
+// Configuracao base da API
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1'
 
 // Usa variável de ambiente se existir, senão o domínio atual
 const API_BASE_URL =
