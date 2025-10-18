@@ -41,6 +41,6 @@ export class Auditoria {
   userAgent?: string;
 
   @ApiProperty({ description: 'Data de criação' })
-  @CreateDateColumn({ name: 'criado_em', type: 'datetime' })
+  @CreateDateColumn({ name: 'criado_em', type: 'timestamp' })
   criadoEm: Date;
 }

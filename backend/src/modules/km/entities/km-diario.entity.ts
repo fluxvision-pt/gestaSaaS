@@ -40,11 +40,11 @@ export class KmDiario {
   kmFim?: number;
 
   @ApiProperty({ description: 'Data de criação' })
-  @CreateDateColumn({ name: 'criado_em', type: 'datetime' })
+  @CreateDateColumn({ name: 'criado_em', type: 'timestamp' })
   criadoEm: Date;
 
   @ApiProperty({ description: 'Data da última atualização' })
-  @UpdateDateColumn({ name: 'atualizado_em', type: 'datetime' })
+  @UpdateDateColumn({ name: 'atualizado_em', type: 'timestamp' })
   atualizadoEm: Date;
 
   // Relacionamentos
