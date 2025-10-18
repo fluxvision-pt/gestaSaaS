@@ -1,0 +1,167 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "actions": "Actions",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close",
+    "view": "View",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "name": "Name",
+    "email": "Email",
+    "date": "Date",
+    "price": "Price",
+    "description": "Description"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "loginTitle": "Sign in to your account",
+    "loginSubtitle": "Enter your email and password to access the system",
+    "loginButton": "Sign In",
+    "loginError": "Login error. Please check your credentials."
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "plans": "Plans",
+    "subscriptions": "Subscriptions",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome to GestaSaaS",
+    "overview": "System Overview"
+  },
+  "users": {
+    "title": "Users",
+    "createUser": "Create User",
+    "editUser": "Edit User",
+    "deleteUser": "Delete User",
+    "userDetails": "User Details",
+    "searchPlaceholder": "Search users...",
+    "filterByTenant": "Filter by tenant",
+    "filterByPlan": "Filter by plan",
+    "allTenants": "All tenants",
+    "allPlans": "All plans",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "tenant": "Tenant",
+      "plan": "Plan",
+      "status": "Status",
+      "lastLogin": "Last Login",
+      "actions": "Actions"
+    },
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "tenant": "Tenant",
+      "role": "Role",
+      "selectTenant": "Select a tenant",
+      "selectRole": "Select a role",
+      "admin": "Administrator",
+      "user": "User"
+    },
+    "messages": {
+      "createSuccess": "User created successfully!",
+      "updateSuccess": "User updated successfully!",
+      "deleteSuccess": "User deleted successfully!",
+      "deleteConfirm": "Are you sure you want to delete this user?"
+    }
+  },
+  "plans": {
+    "title": "Plans",
+    "createPlan": "Create Plan",
+    "editPlan": "Edit Plan",
+    "deletePlan": "Delete Plan",
+    "planDetails": "Plan Details",
+    "searchPlaceholder": "Search plans...",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "unlimited": "Unlimited",
+    "form": {
+      "name": "Name",
+      "description": "Description",
+      "price": "Price",
+      "billingCycle": "Billing Cycle",
+      "maxUsers": "Max Users",
+      "maxStorage": "Max Storage (GB)",
+      "features": "Features",
+      "isActive": "Active Plan",
+      "selectBillingCycle": "Select cycle"
+    },
+    "messages": {
+      "createSuccess": "Plan created successfully!",
+      "updateSuccess": "Plan updated successfully!",
+      "deleteSuccess": "Plan deleted successfully!",
+      "deleteConfirm": "Are you sure you want to delete this plan?"
+    }
+  },
+  "subscriptions": {
+    "title": "Subscriptions",
+    "subscriptionDetails": "Subscription Details",
+    "searchPlaceholder": "Search subscriptions...",
+    "filterByStatus": "Filter by status",
+    "allStatuses": "All statuses",
+    "active": "Active",
+    "expired": "Expired",
+    "cancelled": "Cancelled",
+    "pending": "Pending",
+    "statistics": {
+      "total": "Total Subscriptions",
+      "active": "Active Subscriptions",
+      "revenue": "Monthly Revenue",
+      "expiring": "Expiring in 30 days"
+    },
+    "table": {
+      "tenant": "Tenant",
+      "plan": "Plan",
+      "status": "Status",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "nextPayment": "Next Payment",
+      "actions": "Actions"
+    },
+    "details": {
+      "tenant": "Tenant",
+      "plan": "Plan",
+      "price": "Price",
+      "status": "Status",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "maxUsers": "Max Users",
+      "maxStorage": "Max Storage",
+      "contactEmail": "Contact Email",
+      "contactPhone": "Contact Phone"
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "renew": "Renew",
+      "upgrade": "Upgrade"
+    },
+    "messages": {
+      "cancelSuccess": "Subscription cancelled successfully!",
+      "cancelConfirm": "Are you sure you want to cancel this subscription?"
+    }
+  },
+  "language": {
+    "portuguese": "Português",
+    "english": "English",
+    "selectLanguage": "Select language"
+  }
+}

@@ -1,0 +1,167 @@
+{
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "create": "Criar",
+    "search": "Pesquisar",
+    "filter": "Filtrar",
+    "actions": "Ações",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "confirm": "Confirmar",
+    "yes": "Sim",
+    "no": "Não",
+    "close": "Fechar",
+    "view": "Visualizar",
+    "status": "Status",
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "name": "Nome",
+    "email": "E-mail",
+    "date": "Data",
+    "price": "Preço",
+    "description": "Descrição"
+  },
+  "auth": {
+    "login": "Entrar",
+    "logout": "Sair",
+    "email": "E-mail",
+    "password": "Senha",
+    "loginTitle": "Faça login em sua conta",
+    "loginSubtitle": "Digite seu e-mail e senha para acessar o sistema",
+    "loginButton": "Entrar",
+    "loginError": "Erro ao fazer login. Verifique suas credenciais."
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "users": "Usuários",
+    "plans": "Planos",
+    "subscriptions": "Assinaturas",
+    "settings": "Configurações"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Bem-vindo ao GestaSaaS",
+    "overview": "Visão Geral do Sistema"
+  },
+  "users": {
+    "title": "Usuários",
+    "createUser": "Criar Usuário",
+    "editUser": "Editar Usuário",
+    "deleteUser": "Excluir Usuário",
+    "userDetails": "Detalhes do Usuário",
+    "searchPlaceholder": "Pesquisar usuários...",
+    "filterByTenant": "Filtrar por tenant",
+    "filterByPlan": "Filtrar por plano",
+    "allTenants": "Todos os tenants",
+    "allPlans": "Todos os planos",
+    "table": {
+      "name": "Nome",
+      "email": "E-mail",
+      "tenant": "Tenant",
+      "plan": "Plano",
+      "status": "Status",
+      "lastLogin": "Último Login",
+      "actions": "Ações"
+    },
+    "form": {
+      "name": "Nome",
+      "email": "E-mail",
+      "tenant": "Tenant",
+      "role": "Função",
+      "selectTenant": "Selecione um tenant",
+      "selectRole": "Selecione uma função",
+      "admin": "Administrador",
+      "user": "Usuário"
+    },
+    "messages": {
+      "createSuccess": "Usuário criado com sucesso!",
+      "updateSuccess": "Usuário atualizado com sucesso!",
+      "deleteSuccess": "Usuário excluído com sucesso!",
+      "deleteConfirm": "Tem certeza que deseja excluir este usuário?"
+    }
+  },
+  "plans": {
+    "title": "Planos",
+    "createPlan": "Criar Plano",
+    "editPlan": "Editar Plano",
+    "deletePlan": "Excluir Plano",
+    "planDetails": "Detalhes do Plano",
+    "searchPlaceholder": "Pesquisar planos...",
+    "monthly": "Mensal",
+    "yearly": "Anual",
+    "unlimited": "Ilimitado",
+    "form": {
+      "name": "Nome",
+      "description": "Descrição",
+      "price": "Preço",
+      "billingCycle": "Ciclo de Cobrança",
+      "maxUsers": "Máximo de Usuários",
+      "maxStorage": "Armazenamento Máximo (GB)",
+      "features": "Recursos",
+      "isActive": "Plano Ativo",
+      "selectBillingCycle": "Selecione o ciclo"
+    },
+    "messages": {
+      "createSuccess": "Plano criado com sucesso!",
+      "updateSuccess": "Plano atualizado com sucesso!",
+      "deleteSuccess": "Plano excluído com sucesso!",
+      "deleteConfirm": "Tem certeza que deseja excluir este plano?"
+    }
+  },
+  "subscriptions": {
+    "title": "Assinaturas",
+    "subscriptionDetails": "Detalhes da Assinatura",
+    "searchPlaceholder": "Pesquisar assinaturas...",
+    "filterByStatus": "Filtrar por status",
+    "allStatuses": "Todos os status",
+    "active": "Ativa",
+    "expired": "Expirada",
+    "cancelled": "Cancelada",
+    "pending": "Pendente",
+    "statistics": {
+      "total": "Total de Assinaturas",
+      "active": "Assinaturas Ativas",
+      "revenue": "Receita Mensal",
+      "expiring": "Expirando em 30 dias"
+    },
+    "table": {
+      "tenant": "Tenant",
+      "plan": "Plano",
+      "status": "Status",
+      "startDate": "Data de Início",
+      "endDate": "Data de Término",
+      "nextPayment": "Próximo Pagamento",
+      "actions": "Ações"
+    },
+    "details": {
+      "tenant": "Tenant",
+      "plan": "Plano",
+      "price": "Preço",
+      "status": "Status",
+      "startDate": "Data de Início",
+      "endDate": "Data de Término",
+      "maxUsers": "Máximo de Usuários",
+      "maxStorage": "Armazenamento Máximo",
+      "contactEmail": "E-mail de Contato",
+      "contactPhone": "Telefone de Contato"
+    },
+    "actions": {
+      "cancel": "Cancelar",
+      "renew": "Renovar",
+      "upgrade": "Fazer Upgrade"
+    },
+    "messages": {
+      "cancelSuccess": "Assinatura cancelada com sucesso!",
+      "cancelConfirm": "Tem certeza que deseja cancelar esta assinatura?"
+    }
+  },
+  "language": {
+    "portuguese": "Português",
+    "english": "English",
+    "selectLanguage": "Selecionar idioma"
+  }
+}
