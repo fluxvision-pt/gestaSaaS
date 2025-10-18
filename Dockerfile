@@ -41,7 +41,7 @@ FROM node:18-alpine AS production
 WORKDIR /app
 
 # Instala dependências de sistema necessárias
-RUN apk add --no-cache dumb-init
+RUN apk add --no-cache dumb-init curl
 
 # Cria usuário não-root para segurança
 RUN addgroup -g 1001 -S nodejs && \
@@ -60,22 +60,20 @@ COPY --from=frontend-build /app/frontend/dist ./public
 # Muda ownership dos arquivos para o usuário não-root
 RUN chown -R nestjs:nodejs /app
 
+# Define variáveis de ambiente
+ENV NODE_ENV=production
+ENV PORT=3001
+ENV APP_PORT=3001
+
+# Healthcheck otimizado para EasyPanel + Swarm
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=5 \
+  CMD curl -fs http://127.0.0.1:3001/health || exit 1
+
 # Muda para usuário não-root
 USER nestjs
 
 # Expõe a porta da aplicação
 EXPOSE 3001
-
-# Define variáveis de ambiente
-ENV PORT=3001
-ENV APP_PORT=3001
-
-# Healthcheck otimizado para EasyPanel + Swarm
-RUN apk add --no-cache curl
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=5 \
-  CMD curl -fs http://127.0.0.1:3001/health || exit 1
-
-
 
 # Comando para iniciar a aplicação usando dumb-init
 ENTRYPOINT ["dumb-init", "--"]
