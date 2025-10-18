@@ -4,9 +4,12 @@ FROM node:18-alpine AS frontend-build
 
 WORKDIR /app/frontend
 
+# Instala dependências necessárias para o build
+RUN apk add --no-cache python3 make g++
+
 # Copia arquivos de dependências do frontend
 COPY frontend/package*.json ./
-RUN npm ci --only=production
+RUN npm ci
 
 # Copia código fonte do frontend
 COPY frontend/ ./
@@ -19,9 +22,12 @@ FROM node:18-alpine AS backend-build
 
 WORKDIR /app/backend
 
+# Instala dependências necessárias para o build
+RUN apk add --no-cache python3 make g++
+
 # Copia arquivos de dependências do backend
 COPY backend/package*.json ./
-RUN npm ci --only=production
+RUN npm ci
 
 # Copia código fonte do backend
 COPY backend/ ./
