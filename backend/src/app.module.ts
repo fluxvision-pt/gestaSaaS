@@ -49,7 +49,7 @@ import { Auditoria } from './modules/auditoria/entities/auditoria.entity';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
+        type: configService.get('DB_TYPE') as any,
         host: configService.get('DB_HOST'),
         port: parseInt(configService.get('DB_PORT')) || 5432,
         username: configService.get('DB_USERNAME'),
