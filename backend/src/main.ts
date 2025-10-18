@@ -76,7 +76,8 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   const port = configService.get('APP_PORT') || 8080;
-  await app.listen(port, '0.0.0.0');
+  await app.listen(3001, '0.0.0.0');
+
 
   console.log(`🚀 Gesta SaaS Backend rodando na porta ${port}`);
   console.log(`📚 Documentação disponível em http://localhost:${port}/api/docs`);

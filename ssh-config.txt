@@ -1,0 +1,22 @@
+# Configuração SSH para VPS GestaSaaS
+# =====================================
+
+Host gestasaas-vps
+    HostName 148.230.118.81
+    User root
+    Port 22
+    
+# Para usar esta configuração:
+# 1. Copie este conteúdo para o arquivo ~/.ssh/config (Linux/Mac) ou %USERPROFILE%\.ssh\config (Windows)
+# 2. Execute: ssh gestasaas-vps
+# 3. Digite a senha quando solicitado: Samuel2029#@
+
+# Comandos úteis:
+# ssh root@148.230.118.81
+# scp arquivo.txt root@148.230.118.81:/caminho/destino/
+# rsync -avz pasta/ root@148.230.118.81:/caminho/destino/
+
+# IMPORTANTE: 
+# - Mantenha esta senha segura
+# - Considere configurar autenticação por chave SSH para maior segurança
+# - Este arquivo contém informações sensíveis - não compartilhe
