@@ -4,10 +4,11 @@ export interface AppUser {
   name: string
   email: string
   phone?: string
-  tenantId: number
+  tenantId?: number
   tenant?: AppTenant
-  role: 'admin' | 'user'
-  isActive: boolean
+  role?: 'admin' | 'user'
+  status?: string
+  isActive?: boolean
   lastLogin?: string
   createdAt: string
   updatedAt: string
@@ -17,11 +18,13 @@ export interface AppTenant {
   id: string
   name: string
   domain: string
-  isActive: boolean
-  maxUsers: number
-  currentUsers: number
-  planId: number
+  status?: string
+  isActive?: boolean
+  maxUsers?: number
+  currentUsers?: number
+  planId?: number
   plan?: AppPlan
+  users?: AppUser[]
   createdAt: string
   updatedAt: string
 }
@@ -29,13 +32,17 @@ export interface AppTenant {
 export interface AppPlan {
   id: string
   name: string
-  description: string
+  description?: string
   price?: number
+  currency?: string
+  interval?: string
+  billingCycle?: 'monthly' | 'yearly'
   maxUsers?: number
+  maxStorage?: number
   features?: string[]
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
+  isActive?: boolean
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface Subscription {
@@ -119,7 +126,9 @@ export interface CreatePlanRequest {
   name: string
   description: string
   price: number
-  maxUsers: number
+  billingCycle: 'monthly' | 'yearly'
+  maxUsers: number | null
+  maxStorage: number | null
   features: string[]
 }
 
@@ -127,7 +136,9 @@ export interface UpdatePlanRequest {
   name?: string
   description?: string
   price?: number
-  maxUsers?: number
+  billingCycle?: 'monthly' | 'yearly'
+  maxUsers?: number | null
+  maxStorage?: number | null
   features?: string[]
   isActive?: boolean
 }

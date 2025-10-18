@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTranslation } from 'react-i18next'
 import {
@@ -25,7 +25,6 @@ import { LanguageSelector } from '@/components/LanguageSelector'
 export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const location = useLocation()
-  const navigate = useNavigate()
   const { user, logout } = useAuth()
   const { t } = useTranslation()
 

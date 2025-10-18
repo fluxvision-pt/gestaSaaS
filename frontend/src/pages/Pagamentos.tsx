@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,7 +27,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+
 import { 
   CreditCard, 
   DollarSign, 
@@ -48,8 +48,8 @@ import { toast } from 'sonner'
 
 export default function Pagamentos() {
   // Buscar dados dos pagamentos e assinaturas
-  const { data: pagamentos, loading: pagamentosLoading, error: pagamentosError, refetch: refetchPagamentos } = useApi(() => pagamentoService.getPagamentos())
-  const { data: subscriptions, loading: subscriptionsLoading } = useApi(() => subscriptionService.getSubscriptions())
+  const { data: pagamentos, loading: pagamentosLoading, refetch: refetchPagamentos } = useApi(() => pagamentoService.getPagamentos())
+  const { data: subscriptions } = useApi(() => subscriptionService.getSubscriptions())
 
   // Estados
   const [searchTerm, setSearchTerm] = useState('')
@@ -66,10 +66,6 @@ export default function Pagamentos() {
 
   // Mutations
   const createPagamentoMutation = useApiMutation((data: CreatePagamentoRequest) => pagamentoService.createPagamento(data))
-  const updatePagamentoMutation = useApiMutation(({ id, data }: { id: string, data: any }) => 
-    pagamentoService.updatePagamento(id, data)
-  )
-  const deletePagamentoMutation = useApiMutation((id: string) => pagamentoService.deletePagamento(id))
 
   // Funções de manipulação
   const handleSubmit = async (e: React.FormEvent) => {
@@ -91,22 +87,11 @@ export default function Pagamentos() {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Tem certeza que deseja excluir este pagamento?')) {
-      try {
-        await deletePagamentoMutation.mutate(id)
-        toast.success('Pagamento excluído com sucesso!')
-        refetchPagamentos()
-      } catch (error) {
-        console.error('Erro ao excluir pagamento:', error)
-        toast.error('Erro ao excluir pagamento')
-      }
-    }
-  }
+
 
   const filteredPagamentos = pagamentos?.filter(pagamento => {
-    const matchesSearch = pagamento.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         pagamento.plano.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch = (pagamento.cliente || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (pagamento.plano || '').toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'todos' || pagamento.status === statusFilter
     const matchesMetodo = metodoFilter === 'todos' || pagamento.metodo === metodoFilter
     
@@ -338,7 +323,7 @@ export default function Pagamentos() {
                   Carregando...
                 </div>
               ) : (
-                pagamentos?.length > 0 ? `${((pagamentos.filter(p => p.status === 'pago').length / pagamentos.length) * 100).toFixed(1)}%` : '0%'
+                pagamentos && pagamentos.length > 0 ? `${((pagamentos.filter(p => p.status === 'pago').length / pagamentos.length) * 100).toFixed(1)}%` : '0%'
               )}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -455,8 +440,8 @@ export default function Pagamentos() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge className={getMetodoBadge(pagamento.metodo)}>
-                      {pagamento.metodo}
+                    <Badge className={getMetodoBadge(pagamento.metodo || 'N/A')}>
+                      {pagamento.metodo || 'N/A'}
                     </Badge>
                   </TableCell>
                   <TableCell>{formatDate(pagamento.dataVencimento)}</TableCell>
@@ -501,8 +486,8 @@ export default function Pagamentos() {
                               </div>
                               <div>
                                 <Label>Método</Label>
-                                <Badge className={getMetodoBadge(selectedPagamento.metodo)}>
-                                  {selectedPagamento.metodo}
+                                <Badge className={getMetodoBadge(selectedPagamento.metodo || 'N/A')}>
+                                  {selectedPagamento.metodo || 'N/A'}
                                 </Badge>
                               </div>
                               <div>

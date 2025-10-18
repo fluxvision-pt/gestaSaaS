@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Users, CreditCard, DollarSign, Activity, TrendingUp } from 'lucide-react'
+import { Users, CreditCard, DollarSign, TrendingUp } from 'lucide-react'
 import { useApi } from '@/hooks/useApi'
-import { userService, tenantService, planService, subscriptionService } from '@/services/api'
+import { userService, tenantService, subscriptionService } from '@/services/api'
 import { useMemo } from 'react'
 
 export default function Dashboard() {
@@ -11,7 +11,7 @@ export default function Dashboard() {
   // Buscar dados reais da API
   const { data: users, loading: usersLoading } = useApi(() => userService.getUsers())
   const { data: tenants, loading: tenantsLoading } = useApi(() => tenantService.getTenants())
-  const { data: plans, loading: plansLoading } = useApi(() => planService.getPlans())
+
   const { data: subscriptions, loading: subscriptionsLoading } = useApi(() => subscriptionService.getSubscriptions())
 
   // Calcular estatísticas baseadas nos dados reais
@@ -60,7 +60,7 @@ export default function Dashboard() {
     ]
   }, [users, subscriptions, tenants])
 
-  const isLoading = usersLoading || tenantsLoading || plansLoading || subscriptionsLoading
+  const isLoading = usersLoading || tenantsLoading || subscriptionsLoading
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -111,7 +111,7 @@ export default function Dashboard() {
                 <div className="text-center text-gray-500">Carregando atividades...</div>
               ) : (
                 <>
-                  {subscriptions?.slice(0, 3).map((subscription, index) => (
+                  {subscriptions?.slice(0, 3).map((subscription) => (
                     <div key={subscription.id} className="flex items-center space-x-4 p-4 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200">
                       <div className="w-4 h-4 bg-blue-500 rounded-full flex-shrink-0"></div>
                       <div className="flex-1">

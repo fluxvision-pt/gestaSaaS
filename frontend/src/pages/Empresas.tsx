@@ -42,10 +42,10 @@ interface Tenant {
   id: string
   name: string
   domain: string
-  isActive: boolean
-  maxUsers: number
-  currentUsers: number
-  planId: number
+  isActive?: boolean
+  maxUsers?: number
+  currentUsers?: number
+  planId?: number
   createdAt: string
   updatedAt: string
 }

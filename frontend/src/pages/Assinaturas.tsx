@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,9 +8,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Search, Eye, Edit, AlertTriangle, Calendar, DollarSign, Users, TrendingUp, Loader2 } from 'lucide-react'
-import { subscriptionService, tenantService, planService } from '@/services/api'
+import { subscriptionService } from '@/services/api'
 import { useApi, useApiMutation } from '@/hooks/useApi'
-import type { Subscription, CreateSubscriptionRequest, UpdateSubscriptionRequest } from '@/types'
+import type { Subscription } from '@/types'
 
 export default function Assinaturas() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -20,13 +20,8 @@ export default function Assinaturas() {
 
   // Buscar dados
   const { data: subscriptions, loading: subscriptionsLoading, error: subscriptionsError, refetch: refetchSubscriptions } = useApi(() => subscriptionService.getSubscriptions())
-  const { data: tenants, loading: tenantsLoading } = useApi(() => tenantService.getTenants())
-  const { data: plans, loading: plansLoading } = useApi(() => planService.getPlans())
 
   // Mutations
-  const updateSubscriptionMutation = useApiMutation(({ id, data }: { id: number, data: UpdateSubscriptionRequest }) => 
-    subscriptionService.updateSubscription(id, data)
-  )
   const cancelSubscriptionMutation = useApiMutation((id: number) => subscriptionService.cancelSubscription(id))
 
   const filteredAssinaturas = subscriptions?.filter(assinatura => {
@@ -68,7 +63,7 @@ export default function Assinaturas() {
     }).format(price)
   }
 
-  if (subscriptionsLoading || tenantsLoading || plansLoading) {
+  if (subscriptionsLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin" />

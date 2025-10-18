@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -29,35 +29,14 @@ import {
   RefreshCw,
   Loader2
 } from 'lucide-react'
-import { subscriptionService, tenantService, planService, pagamentoService } from '@/services/api'
+import { subscriptionService, pagamentoService } from '@/services/api'
 import { useApi } from '@/hooks/useApi'
 
-interface DadosFinanceiros {
-  receita: number
-  despesas: number
-  lucro: number
-  crescimento: number
-  receitaRecorrente: number
-  churn: number
-  ltv: number
-  cac: number
-}
 
-interface TransacaoFinanceira {
-  id: number
-  tipo: 'receita' | 'despesa'
-  categoria: string
-  descricao: string
-  valor: number
-  data: string
-  status: 'confirmado' | 'pendente' | 'cancelado'
-}
 
 export default function Financeiro() {
   // Buscar dados
   const { data: subscriptions, loading: subscriptionsLoading } = useApi(() => subscriptionService.getSubscriptions())
-  const { data: tenants, loading: tenantsLoading } = useApi(() => tenantService.getTenants())
-  const { data: plans, loading: plansLoading } = useApi(() => planService.getPlans())
   const { data: pagamentos, loading: pagamentosLoading } = useApi(() => pagamentoService.getPagamentos())
 
   // Calcular dados financeiros baseados nos pagamentos reais
@@ -153,7 +132,7 @@ export default function Financeiro() {
   const [periodoFilter, setPeriodoFilter] = useState<string>('mes')
   const [tipoFilter, setTipoFilter] = useState<string>('todos')
 
-  const isLoading = subscriptionsLoading || tenantsLoading || plansLoading || pagamentosLoading
+  const isLoading = subscriptionsLoading || pagamentosLoading
 
   const filteredTransacoes = transacoes.filter(transacao => {
     const matchesTipo = tipoFilter === 'todos' || transacao.tipo === tipoFilter
@@ -186,7 +165,7 @@ export default function Financeiro() {
       .sort(([a], [b]) => a.localeCompare(b))
       .slice(-6) // Últimos 6 meses
       .map(([mesAno, dados]) => {
-        const [ano, mes] = mesAno.split('-')
+        const [, mes] = mesAno.split('-')
         const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
         return {
           mes: nomesMeses[parseInt(mes) - 1],

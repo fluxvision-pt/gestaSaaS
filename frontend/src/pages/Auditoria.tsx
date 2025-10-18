@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -32,7 +32,6 @@ import {
   Filter, 
   Download, 
   Eye,
-  Calendar,
   User,
   Activity,
   AlertTriangle,
@@ -95,9 +94,9 @@ export default function Auditoria() {
   useEffect(() => {
     const novosFiltros: FiltrosAuditoria = {}
     
-    if (statusFilter !== 'todos') novosFiltros.status = statusFilter
-    if (categoriaFilter !== 'todas') novosFiltros.categoria = categoriaFilter
-    if (riscoFilter !== 'todos') novosFiltros.risco = riscoFilter
+    if (statusFilter !== 'todos') novosFiltros.status = statusFilter as "pendente" | "sucesso" | "erro"
+    if (categoriaFilter !== 'todas') novosFiltros.categoria = categoriaFilter as "autenticacao" | "usuarios" | "pagamentos" | "sistema" | "configuracao"
+    if (riscoFilter !== 'todos') novosFiltros.risco = riscoFilter as "baixo" | "medio" | "alto"
     if (searchTerm) {
       novosFiltros.usuario = searchTerm
       novosFiltros.acao = searchTerm
@@ -182,7 +181,7 @@ export default function Auditoria() {
     const logsArray = logs || []
     const total = logsArray.length
     const sucessos = logsArray.filter(log => log.status === 'sucesso').length
-    const falhas = logsArray.filter(log => log.status === 'falha').length
+    const falhas = logsArray.filter(log => log.status === 'erro').length
     const riscoAlto = logsArray.filter(log => log.risco === 'alto').length
 
     return { total, sucessos, falhas, riscoAlto }

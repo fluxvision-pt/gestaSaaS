@@ -126,7 +126,7 @@ export default function Relatorios() {
     // Relatório Financeiro
     const assinaturasAtivas = subscriptions.filter(sub => sub.status === 'active')
     const receitaTotal = assinaturasAtivas.reduce((total, sub) => {
-      const plan = plans.find(p => p.id === sub.planId)
+      const plan = plans.find(p => p.id === sub.planId.toString())
       return total + (plan?.price || 0)
     }, 0)
 
@@ -161,7 +161,6 @@ export default function Relatorios() {
 
     // Relatório de Assinaturas
     if (subscriptions.length > 0) {
-      const quarterStart = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1)
       const quarterName = `Q${Math.floor(now.getMonth() / 3) + 1} ${now.getFullYear()}`
       
       relatoriosGerados.push({

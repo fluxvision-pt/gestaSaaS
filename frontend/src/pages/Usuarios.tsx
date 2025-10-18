@@ -1,21 +1,19 @@
-import React, { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
+import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Search, Edit, Trash2, Loader2, Eye, LogIn, User } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, Loader2, LogIn, User } from 'lucide-react'
 import { userService, tenantService, planService } from '@/services/api'
 import { useAuth } from '@/contexts/AuthContext'
-import type { AppUser, AppTenant, AppPlan, CreateUserRequest, UpdateUserRequest } from '@/types'
+import type { AppUser, CreateUserRequest, UpdateUserRequest } from '@/types'
 import { useApi, useApiMutation } from '@/hooks/useApi'
 
 export default function Usuarios() {
-  const { t } = useTranslation()
   const { isSuperAdmin, impersonate } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -59,7 +57,7 @@ export default function Usuarios() {
       password: '',
       tenantId: usuario.tenantId ? usuario.tenantId.toString() : 'none',
       planId: usuario.tenant?.plan?.id ? usuario.tenant.plan.id.toString() : 'none',
-      role: usuario.role
+      role: usuario.role || 'user'
     })
     setIsDialogOpen(true)
   }
@@ -150,7 +148,7 @@ export default function Usuarios() {
 
     if (window.confirm(`Deseja visualizar o sistema como ${usuario.name}?`)) {
       try {
-        await impersonate(usuario.tenantId.toString())
+        await impersonate(usuario.tenantId?.toString() || '0')
         // Redirecionar para o dashboard após impersonação
         window.location.href = '/dashboard'
       } catch (error) {
@@ -281,7 +279,7 @@ export default function Usuarios() {
                   <TableCell>
                     <Badge variant="outline">{usuario.tenant?.plan?.name || 'N/A'}</Badge>
                   </TableCell>
-                  <TableCell>{getStatusBadge(usuario.isActive)}</TableCell>
+                  <TableCell>{getStatusBadge(usuario.isActive || false)}</TableCell>
                   <TableCell>{formatDate(usuario.lastLogin || usuario.createdAt)}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
@@ -293,7 +291,7 @@ export default function Usuarios() {
                       >
                         <User className="h-4 w-4" />
                       </Button>
-                      {isSuperAdmin && usuario.tenantId > 0 && (
+                      {isSuperAdmin && (usuario.tenantId || 0) > 0 && (
                         <Button 
                           variant="outline" 
                           size="sm" 

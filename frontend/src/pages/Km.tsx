@@ -25,7 +25,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog'
 import { 
@@ -33,14 +32,11 @@ import {
   Plus, 
   Search, 
   Filter, 
-  Download, 
   Edit,
   Trash2,
   MapPin,
-  Calendar,
   Fuel,
   DollarSign,
-  BarChart3,
   TrendingUp,
   Navigation,
   Loader2
@@ -152,7 +148,6 @@ export default function Km() {
   const isLoading = loadingSubscriptions || loadingTenants
   
   // Estados para gerenciar operações
-  const [isSubmitLoading, setIsLoading] = useState(false)
 
   const [filteredRegistros, setFilteredRegistros] = useState<RegistroKm[]>([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -217,14 +212,13 @@ export default function Km() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
 
     // Calcular km percorrida
     const kmPercorrida = (formData.kmFinal || 0) - (formData.kmInicial || 0)
 
     const novoRegistro: RegistroKm = {
-      id: editingRegistro ? editingRegistro.id : Date.now().toString(),
       ...formData as RegistroKm,
+      id: editingRegistro ? editingRegistro.id : Date.now().toString(),
       kmPercorrida,
       usuario: 'Usuário Atual' // Em um app real, viria do contexto de autenticação
     }
@@ -255,7 +249,6 @@ export default function Km() {
       observacoes: '',
       status: 'pendente'
     })
-    setIsLoading(false)
   }
 
   const handleEdit = (registro: RegistroKm) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -6,13 +6,13 @@ import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Plus, Edit, Trash2, Check, X, Loader2 } from 'lucide-react'
+import { Plus, Edit, Trash2, Check, Loader2 } from 'lucide-react'
 import { planService } from '@/services/api'
 import { useApi, useApiMutation } from '@/hooks/useApi'
 import type { AppPlan, CreatePlanRequest, UpdatePlanRequest } from '@/types'
 
 export default function Planos() {
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchTerm] = useState('')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingPlan, setEditingPlan] = useState<AppPlan | null>(null)
   const [formData, setFormData] = useState({
@@ -37,16 +37,16 @@ export default function Planos() {
 
   const filteredPlanos = plans?.filter(plano =>
     plano.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    plano.description.toLowerCase().includes(searchTerm.toLowerCase())
+    (plano.description || '').toLowerCase().includes(searchTerm.toLowerCase())
   ) || []
 
   const handleEdit = (plano: AppPlan) => {
     setEditingPlan(plano)
     setFormData({
       name: plano.name,
-      description: plano.description,
+      description: plano.description || '',
       price: (plano.price || 0).toString(),
-      billingCycle: plano.billingCycle,
+      billingCycle: plano.billingCycle || 'monthly',
       features: plano.features || [],
       maxUsers: plano.maxUsers?.toString() || '',
       maxStorage: plano.maxStorage?.toString() || ''

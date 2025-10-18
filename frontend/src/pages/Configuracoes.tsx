@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,13 +19,11 @@ import {
   User, 
   Bell, 
   Shield, 
-  CreditCard,
   Globe,
   Mail,
   Smartphone,
   Key,
   Database,
-  Palette,
   Save,
   RefreshCw,
   Loader2,
@@ -55,24 +53,30 @@ export default function Configuracoes() {
     emailTransacional: false,
     smsNotificacoes: false,
     pushNotificacoes: false,
+    frequenciaRelatorios: 'semanal',
+    notificarVencimentos: false,
     relatoriosSemanais: false,
     alertasSeguranca: false
   })
 
   const [configSeguranca, setConfigSeguranca] = useState<ConfiguracaoSeguranca>({
     autenticacaoDoisFatores: false,
+    sessaoMaxima: 8,
+    logAuditoria: false,
+    backupAutomatico: false,
     loginSocial: false,
     sessaoTimeout: 30,
-    tentativasLogin: 5,
-    logAuditoria: false
+    tentativasLogin: 5
   })
 
   const [configIntegracao, setConfigIntegracao] = useState<ConfiguracaoIntegracao>({
-    webhookUrl: '',
     apiKey: '',
-    rateLimitRequests: 1000,
+    webhookUrl: '',
+    gatewayPagamento: 'stripe',
+    emailProvider: 'sendgrid',
     backupAutomatico: false,
-    retencaoDados: 365
+    retencaoDados: 365,
+    rateLimitRequests: 1000
   })
 
   const [isLoading, setIsLoading] = useState(false)
@@ -162,18 +166,7 @@ export default function Configuracoes() {
     }
   }
 
-  const handleGerarNovaApiKey = async () => {
-    setIsLoading(true)
-    try {
-      const novaKey = await configuracaoService.gerarNovaApiKey()
-      setConfigIntegracao(prev => ({ ...prev, apiKey: novaKey }))
-      toast.success('Nova chave API gerada com sucesso!')
-    } catch (error) {
-      toast.error('Erro ao gerar nova chave API')
-    } finally {
-      setIsLoading(false)
-    }
-  }
+
 
   const handleRestaurarPadroes = async () => {
     setIsLoading(true)

@@ -486,6 +486,8 @@ export interface ConfiguracaoNotificacao {
   pushNotificacoes: boolean
   frequenciaRelatorios: 'diario' | 'semanal' | 'mensal'
   notificarVencimentos: boolean
+  relatoriosSemanais: boolean
+  alertasSeguranca: boolean
 }
 
 export interface ConfiguracaoSeguranca {
@@ -493,6 +495,9 @@ export interface ConfiguracaoSeguranca {
   sessaoMaxima: number
   logAuditoria: boolean
   backupAutomatico: boolean
+  loginSocial: boolean
+  sessaoTimeout: number
+  tentativasLogin: number
 }
 
 export interface ConfiguracaoIntegracao {
@@ -500,6 +505,9 @@ export interface ConfiguracaoIntegracao {
   webhookUrl: string
   gatewayPagamento: 'stripe' | 'mercadopago' | 'pagseguro'
   emailProvider: 'sendgrid' | 'mailgun' | 'ses'
+  backupAutomatico: boolean
+  retencaoDados: number
+  rateLimitRequests: number
 }
 
 export const configuracaoService = {
@@ -528,19 +536,27 @@ export const configuracaoService = {
         smsNotificacoes: false,
         pushNotificacoes: true,
         frequenciaRelatorios: 'semanal',
-        notificarVencimentos: true
+        notificarVencimentos: true,
+        relatoriosSemanais: true,
+        alertasSeguranca: true
       },
       seguranca: {
         autenticacaoDoisFatores: false,
         sessaoMaxima: 8,
         logAuditoria: true,
-        backupAutomatico: true
+        backupAutomatico: true,
+        loginSocial: false,
+        sessaoTimeout: 30,
+        tentativasLogin: 5
       },
       integracao: {
         apiKey: 'sk_test_123456789',
         webhookUrl: 'https://gestasaas.com/webhook',
         gatewayPagamento: 'stripe',
-        emailProvider: 'sendgrid'
+        emailProvider: 'sendgrid',
+        backupAutomatico: true,
+        retencaoDados: 30,
+        rateLimitRequests: 1000
       }
     }
   },
