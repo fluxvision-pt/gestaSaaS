@@ -3,8 +3,12 @@ import { runInitialSeed } from './initial-seed';
 
 // Configuração do banco de dados
 const AppDataSource = new DataSource({
-  type: 'sqlite',
-  database: 'database.sqlite',
+  type: 'postgres',
+  host: 'aplicacao_gesta_db',
+  port: 5432,
+  username: 'postgres',
+  password: '2084b5fb1f7fd997a2b0',
+  database: 'app_gesta_db',
   entities: [__dirname + '/../../**/*.entity{.ts,.js}'],
   synchronize: true,
   logging: false,
