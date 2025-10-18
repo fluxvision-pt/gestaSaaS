@@ -67,13 +67,11 @@ USER nestjs
 EXPOSE 3001
 
 # Define variáveis de ambiente
-ENV NODE_ENV=production
 ENV PORT=3001
 ENV APP_PORT=3001
-
-# Healthcheck
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3001/health', res => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+
 
 # Comando para iniciar a aplicação usando dumb-init
 ENTRYPOINT ["dumb-init", "--"]
