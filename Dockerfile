@@ -43,17 +43,17 @@ COPY --from=backend-build /app/backend/dist ./dist
 # Copia o frontend buildado (Vite) para pasta pública
 COPY --from=frontend-build /app/frontend/dist ./public
 
-# Define variáveis
+# Expõe a porta da aplicação (usa a 3001 do Nest)
+EXPOSE 3001
+
+# Define variáveis de ambiente
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=3001
+ENV APP_PORT=3001
 
-# Exposição da porta
-EXPOSE 3000
+# Healthcheck interno (verifica se o backend está a responder)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3001/api/v1/health', res => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
 
-# Healthcheck interno (sem HTTPS)
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/health', res => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
-
-# Entrada padrão
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "dist/main.js"]
