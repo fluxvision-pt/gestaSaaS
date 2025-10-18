@@ -23,9 +23,7 @@ import type {
 // ==========================
 // Configuração base da API
 // ==========================
-
-// Configuracao base da API
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://app.fluxvision.cloud:3001/api/v1'
 
 // Usa variável de ambiente se existir, senão o domínio atual
 const API_BASE_URL =
