@@ -32,15 +32,30 @@ async function bootstrap() {
   app.use(compression());
 
   // CORS
-  const allowedOrigins =
+  // CORS — configuração dinâmica e compatível com produção
+const allowedOrigins =
   configService.get('ALLOWLIST_ORIGINS')?.split(',') || [
     'https://app.fluxvision.cloud',
+    'http://localhost:5173',
   ];
 
-  app.enableCors({
-    origin: allowedOrigins,
-    credentials: true,
-  });
+app.enableCors({
+  origin: (origin, callback) => {
+    // Permitir chamadas internas sem origin (como healthchecks)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn('🚫 Origem bloqueada pelo CORS:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  allowedHeaders:
+    'Content-Type, Accept, Authorization, X-Requested-With, Origin',
+});
 
 
   // Validação global
