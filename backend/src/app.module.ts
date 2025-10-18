@@ -88,6 +88,11 @@ import { Auditoria } from './modules/auditoria/entities/auditoria.entity';
       ],
     }),
 
+    // Verifica erros se o container trava na conexão do banco
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+  logger: ['error', 'warn', 'log'],
+});
+
     // Módulos da aplicação
     HealthModule,
     AuthModule,
