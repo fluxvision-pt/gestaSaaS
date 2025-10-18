@@ -26,34 +26,34 @@ RUN npm run build
 FROM node:18-alpine AS production
 WORKDIR /app
 
-# Instala dependências básicas
+# Instala utilitário init seguro
 RUN apk add --no-cache dumb-init
 
-# Cria usuário seguro
+# Cria usuário não-root
 RUN addgroup -S nodejs && adduser -S nestjs -G nodejs
 USER nestjs
 
-# Copia package.json e instala dependências de produção
+# Copia dependências do backend e instala apenas produção
 COPY backend/package*.json ./
 RUN npm ci --omit=dev
 
-# Copia o backend buildado
+# Copia o backend compilado
 COPY --from=backend-build /app/backend/dist ./dist
 
 # Copia o frontend buildado (Vite) para pasta pública
 COPY --from=frontend-build /app/frontend/dist ./public
-
-# Expõe a porta da aplicação (usa a 3001 do Nest)
-EXPOSE 3001
 
 # Define variáveis de ambiente
 ENV NODE_ENV=production
 ENV PORT=3001
 ENV APP_PORT=3001
 
-# Healthcheck interno (verifica se o backend está a responder)
+# Expõe a porta correta
+EXPOSE 3001
+
+# Healthcheck local
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/api/v1/health', res => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+  CMD node -e "require('http').get('http://localhost:3001/health', res => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "dist/main.js"]
