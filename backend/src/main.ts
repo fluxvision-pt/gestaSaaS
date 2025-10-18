@@ -32,7 +32,7 @@ async function bootstrap() {
   app.use(compression());
 
   // CORS
-  const allowedOrigins = configService.get('ALLOWLIST_ORIGINS')?.split(',') || ['https://app.fluxvision.cloud:3001'];
+  const allowedOrigins = configService.get('ALLOWLIST_ORIGINS')?.split(',') || ['http://localhost:3001'];
   app.enableCors({
     origin: allowedOrigins,
     credentials: true,
