@@ -71,8 +71,10 @@ ENV PORT=3001
 ENV APP_PORT=3001
 
 # Healthcheck otimizado para EasyPanel + Swarm
-HEALTHCHECK --interval=20s --timeout=5s --start-period=25s --retries=5 \
-  CMD wget -qO- http://127.0.0.1:3001/health | grep -q '"status":"ok"' || exit 1
+RUN apk add --no-cache curl
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=5 \
+  CMD curl -fs http://127.0.0.1:3001/health || exit 1
+
 
 
 # Comando para iniciar a aplicação usando dumb-init
