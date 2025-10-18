@@ -69,8 +69,11 @@ EXPOSE 3001
 # Define variáveis de ambiente
 ENV PORT=3001
 ENV APP_PORT=3001
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=5 \
-  CMD node -e "require('http').get('http://localhost:3001/health', res => { if (res.statusCode === 200) process.exit(0); else process.exit(1); }).on('error', () => process.exit(1));"
+
+# Healthcheck otimizado para EasyPanel + Swarm
+HEALTHCHECK --interval=20s --timeout=5s --start-period=25s --retries=5 \
+  CMD wget -qO- http://127.0.0.1:3001/health | grep -q '"status":"ok"' || exit 1
+
 
 # Comando para iniciar a aplicação usando dumb-init
 ENTRYPOINT ["dumb-init", "--"]
