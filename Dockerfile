@@ -64,11 +64,12 @@ RUN chown -R nestjs:nodejs /app
 USER nestjs
 
 # Expõe a porta da aplicação
-EXPOSE 3000
+EXPOSE 3001
 
 # Define variáveis de ambiente
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=3001
+ENV APP_PORT=3001
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
