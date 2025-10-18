@@ -48,8 +48,12 @@ import { Auditoria } from './modules/auditoria/entities/auditoria.entity';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        type: 'sqlite',
-        database: 'database.sqlite',
+        type: 'postgres',
+        host: configService.get('DB_HOST'),
+        port: parseInt(configService.get('DB_PORT')) || 5432,
+        username: configService.get('DB_USERNAME'),
+        password: configService.get('DB_PASSWORD'),
+        database: configService.get('DB_DATABASE'),
         entities: [
           Tenant,
           Usuario,
@@ -67,6 +71,7 @@ import { Auditoria } from './modules/auditoria/entities/auditoria.entity';
         ],
         synchronize: true,
         logging: configService.get('NODE_ENV') === 'development',
+        ssl: false, // Desabilitado conforme configuração do VPS
       }),
     }),
 
