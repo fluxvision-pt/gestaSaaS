@@ -21,7 +21,7 @@ import type {
 } from '@/types'
 
 // Configuracao base da API
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://app/fluxvision.cloud/api/v1'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://app.fluxvision.cloud/api/v1'
 
 // Criar instancia do axios
 const api = axios.create({
@@ -78,7 +78,7 @@ export const authService = {
     const response = await api.get('/auth/me')
     const user = response.data
     return {
-      id: parseInt(user.id), // Converter string UUID para number conforme esperado pelo AppUser
+      id: user.id, // UUID como string
       name: user.nome, // Backend retorna 'nome'
       email: user.email,
       role: user.perfil === 'super_admin' ? 'admin' : 'user', // Backend retorna 'perfil'
@@ -157,12 +157,12 @@ export const userService = {
     }
   },
 
-  updateUser: async (id: number, data: UpdateUserRequest): Promise<AppUser> => {
+  updateUser: async (id: string, data: UpdateUserRequest): Promise<AppUser> => {
     const response = await api.patch(`/usuarios/${id}`, data)
     return response.data
   },
 
-  deleteUser: async (id: number): Promise<void> => {
+  deleteUser: async (id: string): Promise<void> => {
     await api.delete(`/usuarios/${id}`)
   }
 }
