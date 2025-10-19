@@ -4,6 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
+// Importa Debug no navegador
+import { DebugModule } from './debug/debug.module';
+
 // Módulos da aplicação
 import { AuthModule } from './modules/auth/auth.module';
 import { TenancyModule } from './modules/tenancy/tenancy.module';
@@ -38,6 +41,7 @@ import { Auditoria } from './modules/auditoria/entities/auditoria.entity';
 
 @Module({
   imports: [
+    DebugModule,
     // Configuração global
     ConfigModule.forRoot({
       isGlobal: true,
@@ -75,7 +79,7 @@ import { Auditoria } from './modules/auditoria/entities/auditoria.entity';
         ssl: false, // Desabilitado conforme configuração do VPS
       }),
     }),
-
+    
     // Rate limiting
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
