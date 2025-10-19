@@ -18,17 +18,33 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, senha: string): Promise<Usuario | null> {
-    const usuario = await this.usuarioRepository.findOne({
-      where: { email },
-      relations: ['tenant'],
-    });
+  console.log('🧩 [AuthService] Iniciando validação de login');
+  console.log('📧 Email recebido:', email);
 
-    if (usuario && await bcrypt.compare(senha, usuario.senhaHash)) {
-      return usuario;
-    }
+  const usuario = await this.usuarioRepository.findOne({
+    where: { email },
+    relations: ['tenant'],
+  });
 
+  if (!usuario) {
+    console.log('⚠️ Usuário não encontrado no banco');
     return null;
   }
+
+  console.log('🔐 Hash salvo no banco:', usuario.senhaHash ? 'OK' : 'NULO');
+  console.log('🧱 Valor recebido (senha):', senha);
+
+  const match = await bcrypt.compare(senha, usuario.senhaHash);
+  console.log('📊 Resultado do bcrypt.compare:', match);
+
+  if (match) {
+    console.log('✅ Senha validada com sucesso');
+    return usuario;
+  }
+
+  console.log('❌ Senha inválida');
+  return null;
+}
 
   async login(loginDto: LoginDto) {
     const usuario = await this.validateUser(loginDto.email, loginDto.senha);
