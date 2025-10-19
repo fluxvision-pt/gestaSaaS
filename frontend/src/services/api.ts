@@ -21,7 +21,7 @@ import type {
 } from '@/types'
 
 // Configuracao base da API
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.fluxvision.cloud/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://app.fluxvision.cloud/api'
 
 // Criar instancia do axios
 const api = axios.create({
@@ -66,16 +66,9 @@ api.interceptors.response.use(
 
 export const authService = {
   login: async (data: LoginRequest): Promise<LoginResponse> => {
-  // Garante compatibilidade com backend (usa 'senha' em vez de 'password')
-  const payload = {
-    email: data.email,
-    senha: (data as any).senha ?? (data as any).password,
-  };
-
-  const response = await api.post('/auth/login', payload);
-  return response.data;
-},
-
+    const response = await api.post('/auth/login', data)
+    return response.data
+  },
 
   logout: async (): Promise<void> => {
     await api.post('/auth/logout')
@@ -89,7 +82,7 @@ export const authService = {
       name: user.nome, // Backend retorna 'nome'
       email: user.email,
       role: user.perfil === 'super_admin' ? 'admin' : 'user', // Backend retorna 'perfil'
-      tenantId: user.tenantId ? parseInt(user.tenantId) : 0,
+      tenantId: user.tenantId || null, // Manter como string (UUID) ou null para super_admin
       isActive: true,
       createdAt: new Date().toISOString(), // Backend não retorna essas datas no /auth/me
       updatedAt: new Date().toISOString()
