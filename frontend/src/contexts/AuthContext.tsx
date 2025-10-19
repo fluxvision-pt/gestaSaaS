@@ -79,6 +79,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 }
 
+  const handleLogin = async (credentials) => {
+  await login(credentials)
+  navigate('/dashboard')
+}
+
   const logout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('refreshToken')
