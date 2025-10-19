@@ -1,6 +1,8 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
+import { Public } from '../modules/auth/decorators/public.decorator'; // se existir
+import { JwtAuthGuard } from '../modules/auth/guards/jwt-auth.guard';
 
 @Controller('debug')
 export class DebugController {
@@ -9,12 +11,13 @@ export class DebugController {
     private readonly dataSource: DataSource
   ) {}
 
+  // 🔓 Ignora autenticação
+  @UseGuards()
   @Get()
   async getDebugInfo() {
     let dbStatus = 'unknown';
 
     try {
-      // Tenta abrir conexão com o banco
       await this.dataSource.query('SELECT NOW()');
       dbStatus = 'connected ✅';
     } catch (error) {
