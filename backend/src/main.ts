@@ -1,28 +1,19 @@
-import { NestFactory } from '@nestjs/core'
-import { ValidationPipe } from '@nestjs/common'
-import { NestExpressApplication } from '@nestjs/platform-express'
-import helmet from 'helmet'
-import * as compression from 'compression'
-import { AppModule } from './app.module'
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule)
+  const app = await NestFactory.create(AppModule);
 
-  app.use(helmet())
-  app.use(compression())
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }))
+  app.setGlobalPrefix('api/v1'); // ✅ adiciona isto
 
   app.enableCors({
     origin: ['https://app.fluxvision.cloud'],
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
-  })
+  });
 
-  app.setGlobalPrefix('api')
+  app.useGlobalPipes(new ValidationPipe());
 
-  const port = 3001
-  await app.listen(port)
-  console.log(`🚀 API ativa em https://api.fluxvision.cloud`)
+  await app.listen(process.env.PORT || 3001);
 }
-
-bootstrap()
+bootstrap();
