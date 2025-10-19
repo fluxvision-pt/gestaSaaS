@@ -1,3 +1,0 @@
-[phases.setup]
-# Usa Node.js 22.12 (mínimo suportado pelo Vite 7.x)
-nixPkgs = ["nodejs_20"]
