@@ -28,7 +28,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     )
   }
   
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />
+  // Se não autenticado, redirecionar para login
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+  
+  return <>{children}</>
 }
 
 // Componente para rotas públicas (redireciona se já autenticado)
@@ -43,7 +48,12 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     )
   }
   
-  return !isAuthenticated ? <>{children}</> : <Navigate to="/dashboard" />
+  // Se já autenticado, redirecionar para dashboard
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />
+  }
+  
+  return <>{children}</>
 }
 
 function AppRoutes() {
