@@ -1,4 +1,8 @@
+# =========================================
 # Multi-stage build para aplicação SaaS Gesta
+# Frontend (React/Vite) + Backend (NestJS)
+# =========================================
+
 # Etapa 1: Build do Frontend (React/Vite)
 FROM node:18-alpine AS frontend-build
 
@@ -8,14 +12,15 @@ WORKDIR /app/frontend
 RUN apk add --no-cache python3 make g++
 
 # Copia arquivos de dependências do frontend
-COPY frontend/package*.json ./
+COPY ./frontend/package*.json ./
 RUN npm ci
 
 # Copia código fonte do frontend
-COPY frontend/ ./
+COPY ./frontend/ ./
 
 # Build do frontend para produção
 RUN npm run build
+
 
 # Etapa 2: Build do Backend (NestJS)
 FROM node:18-alpine AS backend-build
@@ -26,14 +31,15 @@ WORKDIR /app/backend
 RUN apk add --no-cache python3 make g++
 
 # Copia arquivos de dependências do backend
-COPY backend/package*.json ./
+COPY ./backend/package*.json ./
 RUN npm ci
 
 # Copia código fonte do backend
-COPY backend/ ./
+COPY ./backend/ ./
 
 # Build do backend para produção
 RUN npm run build
+
 
 # Etapa 3: Imagem final de produção
 FROM node:18-alpine AS production
@@ -48,13 +54,13 @@ RUN addgroup -g 1001 -S nodejs && \
     adduser -S nestjs -u 1001 -G nodejs
 
 # Copia e instala apenas dependências de produção do backend
-COPY backend/package*.json ./
+COPY ./backend/package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
 # Copia o backend buildado
 COPY --from=backend-build /app/backend/dist ./dist
 
-# Copia o frontend buildado para ser servido pelo backend
+# Copia o frontend buildado para ser servido pelo backend (opcional)
 COPY --from=frontend-build /app/frontend/dist ./public
 
 # Muda ownership dos arquivos para o usuário não-root
@@ -67,7 +73,7 @@ ENV APP_PORT=3001
 
 # Healthcheck otimizado para EasyPanel + Swarm
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=5 \
-  CMD curl -fs http://localhost:3001/health || exit 1
+  CMD curl -fs http://localhost:3001/api/health || exit 1
 
 # Muda para usuário não-root
 USER nestjs
