@@ -48,19 +48,6 @@ async function bootstrap() {
   // Desenvolvimento: const corsOrigins = process.env.CORS_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:3001'];
   // Desenvolvimento: app.enableCors({ origin: corsOrigins, credentials: true });
 
- // Swagger (documentação)
-const config = new DocumentBuilder()
-  .setTitle('FluxVision API')
-  .setDescription('Documentação da API FluxVision (NestJS)')
-  .setVersion('1.0')
-  .addBearerAuth()
-  .build();
-
-const document = SwaggerModule.createDocument(app, config);
-SwaggerModule.setup('api/docs', app, document, {
-  swaggerOptions: { persistAuthorization: true },
-});
-
 const port = process.env.PORT || 3001;
 await app.listen(port);
   
