@@ -16,25 +16,25 @@ async function bootstrap() {
 
   app.enableCors({
     origin: ['https://app.fluxvision.cloud'],
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
   });
 
-  // ✅ todas as rotas da API são prefixadas com /api
+  // ✅ prefixo global para todas as rotas da API
   app.setGlobalPrefix('api');
 
-  // ✅ servir o frontend apenas se quiser o mesmo domínio
+  // ✅ serve apenas os arquivos estáticos
   app.useStaticAssets(join(__dirname, '..', 'public'), { index: false });
 
-  // ✅ esta linha deve ser a última
+  // ⚠️ Este trecho deve vir **DEPOIS** de registrar as rotas da API
   app.use('*', (req, res, next) => {
     if (req.originalUrl.startsWith('/api')) return next();
     res.sendFile(join(__dirname, '..', 'public', 'index.html'));
   });
 
-  const port = configService.get('PORT') || 3001;
+  const port = configService.get('PORT') || 3000;
   await app.listen(port);
-  console.log(`🚀 Server running on port ${port}`);
+  console.log(`🚀 Backend online na porta ${port}`);
 }
 
 bootstrap();
+
