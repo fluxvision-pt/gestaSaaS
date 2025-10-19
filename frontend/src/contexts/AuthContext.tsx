@@ -23,7 +23,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [loading, setLoading] = useState(true)
 
   const isAuthenticated = !!user
-  const isSuperAdmin = user?.role === 'admin' && user?.tenantId === 0
+  const isSuperAdmin = user?.role === 'admin' && user?.tenantId === null  // Super admin tem tenantId null
 
   // Verificar se há token salvo e buscar dados do usuário
   useEffect(() => {
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         id: response.usuario.id.toString(),
         name: response.usuario.nome,
         email: response.usuario.email,
-        tenantId: response.usuario.tenantId ? parseInt(response.usuario.tenantId) : 0,
+        tenantId: response.usuario.tenantId || null,  // Manter como UUID string ou null
         role: response.usuario.perfil === 'super_admin' ? 'admin' : 'user',
         isActive: true,
         createdAt: new Date().toISOString(),
@@ -99,7 +99,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         id: response.usuario.id.toString(),
         name: response.usuario.nome,
         email: response.usuario.email,
-        tenantId: response.usuario.tenantId ? parseInt(response.usuario.tenantId) : 0,
+        tenantId: response.usuario.tenantId || null,  // Manter como UUID string ou null
         role: response.usuario.perfil === 'super_admin' ? 'admin' : 'user',
         isActive: true,
         createdAt: new Date().toISOString(),
