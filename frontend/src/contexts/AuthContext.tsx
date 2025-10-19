@@ -23,72 +23,90 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [loading, setLoading] = useState(true)
 
   const isAuthenticated = !!user
-  const isSuperAdmin = user?.role === 'admin' && user?.tenantId === null  // Super admin tem tenantId null
+  const isSuperAdmin = user?.role === 'admin' && user?.tenantId === null // super admin => tenantId null
 
-  // Verificar se há token salvo e buscar dados do usuário
+  // Carrega usuário se houver token salvo
   useEffect(() => {
     const initAuth = async () => {
       const token = localStorage.getItem('token')
-      
+
       if (token) {
         try {
           const userData = await authService.getCurrentUser()
           setUser(userData)
         } catch (error) {
-          // Token inválido, remover
+          // Token inválido: limpar tudo
           localStorage.removeItem('token')
+          localStorage.removeItem('refreshToken')
+          localStorage.removeItem('user')
+          console.log('Token inválido removido:', error)
         }
       }
-      
+
       setLoading(false)
     }
 
     initAuth()
   }, [])
 
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // LOGIN: normaliza o retorno do backend (camelCase/snake_case)
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   const login = async (credentials: LoginRequest) => {
-  try {
-    setLoading(true)
-    const response = await authService.login(credentials)
+    try {
+      setLoading(true)
 
-    // ⚠️ Corrigido conforme retorno real do backend
-    const accessToken = response.access_token
-    const userData = response.user
+      const response = await authService.login(credentials)
+      // console.log('Login response:', response)
 
-    // Salvar token
-    localStorage.setItem('token', accessToken)
+      // Alguns backends enviam accessToken/refreshToken
+      // outros enviam access_token/refresh_token
+      const accessToken =
+        (response as any).accessToken ?? (response as any).access_token
+      const refreshToken =
+        (response as any).refreshToken ?? (response as any).refresh_token
 
-    // Converter dados do usuário para o formato esperado
-    const formattedUser: AppUser = {
-      id: userData.id.toString(),
-      name: userData.nome || userData.name,
-      email: userData.email,
-      tenantId: userData.tenantId || null,
-      role: userData.perfil === 'super_admin' ? 'admin' : 'user',
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      // Usuário pode vir como "usuario" (pt) ou "user"
+      const rawUser =
+        (response as any).usuario ?? (response as any).user
+
+      if (!accessToken || !rawUser) {
+        throw new Error('Resposta de login inesperada do servidor')
+      }
+
+      // Salva tokens
+      localStorage.setItem('token', accessToken)
+      if (refreshToken) localStorage.setItem('refreshToken', refreshToken)
+
+      // Normaliza usuário para o shape do AppUser
+      const userData: AppUser = {
+        id: String(rawUser.id),
+        name: rawUser.nome ?? rawUser.name ?? '',
+        email: rawUser.email,
+        tenantId: rawUser.tenantId ?? null, // UUID ou null
+        role:
+          rawUser.perfil === 'super_admin'
+            ? 'admin'
+            : (rawUser.role as 'admin' | 'user') ?? 'user',
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+
+      setUser(userData)
+    } catch (error) {
+      // Propaga para a tela de login mostrar mensagem
+      throw error
+    } finally {
+      setLoading(false)
     }
-
-    setUser(formattedUser)
-  } catch (error) {
-    console.error('Erro ao fazer login:', error)
-    throw error
-  } finally {
-    setLoading(false)
   }
-}
-
-  const handleLogin = async (credentials) => {
-  await login(credentials)
-  navigate('/dashboard')
-}
 
   const logout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('refreshToken')
     setUser(null)
-    
+
     // Chamar API de logout (opcional)
     authService.logout().catch(() => {
       // Ignorar erros no logout
@@ -99,22 +117,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setLoading(true)
       const response = await authService.impersonate(tenantId)
-      
-      // Salvar novo token
-      localStorage.setItem('token', response.accessToken)
-      
-      // Converter dados do usuário para o formato esperado
+
+      // Normaliza tokens/usuário também aqui
+      const accessToken =
+        (response as any).accessToken ?? (response as any).access_token
+      const rawUser =
+        (response as any).usuario ?? (response as any).user
+
+      if (accessToken) localStorage.setItem('token', accessToken)
+
       const userData: AppUser = {
-        id: response.usuario.id.toString(),
-        name: response.usuario.nome,
-        email: response.usuario.email,
-        tenantId: response.usuario.tenantId || null,  // Manter como UUID string ou null
-        role: response.usuario.perfil === 'super_admin' ? 'admin' : 'user',
+        id: String(rawUser.id),
+        name: rawUser.nome ?? rawUser.name ?? '',
+        email: rawUser.email,
+        tenantId: rawUser.tenantId ?? null,
+        role:
+          rawUser.perfil === 'super_admin'
+            ? 'admin'
+            : (rawUser.role as 'admin' | 'user') ?? 'user',
         isActive: true,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       }
-      
+
       setUser(userData)
     } catch (error) {
       throw error
