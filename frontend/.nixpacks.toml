@@ -1,2 +1,15 @@
+# nixpacks.toml — configuração limpa e otimizada para Vite + EasyPanel
+
 [phases.setup]
+# Usa Node 20 estável
 nixPkgs = ["nodejs_20"]
+aptPkgs = []
+
+[phases.install]
+cmds = ["npm ci"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "npm run preview -- --port 80 --host"
