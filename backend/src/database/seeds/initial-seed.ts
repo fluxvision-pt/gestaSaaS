@@ -22,11 +22,13 @@ export async function runInitialSeed(dataSource: DataSource) {
 
   // 1. Criar Super Admin
   console.log('👤 Criando Super Admin...');
-  const senhaHash = await bcrypt.hash('SuperAdmin@123', 12);
+  const adminEmail = process.env.SUPER_ADMIN_EMAIL || 'admin@exemplo.com';
+  const adminPassword = process.env.SUPER_ADMIN_PASSWORD || 'ChangeMe@123';
+  const senhaHash = await bcrypt.hash(adminPassword, 12);
   
   const superAdmin = usuarioRepository.create({
     nome: 'Super Administrador',
-    email: 'admin@gestasaas.com',
+    email: adminEmail,
     senhaHash,
     perfil: PerfilUsuario.SUPER_ADMIN,
     status: StatusUsuario.ATIVO,
@@ -167,7 +169,7 @@ export async function runInitialSeed(dataSource: DataSource) {
   console.log('🎉 Seeds iniciais executados com sucesso!');
   console.log('');
   console.log('📋 Resumo:');
-  console.log(`👤 Super Admin: admin@gestasaas.com / SuperAdmin@123`);
+  console.log(`👤 Super Admin criado com email: ${adminEmail}`);
   console.log(`📋 Planos: ${savedPlanoBasico.nome}, ${savedPlanoProfissional.nome}, ${savedPlanoEmpresarial.nome}`);
   console.log(`🔧 Recursos: ${recursosCreated.length} recursos criados`);
   console.log(`💳 Gateway: ${gatewayTransferencia.nome}`);
