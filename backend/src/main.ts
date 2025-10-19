@@ -21,6 +21,8 @@ async function bootstrap() {
   });
 
   await app.listen(process.env.PORT || 3001);
+  
+  console.log(`📚 Documentação disponível em https://api.fluxvision.cloud/api/docs`);
   console.log(`🚀 Server running on port ${process.env.PORT || 3001}`);
 }
 bootstrap();
