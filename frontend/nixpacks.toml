@@ -1,9 +1,10 @@
 # nixpacks.toml — configuração limpa e otimizada para Vite + EasyPanel
 
+[build]
+exclude = ["Caddyfile"]
+
 [phases.setup]
-# Usa Node 20 estável
 nixPkgs = ["nodejs_20"]
-aptPkgs = []
 
 [phases.install]
 cmds = ["npm ci"]
