@@ -15,8 +15,8 @@ export default defineConfig({
   },
   server: {
     host: true,
-    strictPort: true,
     port: 80,
+    strictPort: true,
     allowedHosts: ['app.fluxvision.cloud'],
     proxy: {
       '/api': {
@@ -25,5 +25,10 @@ export default defineConfig({
         secure: true,
       },
     },
+  },
+  preview: {
+    host: true,
+    port: 80,
+    allowedHosts: ['app.fluxvision.cloud'],
   },
 })
