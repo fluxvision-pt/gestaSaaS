@@ -13,6 +13,16 @@ import { useAuth } from '@/contexts/AuthContext'
 import type { AppUser, CreateUserRequest, UpdateUserRequest } from '@/types'
 import { useApi, useApiMutation } from '@/hooks/useApi'
 
+// Função para gerar senha temporária segura
+const generateTempPassword = (): string => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%'
+  let password = ''
+  for (let i = 0; i < 12; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return password
+}
+
 export default function Usuarios() {
   const { isSuperAdmin, impersonate } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
@@ -35,10 +45,10 @@ export default function Usuarios() {
 
   // Mutations
   const createUserMutation = useApiMutation((data: CreateUserRequest) => userService.createUser(data))
-  const updateUserMutation = useApiMutation(({ id, data }: { id: number, data: UpdateUserRequest }) => 
+  const updateUserMutation = useApiMutation(({ id, data }: { id: string, data: UpdateUserRequest }) => 
     userService.updateUser(id, data)
   )
-  const deleteUserMutation = useApiMutation((id: number) => userService.deleteUser(id))
+  const deleteUserMutation = useApiMutation((id: string) => userService.deleteUser(id))
 
   const filteredUsuarios = users?.filter(usuario =>
     usuario.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -114,7 +124,7 @@ export default function Usuarios() {
           nome: formData.name,
           email: formData.email,
           telefoneE164: formatPhoneToE164(formData.phone),
-          senha: formData.password || 'TempPass@123', // Senha temporária se não informada
+          senha: formData.password || generateTempPassword(), // Senha temporária se não informada
           tenantId: formData.tenantId !== 'none' ? formData.tenantId : undefined,
           perfil: formData.role as 'super_admin' | 'cliente_admin' | 'cliente_usuario'
         }
@@ -129,8 +139,8 @@ export default function Usuarios() {
     }
   }
 
-  const handleDelete = async (id: number) => {
-    if (confirm('Tem certeza que deseja excluir este usuário?')) {
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Tem certeza que deseja excluir este usuário?')) {
       try {
         await deleteUserMutation.mutate(id)
         refetchUsers()
@@ -291,7 +301,7 @@ export default function Usuarios() {
                       >
                         <User className="h-4 w-4" />
                       </Button>
-                      {isSuperAdmin && (usuario.tenantId || 0) > 0 && (
+                      {isSuperAdmin && usuario.tenantId && (
                         <Button 
                           variant="outline" 
                           size="sm" 
@@ -388,9 +398,10 @@ export default function Usuarios() {
                       placeholder="Deixe vazio para senha padrão"
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      autoComplete="new-password"
                     />
                     <p className="text-sm text-muted-foreground">
-                      Senha padrão do sistema: <strong>TempPass@123</strong>
+                      Deixe vazio para gerar uma senha temporária automaticamente
                     </p>
                   </div>
                 </div>

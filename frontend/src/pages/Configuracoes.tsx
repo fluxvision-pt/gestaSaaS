@@ -552,6 +552,7 @@ export default function Configuracoes() {
                     value={configIntegracao.apiKey}
                     onChange={(e) => setConfigIntegracao({...configIntegracao, apiKey: e.target.value})}
                     type="password"
+                    autoComplete="off"
                   />
                   <Button variant="outline">
                     Gerar Nova

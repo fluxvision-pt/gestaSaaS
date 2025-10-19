@@ -20,8 +20,9 @@ import type {
   UpdatePagamentoRequest
 } from '@/types'
 
-// Configuracao base da API
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://app.fluxvision.cloud:3001/api/v1'
+// 🚀 Configuração da URL base da API
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.fluxvision.cloud/api'
+// Desenvolvimento: const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 
 // Criar instancia do axios
 const api = axios.create({
@@ -78,22 +79,14 @@ export const authService = {
     const response = await api.get('/auth/me')
     const user = response.data
     return {
-      id: user.id,
-      name: user.name || user.nome,
+      id: user.id.toString(), // UUID como string
+      name: user.nome, // Backend retorna 'nome'
       email: user.email,
-      role: user.role || user.papel,
-      status: user.status || 'ativo',
-      phone: user.phone || user.telefone,
-      tenant: user.tenant ? {
-        id: user.tenant.id,
-        name: user.tenant.name || user.tenant.nome,
-        domain: user.tenant.domain || user.tenant.dominio,
-        status: user.tenant.status || 'ativo',
-        createdAt: user.tenant.criadoEm || user.tenant.createdAt,
-        updatedAt: user.tenant.atualizadoEm || user.tenant.updatedAt
-      } : undefined,
-      createdAt: user.criadoEm || user.createdAt,
-      updatedAt: user.atualizadoEm || user.updatedAt
+      role: user.perfil === 'super_admin' ? 'admin' : 'user', // Backend retorna 'perfil'
+      tenantId: user.tenantId || null, // Manter como string (UUID) ou null para super_admin
+      isActive: true,
+      createdAt: new Date().toISOString(), // Backend não retorna essas datas no /auth/me
+      updatedAt: new Date().toISOString()
     }
   },
 
@@ -108,7 +101,7 @@ export const userService = {
     const response = await api.get('/usuarios')
     const users = response.data
     return users.map((user: any) => ({
-      id: user.id,
+      id: user.id.toString(),
       name: user.name || user.nome,
       email: user.email,
       role: user.role || user.papel,
@@ -127,11 +120,11 @@ export const userService = {
     }))
   },
 
-  getUserById: async (id: number): Promise<AppUser> => {
+  getUserById: async (id: string): Promise<AppUser> => {
     const response = await api.get(`/usuarios/${id}`)
     const user = response.data
     return {
-      id: user.id,
+      id: user.id.toString(),
       name: user.name || user.nome,
       email: user.email,
       role: user.role || user.papel,
@@ -154,7 +147,7 @@ export const userService = {
     const response = await api.post('/usuarios', data)
     const user = response.data
     return {
-      id: user.id,
+      id: user.id.toString(),
       name: user.name || user.nome,
       email: user.email,
       role: user.role || user.papel,
@@ -165,12 +158,16 @@ export const userService = {
     }
   },
 
-  updateUser: async (id: number, data: UpdateUserRequest): Promise<AppUser> => {
+  updateUser: async (id: string, data: UpdateUserRequest): Promise<AppUser> => {
     const response = await api.patch(`/usuarios/${id}`, data)
-    return response.data
+    const user = response.data
+    return {
+      ...user,
+      id: user.id.toString()
+    }
   },
 
-  deleteUser: async (id: number): Promise<void> => {
+  deleteUser: async (id: string): Promise<void> => {
     await api.delete(`/usuarios/${id}`)
   }
 }
@@ -180,12 +177,12 @@ export const tenantService = {
     const response = await api.get('/tenants')
     const tenants = response.data
     return tenants.map((tenant: any) => ({
-      id: tenant.id,
+      id: tenant.id.toString(),
       name: tenant.name || tenant.nome,
       domain: tenant.domain || tenant.dominio,
       status: tenant.status || 'ativo',
       plan: tenant.plan ? {
-        id: tenant.plan.id,
+        id: tenant.plan.id.toString(),
         name: tenant.plan.name || tenant.plan.nome,
         price: tenant.plan.price || tenant.plan.preco,
         features: tenant.plan.features || tenant.plan.recursos
@@ -199,12 +196,12 @@ export const tenantService = {
     const response = await api.get(`/tenants/${id}`)
     const tenant = response.data
     return {
-      id: tenant.id,
+      id: tenant.id.toString(),
       name: tenant.name || tenant.nome,
       domain: tenant.domain || tenant.dominio,
       status: tenant.status || 'ativo',
       plan: tenant.plan ? {
-        id: tenant.plan.id,
+        id: tenant.plan.id.toString(),
         name: tenant.plan.name || tenant.plan.nome,
         price: tenant.plan.price || tenant.plan.preco,
         features: tenant.plan.features || tenant.plan.recursos
@@ -218,12 +215,12 @@ export const tenantService = {
     const response = await api.post('/tenants', data)
     const tenant = response.data
     return {
-      id: tenant.id,
+      id: tenant.id.toString(),
       name: tenant.name || tenant.nome,
       domain: tenant.domain || tenant.dominio,
       status: tenant.status || 'ativo',
       plan: tenant.plan ? {
-        id: tenant.plan.id,
+        id: tenant.plan.id.toString(),
         name: tenant.plan.name || tenant.plan.nome,
         price: tenant.plan.price || tenant.plan.preco,
         features: tenant.plan.features || tenant.plan.recursos
@@ -262,7 +259,7 @@ export const planService = {
     const response = await api.get('/planos')
     const plans = response.data
     return plans.map((plan: any) => ({
-      id: plan.id,
+      id: plan.id.toString(),
       name: plan.name || plan.nome,
       description: plan.description || plan.descricao,
       price: plan.price || plan.preco,
@@ -279,7 +276,7 @@ export const planService = {
     const response = await api.get(`/planos/${id}`)
     const plan = response.data
     return {
-      id: plan.id,
+      id: plan.id.toString(),
       name: plan.name || plan.nome,
       description: plan.description || plan.descricao,
       price: plan.price || plan.preco,
@@ -296,7 +293,7 @@ export const planService = {
     const response = await api.post('/planos', data)
     const plan = response.data
     return {
-      id: plan.id,
+      id: plan.id.toString(),
       name: plan.name || plan.nome,
       description: plan.description || plan.descricao,
       price: plan.price || plan.preco,
@@ -313,7 +310,7 @@ export const planService = {
     const response = await api.patch(`/planos/${id}`, data)
     const plan = response.data
     return {
-      id: plan.id,
+      id: plan.id.toString(),
       name: plan.name || plan.nome,
       description: plan.description || plan.descricao,
       price: plan.price || plan.preco,
@@ -523,7 +520,7 @@ export const configuracaoService = {
     return {
       geral: {
         nomeEmpresa: 'GestaSaaS',
-        email: 'contato@gestasaas.com',
+        email: 'contato@exemplo.com',
         telefone: '+55 11 99999-9999',
         endereco: 'Rua das Empresas, 123 - São Paulo, SP',
         timezone: 'America/Sao_Paulo',
@@ -551,7 +548,7 @@ export const configuracaoService = {
       },
       integracao: {
         apiKey: 'sk_test_123456789',
-        webhookUrl: 'https://gestasaas.com/webhook',
+        webhookUrl: 'https://exemplo.com/webhook',
         gatewayPagamento: 'stripe',
         emailProvider: 'sendgrid',
         backupAutomatico: true,
@@ -619,7 +616,7 @@ export const auditoriaService = {
       'Relatorio exportado', 'Dados importados', 'Senha alterada', 'Perfil atualizado'
     ]
     
-    const usuarios = ['admin@gestasaas.com', 'usuario1@empresa.com', 'usuario2@empresa.com', 'sistema']
+    const usuarios = ['admin@exemplo.com', 'usuario1@exemplo.com', 'usuario2@exemplo.com', 'sistema']
     const recursos = ['usuarios', 'pagamentos', 'assinaturas', 'configuracoes', 'sistema', 'relatorios']
     const ips = ['192.168.1.100', '10.0.0.50', '172.16.0.25', '203.0.113.10']
     

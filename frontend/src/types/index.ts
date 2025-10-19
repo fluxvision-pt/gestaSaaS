@@ -1,10 +1,10 @@
 // Tipos para as entidades
 export interface AppUser {
-  id: number
+  id: string
   name: string
   email: string
   phone?: string
-  tenantId?: number
+  tenantId?: string | null  // UUID string ou null para super_admin
   tenant?: AppTenant
   role?: 'admin' | 'user'
   status?: string
@@ -47,7 +47,7 @@ export interface AppPlan {
 
 export interface Subscription {
   id: number
-  tenantId: number
+  tenantId: string  // UUID string
   tenant?: AppTenant
   planId: number
   plan?: AppPlan
@@ -144,7 +144,7 @@ export interface UpdatePlanRequest {
 }
 
 export interface CreateSubscriptionRequest {
-  tenantId: number
+  tenantId: string  // UUID string
   planId: number
   paymentMethod: string
   startDate: string

@@ -41,7 +41,7 @@ import { Auditoria } from './modules/auditoria/entities/auditoria.entity';
     // Configuração global
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: process.env.NODE_ENV === 'development' ? '.env.development' : '.env',
     }),
 
     // Configuração do banco de dados

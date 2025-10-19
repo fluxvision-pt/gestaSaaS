@@ -126,6 +126,7 @@ export default function Login() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    autoComplete="email"
                     className="w-full"
                   />
                 </div>
@@ -142,6 +143,7 @@ export default function Login() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                      autoComplete="current-password"
                       className="w-full pr-10"
                     />
                     <button
@@ -184,14 +186,7 @@ export default function Login() {
             </CardContent>
           </Card>
 
-          {/* Informações de demonstração */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <h4 className="font-medium text-blue-900 mb-2">Conta de demonstração:</h4>
-            <p className="text-sm text-blue-700">
-              <strong>Email:</strong> admin@gestasaas.com<br />
-              <strong>Senha:</strong> SuperAdmin@123
-            </p>
-          </div>
+
         </div>
       </div>
       </div>

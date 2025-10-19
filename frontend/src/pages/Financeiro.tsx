@@ -81,7 +81,7 @@ export default function Financeiro() {
 
     // Transações de receita baseadas em pagamentos reais
     const transacoesReceita = pagamentos.map((pagamento) => ({
-      id: parseInt(pagamento.id) || Math.random(),
+      id: pagamento.id || Math.random().toString(),
       tipo: 'receita' as const,
       categoria: 'Assinaturas',
       descricao: `${pagamento.plano} - ${pagamento.cliente}`,
