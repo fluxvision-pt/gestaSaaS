@@ -4,21 +4,20 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
-  root: path.resolve(__dirname, 'frontend'),
-  build: {
-    outDir: path.resolve(__dirname, 'frontend/dist'),
-    emptyOutDir: true,
-  },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'frontend/src'),
+      '@': path.resolve(__dirname, './src'),
     },
+  },
+  build: {
+    outDir: 'dist',          // ✅ gera /frontend/dist automaticamente
+    emptyOutDir: true,
   },
   server: {
     port: 4173,
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: 'http://localhost:3001', // ✅ redireciona para backend local
         changeOrigin: true,
       },
     },
