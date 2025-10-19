@@ -4,7 +4,6 @@ WORKDIR /app
 
 COPY package*.json ./
 RUN npm ci
-
 COPY . .
 RUN npm run build
 
@@ -14,10 +13,10 @@ WORKDIR /app
 
 COPY --from=build /app/dist ./dist
 
-RUN npm install -g serve
+RUN npm install -g http-server
 RUN chmod -R 755 /app/dist
 
 EXPOSE 80
 ENV PORT=80
 
-CMD ["serve", "-s", "dist", "-l", "80", "--no-clipboard"]
+CMD ["http-server", "dist", "-p", "80", "--cors"]
