@@ -16,6 +16,33 @@ async function bootstrap() {
   // 🚀 Prefixo global para todas as rotas da API
   app.setGlobalPrefix('api');
 
+  // 📚 Configuração do Swagger
+  const config = new DocumentBuilder()
+    .setTitle('GestaSaaS API')
+    .setDescription('API para sistema de gestão SaaS com controle de assinaturas, pagamentos e quilometragem')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .addTag('auth', 'Autenticação e autorização')
+    .addTag('tenants', 'Gestão de tenants')
+    .addTag('usuarios', 'Gestão de usuários')
+    .addTag('planos', 'Gestão de planos')
+    .addTag('assinaturas', 'Gestão de assinaturas')
+    .addTag('pagamentos', 'Gestão de pagamentos')
+    .addTag('financeiro', 'Controle financeiro')
+    .addTag('km', 'Controle de quilometragem')
+    .addTag('relatorios', 'Relatórios')
+    .addTag('configuracoes', 'Configurações')
+    .addTag('auditoria', 'Auditoria')
+    .addTag('health', 'Health check')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
+  
   // 🚀 CORS configurado para produção
   app.enableCors({ origin: ['https://app.fluxvision.cloud'], credentials: true });
   // Desenvolvimento: const corsOrigins = process.env.CORS_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:3001'];
