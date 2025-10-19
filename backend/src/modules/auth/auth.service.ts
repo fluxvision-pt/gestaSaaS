@@ -18,34 +18,33 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, senha: string): Promise<Usuario | null> {
-  console.log('🧩 [AuthService] Iniciando validação de login');
-  console.log('📧 Email recebido:', email);
+  console.log(`[AuthService] Iniciando validação de login`);
+  console.log(`📩 Email recebido: ${email}`);
 
   const usuario = await this.usuarioRepository
     .createQueryBuilder('u')
     .leftJoinAndSelect('u.tenant', 't')
-    .where('LOWER(u.email) = LOWER(:email)', { email: email.trim() })
+    .where('LOWER(u.email) = LOWER(:email)', { email })
+    .andWhere('u.status = :status', { status: 'ativo' })
     .getOne();
 
   if (!usuario) {
-    console.log('⚠️ Usuário não encontrado no banco (após query insensível)');
+    console.warn('⚠️ Usuário não encontrado no banco (após query insensível)');
     return null;
   }
 
-  console.log('🔐 Hash salvo no banco:', usuario.senhaHash ? 'OK' : 'NULO');
-  console.log('🧱 Valor recebido (senha):', senha);
+  const senhaValida = await bcrypt.compare(senha, usuario.senhaHash);
+  console.log('📊 Resultado do bcrypt.compare:', senhaValida);
 
-  const match = await bcrypt.compare(senha, usuario.senhaHash);
-  console.log('📊 Resultado do bcrypt.compare:', match);
-
-  if (match) {
-    console.log('✅ Senha validada com sucesso');
-    return usuario;
+  if (!senhaValida) {
+    console.warn('❌ Senha incorreta');
+    return null;
   }
 
-  console.log('❌ Senha inválida');
-  return null;
+  console.log('✅ Senha validada com sucesso');
+  return usuario;
 }
+
 
   async login(loginDto: LoginDto) {
     const usuario = await this.validateUser(loginDto.email, loginDto.senha);
