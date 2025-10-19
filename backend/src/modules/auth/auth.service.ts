@@ -21,13 +21,14 @@ export class AuthService {
   console.log('🧩 [AuthService] Iniciando validação de login');
   console.log('📧 Email recebido:', email);
 
-  const usuario = await this.usuarioRepository.findOne({
-    where: { email },
-    relations: ['tenant'],
-  });
+  const usuario = await this.usuarioRepository
+    .createQueryBuilder('u')
+    .leftJoinAndSelect('u.tenant', 't')
+    .where('LOWER(u.email) = LOWER(:email)', { email: email.trim() })
+    .getOne();
 
   if (!usuario) {
-    console.log('⚠️ Usuário não encontrado no banco');
+    console.log('⚠️ Usuário não encontrado no banco (após query insensível)');
     return null;
   }
 
