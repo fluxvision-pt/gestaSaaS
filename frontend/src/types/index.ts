@@ -1,6 +1,6 @@
 // Tipos para as entidades
 export interface AppUser {
-  id: number
+  id: string
   name: string
   email: string
   phone?: string
