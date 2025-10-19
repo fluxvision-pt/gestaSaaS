@@ -21,7 +21,7 @@ import type {
 } from '@/types'
 
 // Configuracao base da API
-const API_BASE_URL = import.meta.env.VITE_API_URL || https://api.fluxvision.cloud/api
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.fluxvision.cloud/api'
 
 // Criar instancia do axios
 const api = axios.create({
