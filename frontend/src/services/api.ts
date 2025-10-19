@@ -78,22 +78,14 @@ export const authService = {
     const response = await api.get('/auth/me')
     const user = response.data
     return {
-      id: user.id,
-      name: user.name || user.nome,
+      id: parseInt(user.id), // Converter string UUID para number conforme esperado pelo AppUser
+      name: user.nome, // Backend retorna 'nome'
       email: user.email,
-      role: user.role || user.papel,
-      status: user.status || 'ativo',
-      phone: user.phone || user.telefone,
-      tenant: user.tenant ? {
-        id: user.tenant.id,
-        name: user.tenant.name || user.tenant.nome,
-        domain: user.tenant.domain || user.tenant.dominio,
-        status: user.tenant.status || 'ativo',
-        createdAt: user.tenant.criadoEm || user.tenant.createdAt,
-        updatedAt: user.tenant.atualizadoEm || user.tenant.updatedAt
-      } : undefined,
-      createdAt: user.criadoEm || user.createdAt,
-      updatedAt: user.atualizadoEm || user.updatedAt
+      role: user.perfil === 'super_admin' ? 'admin' : 'user', // Backend retorna 'perfil'
+      tenantId: user.tenantId ? parseInt(user.tenantId) : 0,
+      isActive: true,
+      createdAt: new Date().toISOString(), // Backend não retorna essas datas no /auth/me
+      updatedAt: new Date().toISOString()
     }
   },
 
