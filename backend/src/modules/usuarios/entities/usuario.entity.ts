@@ -27,7 +27,7 @@ export enum StatusUsuario {
   SUSPENSO = 'suspenso',
 }
 
-@Entity('usuarios')
+@Entity({ name: 'usuarios', schema: 'public' })
 @Unique(['email'])
 export class Usuario {
   @ApiProperty({ description: 'ID único do usuário' })
