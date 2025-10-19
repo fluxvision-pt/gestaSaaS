@@ -11,26 +11,12 @@ export class DebugController {
     private readonly dataSource: DataSource
   ) {}
 
-  // 🔓 Ignora autenticação
-  @UseGuards()
+  @Public()
   @Get()
-  async getDebugInfo() {
-    let dbStatus = 'unknown';
-
-    try {
-      await this.dataSource.query('SELECT NOW()');
-      dbStatus = 'connected ✅';
-    } catch (error) {
-      dbStatus = `error ❌: ${error.message}`;
-    }
-
+  getDebugInfo() {
     return {
-      status: 'online ✅',
-      environment: this.configService.get('NODE_ENV') || 'development',
-      timestamp: new Date().toISOString(),
-      cors: this.configService.get('CORS_ORIGINS') || 'https://app.fluxvision.cloud',
-      db: dbStatus,
-      docs: 'https://api.fluxvision.cloud/api/docs',
+      message: '🔥 Rota pública funcionando!',
+      timestamp: new Date().toISOString()
     };
   }
 }
