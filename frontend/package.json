@@ -6,11 +6,14 @@
   "engines": {
   "node": ">=20.19.0"
 },
+  {
   "scripts": {
-  "dev": "vite",
-  "build": "vite build",
-  "preview": "vite preview --port $PORT --host"
-},
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 80 --host"
+  }
+}
+
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-avatar": "^1.1.10",
