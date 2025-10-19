@@ -78,7 +78,7 @@ export const authService = {
     const response = await api.get('/auth/me')
     const user = response.data
     return {
-      id: user.id, // UUID como string
+      id: user.id.toString(), // UUID como string
       name: user.nome, // Backend retorna 'nome'
       email: user.email,
       role: user.perfil === 'super_admin' ? 'admin' : 'user', // Backend retorna 'perfil'
@@ -100,7 +100,7 @@ export const userService = {
     const response = await api.get('/usuarios')
     const users = response.data
     return users.map((user: any) => ({
-      id: user.id,
+      id: user.id.toString(),
       name: user.name || user.nome,
       email: user.email,
       role: user.role || user.papel,
@@ -119,11 +119,11 @@ export const userService = {
     }))
   },
 
-  getUserById: async (id: number): Promise<AppUser> => {
+  getUserById: async (id: string): Promise<AppUser> => {
     const response = await api.get(`/usuarios/${id}`)
     const user = response.data
     return {
-      id: user.id,
+      id: user.id.toString(),
       name: user.name || user.nome,
       email: user.email,
       role: user.role || user.papel,
@@ -159,7 +159,11 @@ export const userService = {
 
   updateUser: async (id: string, data: UpdateUserRequest): Promise<AppUser> => {
     const response = await api.patch(`/usuarios/${id}`, data)
-    return response.data
+    const user = response.data
+    return {
+      ...user,
+      id: user.id.toString()
+    }
   },
 
   deleteUser: async (id: string): Promise<void> => {
@@ -172,12 +176,12 @@ export const tenantService = {
     const response = await api.get('/tenants')
     const tenants = response.data
     return tenants.map((tenant: any) => ({
-      id: tenant.id,
+      id: tenant.id.toString(),
       name: tenant.name || tenant.nome,
       domain: tenant.domain || tenant.dominio,
       status: tenant.status || 'ativo',
       plan: tenant.plan ? {
-        id: tenant.plan.id,
+        id: tenant.plan.id.toString(),
         name: tenant.plan.name || tenant.plan.nome,
         price: tenant.plan.price || tenant.plan.preco,
         features: tenant.plan.features || tenant.plan.recursos
@@ -191,12 +195,12 @@ export const tenantService = {
     const response = await api.get(`/tenants/${id}`)
     const tenant = response.data
     return {
-      id: tenant.id,
+      id: tenant.id.toString(),
       name: tenant.name || tenant.nome,
       domain: tenant.domain || tenant.dominio,
       status: tenant.status || 'ativo',
       plan: tenant.plan ? {
-        id: tenant.plan.id,
+        id: tenant.plan.id.toString(),
         name: tenant.plan.name || tenant.plan.nome,
         price: tenant.plan.price || tenant.plan.preco,
         features: tenant.plan.features || tenant.plan.recursos
@@ -210,12 +214,12 @@ export const tenantService = {
     const response = await api.post('/tenants', data)
     const tenant = response.data
     return {
-      id: tenant.id,
+      id: tenant.id.toString(),
       name: tenant.name || tenant.nome,
       domain: tenant.domain || tenant.dominio,
       status: tenant.status || 'ativo',
       plan: tenant.plan ? {
-        id: tenant.plan.id,
+        id: tenant.plan.id.toString(),
         name: tenant.plan.name || tenant.plan.nome,
         price: tenant.plan.price || tenant.plan.preco,
         features: tenant.plan.features || tenant.plan.recursos
@@ -254,7 +258,7 @@ export const planService = {
     const response = await api.get('/planos')
     const plans = response.data
     return plans.map((plan: any) => ({
-      id: plan.id,
+      id: plan.id.toString(),
       name: plan.name || plan.nome,
       description: plan.description || plan.descricao,
       price: plan.price || plan.preco,
@@ -271,7 +275,7 @@ export const planService = {
     const response = await api.get(`/planos/${id}`)
     const plan = response.data
     return {
-      id: plan.id,
+      id: plan.id.toString(),
       name: plan.name || plan.nome,
       description: plan.description || plan.descricao,
       price: plan.price || plan.preco,
@@ -288,7 +292,7 @@ export const planService = {
     const response = await api.post('/planos', data)
     const plan = response.data
     return {
-      id: plan.id,
+      id: plan.id.toString(),
       name: plan.name || plan.nome,
       description: plan.description || plan.descricao,
       price: plan.price || plan.preco,
@@ -305,7 +309,7 @@ export const planService = {
     const response = await api.patch(`/planos/${id}`, data)
     const plan = response.data
     return {
-      id: plan.id,
+      id: plan.id.toString(),
       name: plan.name || plan.nome,
       description: plan.description || plan.descricao,
       price: plan.price || plan.preco,
