@@ -5,7 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.setGlobalPrefix('api/v1'); // ✅ adiciona isto
+  app.setGlobalPrefix('api'); // ✅ adiciona isto
 
   app.enableCors({
     origin: ['https://app.fluxvision.cloud'],
