@@ -146,7 +146,7 @@ export const userService = {
     const response = await api.post('/usuarios', data)
     const user = response.data
     return {
-      id: user.id,
+      id: user.id.toString(),
       name: user.name || user.nome,
       email: user.email,
       role: user.role || user.papel,
