@@ -20,7 +20,7 @@ export default defineConfig({
     allowedHosts: ['app.fluxvision.cloud'],
     proxy: {
       '/api': {
-        target: 'https://api.fluxvision.cloud',
+        target: 'https://api.fluxvision.cloud/api',
         changeOrigin: true,
         secure: true,
       },
