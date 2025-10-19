@@ -23,8 +23,12 @@ export default function Login() {
 
     try {
       await login({ email, senha: password })
-      navigate('/dashboard')
+      // Aguardar um pouco para garantir que o contexto seja atualizado
+      setTimeout(() => {
+        navigate('/dashboard')
+      }, 100)
     } catch (error: any) {
+      console.error('Erro no login:', error)
       setError(error.response?.data?.message || t('auth.loginError'))
     }
   }
