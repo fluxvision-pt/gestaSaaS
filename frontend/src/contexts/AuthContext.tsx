@@ -57,7 +57,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       // Converter dados do usuário para o formato esperado
       const userData: AppUser = {
-        id: parseInt(response.usuario.id),
+        id: response.usuario.id,
         name: response.usuario.nome,
         email: response.usuario.email,
         tenantId: response.usuario.tenantId ? parseInt(response.usuario.tenantId) : 0,
@@ -96,7 +96,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       // Converter dados do usuário para o formato esperado
       const userData: AppUser = {
-        id: parseInt(response.usuario.id),
+        id: response.usuario.id,
         name: response.usuario.nome,
         email: response.usuario.email,
         tenantId: response.usuario.tenantId ? parseInt(response.usuario.tenantId) : 0,
