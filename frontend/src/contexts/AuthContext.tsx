@@ -47,33 +47,37 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [])
 
   const login = async (credentials: LoginRequest) => {
-    try {
-      setLoading(true)
-      const response = await authService.login(credentials)
-      
-      // Salvar token
-      localStorage.setItem('token', response.accessToken)
-      localStorage.setItem('refreshToken', response.refreshToken)
-      
-      // Converter dados do usuário para o formato esperado
-      const userData: AppUser = {
-        id: response.usuario.id.toString(),
-        name: response.usuario.nome,
-        email: response.usuario.email,
-        tenantId: response.usuario.tenantId || null,  // Manter como UUID string ou null
-        role: response.usuario.perfil === 'super_admin' ? 'admin' : 'user',
-        isActive: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-      
-      setUser(userData)
-    } catch (error) {
-      throw error
-    } finally {
-      setLoading(false)
+  try {
+    setLoading(true)
+    const response = await authService.login(credentials)
+
+    // ⚠️ Corrigido conforme retorno real do backend
+    const accessToken = response.access_token
+    const userData = response.user
+
+    // Salvar token
+    localStorage.setItem('token', accessToken)
+
+    // Converter dados do usuário para o formato esperado
+    const formattedUser: AppUser = {
+      id: userData.id.toString(),
+      name: userData.nome || userData.name,
+      email: userData.email,
+      tenantId: userData.tenantId || null,
+      role: userData.perfil === 'super_admin' ? 'admin' : 'user',
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     }
+
+    setUser(formattedUser)
+  } catch (error) {
+    console.error('Erro ao fazer login:', error)
+    throw error
+  } finally {
+    setLoading(false)
   }
+}
 
   const logout = () => {
     localStorage.removeItem('token')
