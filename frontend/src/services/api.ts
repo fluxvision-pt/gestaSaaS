@@ -21,7 +21,7 @@ import type {
 } from '@/types'
 
 // Configuracao base da API
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://app.fluxvision.cloud:3001/api/v1'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://app/fluxvision.cloud/api/v1'
 
 // Criar instancia do axios
 const api = axios.create({
@@ -515,7 +515,7 @@ export const configuracaoService = {
     return {
       geral: {
         nomeEmpresa: 'GestaSaaS',
-        email: 'contato@gestasaas.com',
+        email: 'contato@exemplo.com',
         telefone: '+55 11 99999-9999',
         endereco: 'Rua das Empresas, 123 - São Paulo, SP',
         timezone: 'America/Sao_Paulo',
@@ -543,7 +543,7 @@ export const configuracaoService = {
       },
       integracao: {
         apiKey: 'sk_test_123456789',
-        webhookUrl: 'https://gestasaas.com/webhook',
+        webhookUrl: 'https://exemplo.com/webhook',
         gatewayPagamento: 'stripe',
         emailProvider: 'sendgrid',
         backupAutomatico: true,
@@ -611,7 +611,7 @@ export const auditoriaService = {
       'Relatorio exportado', 'Dados importados', 'Senha alterada', 'Perfil atualizado'
     ]
     
-    const usuarios = ['admin@gestasaas.com', 'usuario1@empresa.com', 'usuario2@empresa.com', 'sistema']
+    const usuarios = ['admin@exemplo.com', 'usuario1@exemplo.com', 'usuario2@exemplo.com', 'sistema']
     const recursos = ['usuarios', 'pagamentos', 'assinaturas', 'configuracoes', 'sistema', 'relatorios']
     const ips = ['192.168.1.100', '10.0.0.50', '172.16.0.25', '203.0.113.10']
     
