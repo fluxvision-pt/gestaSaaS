@@ -14,15 +14,16 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
-  host: true,
-  strictPort: true,
-  port: 80,
-  allowedHosts: ['app.fluxvision.cloud'],
-  proxy: {
-    '/api': {
-      target: 'https://api.fluxvision.cloud',
-      changeOrigin: true,
-      secure: true,
+    host: true,
+    strictPort: true,
+    port: 80,
+    allowedHosts: ['app.fluxvision.cloud'],
+    proxy: {
+      '/api': {
+        target: 'https://api.fluxvision.cloud',
+        changeOrigin: true,
+        secure: true,
+      },
     },
   },
-},
+})
