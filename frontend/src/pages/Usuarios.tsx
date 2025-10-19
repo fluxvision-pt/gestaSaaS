@@ -13,6 +13,16 @@ import { useAuth } from '@/contexts/AuthContext'
 import type { AppUser, CreateUserRequest, UpdateUserRequest } from '@/types'
 import { useApi, useApiMutation } from '@/hooks/useApi'
 
+// Função para gerar senha temporária segura
+const generateTempPassword = (): string => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%'
+  let password = ''
+  for (let i = 0; i < 12; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return password
+}
+
 export default function Usuarios() {
   const { isSuperAdmin, impersonate } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
@@ -114,7 +124,7 @@ export default function Usuarios() {
           nome: formData.name,
           email: formData.email,
           telefoneE164: formatPhoneToE164(formData.phone),
-          senha: formData.password || 'TempPass@123', // Senha temporária se não informada
+          senha: formData.password || generateTempPassword(), // Senha temporária se não informada
           tenantId: formData.tenantId !== 'none' ? formData.tenantId : undefined,
           perfil: formData.role as 'super_admin' | 'cliente_admin' | 'cliente_usuario'
         }
@@ -390,7 +400,7 @@ export default function Usuarios() {
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     />
                     <p className="text-sm text-muted-foreground">
-                      Senha padrão do sistema: <strong>TempPass@123</strong>
+                      Deixe vazio para gerar uma senha temporária automaticamente
                     </p>
                   </div>
                 </div>
