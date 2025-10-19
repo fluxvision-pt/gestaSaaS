@@ -301,7 +301,7 @@ export default function Usuarios() {
                       >
                         <User className="h-4 w-4" />
                       </Button>
-                      {isSuperAdmin && (usuario.tenantId || 0) > 0 && (
+                      {isSuperAdmin && usuario.tenantId && (
                         <Button 
                           variant="outline" 
                           size="sm" 
