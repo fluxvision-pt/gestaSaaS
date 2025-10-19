@@ -10,14 +10,14 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: 'dist',          // ✅ gera /frontend/dist automaticamente
+    outDir: 'dist',
     emptyOutDir: true,
   },
   server: {
     port: 4173,
     proxy: {
       '/api': {
-        target: 'http://localhost:3001', // ✅ redireciona para backend local
+        target: 'http://localhost:3001',
         changeOrigin: true,
       },
     },
