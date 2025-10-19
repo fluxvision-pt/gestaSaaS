@@ -31,7 +31,7 @@ async function bootstrap() {
     res.sendFile(join(__dirname, '..', 'public', 'index.html'));
   });
 
-  const port = configService.get('PORT') || 3000;
+  const port = configService.get('PORT') || 3001;
   await app.listen(port);
   console.log(`🚀 Backend online na porta ${port}`);
 }
