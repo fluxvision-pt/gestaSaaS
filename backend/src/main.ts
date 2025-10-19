@@ -4,7 +4,6 @@ import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
 import * as compression from 'compression';
-import { join } from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -13,28 +12,21 @@ async function bootstrap() {
 
   app.use(helmet());
   app.use(compression());
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
+  // CORS: libera apenas o app frontend
   app.enableCors({
     origin: ['https://app.fluxvision.cloud'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
   });
 
-  // ✅ prefixo global para todas as rotas da API
+  // Prefixo padrão
   app.setGlobalPrefix('api');
-
-  // ✅ serve apenas os arquivos estáticos
-  app.useStaticAssets(join(__dirname, '..', 'public'), { index: false });
-
-  // ⚠️ Este trecho deve vir **DEPOIS** de registrar as rotas da API
-  app.use('*', (req, res, next) => {
-    if (req.originalUrl.startsWith('/api')) return next();
-    res.sendFile(join(__dirname, '..', 'public', 'index.html'));
-  });
 
   const port = configService.get('PORT') || 3001;
   await app.listen(port);
-  console.log(`🚀 Backend online na porta ${port}`);
+  console.log(`🚀 Backend ativo em https://api.fluxvision.cloud`);
 }
 
 bootstrap();
-
