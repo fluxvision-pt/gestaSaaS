@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import * as compression from 'compression';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,8 +21,21 @@ async function bootstrap() {
   // Desenvolvimento: const corsOrigins = process.env.CORS_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:3001'];
   // Desenvolvimento: app.enableCors({ origin: corsOrigins, credentials: true });
 
-  const port = process.env.PORT || 3001;
-  await app.listen(port);
+ // Swagger (documentação)
+const config = new DocumentBuilder()
+  .setTitle('FluxVision API')
+  .setDescription('Documentação da API FluxVision (NestJS)')
+  .setVersion('1.0')
+  .addBearerAuth()
+  .build();
+
+const document = SwaggerModule.createDocument(app, config);
+SwaggerModule.setup('api/docs', app, document, {
+  swaggerOptions: { persistAuthorization: true },
+});
+
+const port = process.env.PORT || 3001;
+await app.listen(port);
   
   console.log(`📚 Documentação disponível em https://api.fluxvision.cloud/api/docs`);
   // Desenvolvimento: const baseUrl = process.env.BASE_URL || `http://localhost:${port}`;
