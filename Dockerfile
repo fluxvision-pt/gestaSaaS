@@ -67,7 +67,7 @@ ENV APP_PORT=3001
 
 # Healthcheck otimizado para EasyPanel + Swarm
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=5 \
-  CMD curl -fs http://127.0.0.1:3001/health || exit 1
+  CMD curl -fs http://l;ocalhost:3001/health || exit 1
 
 # Muda para usuário não-root
 USER nestjs
