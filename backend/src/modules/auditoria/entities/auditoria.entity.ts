@@ -3,44 +3,33 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
-import { ApiProperty } from '@nestjs/swagger';
+import { Tenant } from '../../tenancy/entities/tenant.entity';
 
-@Entity('auditoria')
+@Entity({ name: 'auditoria', schema: 'public' })
 export class Auditoria {
-  @ApiProperty({ description: 'ID único do registro de auditoria' })
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ApiProperty({ description: 'ID do tenant', required: false })
   @Column({ name: 'tenant_id', type: 'uuid', nullable: true })
   tenantId?: string;
 
-  @ApiProperty({ description: 'ID do usuário', required: false })
-  @Column({ name: 'usuario_id', type: 'uuid', nullable: true })
-  usuarioId?: string;
-
-  @ApiProperty({ description: 'Ação realizada', example: 'criar_transacao' })
-  @Column({ type: 'text' })
-  acao: string;
-
-  @ApiProperty({ description: 'Entidade afetada', example: 'transacoes', required: false })
   @Column({ type: 'text', nullable: true })
-  entidade?: string;
+  acao?: string;
 
-  @ApiProperty({ description: 'ID da entidade afetada', required: false })
-  @Column({ name: 'entidade_id', type: 'uuid', nullable: true })
-  entidadeId?: string;
-
-  @ApiProperty({ description: 'Endereço IP do usuário', required: false })
   @Column({ type: 'text', nullable: true })
-  ip?: string;
+  tabela?: string;
 
-  @ApiProperty({ description: 'User Agent do navegador', required: false })
-  @Column({ name: 'user_agent', type: 'text', nullable: true })
-  userAgent?: string;
+  @Column({ type: 'jsonb', nullable: true })
+  dados?: any;
 
-  @ApiProperty({ description: 'Data de criação' })
   @CreateDateColumn({ name: 'criado_em', type: 'timestamp' })
   criadoEm: Date;
+
+  // 🔥 Adiciona este relacionamento:
+  @ManyToOne(() => Tenant, (tenant) => tenant.auditorias, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'tenant_id' })
+  tenant: Tenant;
 }
