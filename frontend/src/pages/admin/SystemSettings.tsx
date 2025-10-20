@@ -103,26 +103,26 @@ export default function SystemSettings() {
       return changes[config.id];
     }
     
-    switch (config.tipo) {
+    switch (config.type) {
       case 'boolean':
-        return config.valor === 'true';
+        return config.value === 'true';
       case 'number':
-        return Number(config.valor);
+        return Number(config.value);
       case 'json':
         try {
-          return JSON.parse(config.valor);
+          return JSON.parse(config.value);
         } catch {
-          return config.valor;
+          return config.value;
         }
       default:
-        return config.valor;
+        return config.value;
     }
   };
 
   const renderConfigInput = (config: SystemConfig) => {
     const value = getConfigValue(config);
 
-    switch (config.tipo) {
+    switch (config.type) {
       case 'boolean':
         return (
           <div className="flex items-center space-x-2">
@@ -161,7 +161,7 @@ export default function SystemSettings() {
         );
 
       default:
-        if (config.chave.includes('password') || config.chave.includes('secret') || config.chave.includes('key')) {
+        if (config.key.includes('password') || config.key.includes('secret') || config.key.includes('key')) {
           return (
             <Input
               type="password"
@@ -171,7 +171,7 @@ export default function SystemSettings() {
           );
         }
         
-        if (config.descricao && config.descricao.length > 100) {
+        if (config.description && config.description.length > 100) {
           return (
             <Textarea
               value={value}
@@ -192,10 +192,10 @@ export default function SystemSettings() {
 
   const groupConfigsByCategory = (): ConfigSection[] => {
     const grouped = configurations.reduce((acc, config) => {
-      if (!acc[config.categoria]) {
-        acc[config.categoria] = [];
+      if (!acc[config.category]) {
+        acc[config.category] = [];
       }
-      acc[config.categoria].push(config);
+      acc[config.category].push(config);
       return acc;
     }, {} as { [key: string]: SystemConfig[] });
 
@@ -336,7 +336,7 @@ export default function SystemSettings() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <Label htmlFor={config.id} className="text-sm font-medium">
-                          {config.chave.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          {config.key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                         </Label>
                         <div className="flex items-center space-x-2">
                           {changes[config.id] !== undefined && (
@@ -344,7 +344,7 @@ export default function SystemSettings() {
                               Alterado
                             </Badge>
                           )}
-                          {config.publico && (
+                          {config.isPublic && (
                             <Badge variant="secondary" className="text-xs">
                               Público
                             </Badge>
@@ -352,9 +352,9 @@ export default function SystemSettings() {
                         </div>
                       </div>
                       
-                      {config.descricao && (
+                      {config.description && (
                         <p className="text-sm text-muted-foreground">
-                          {config.descricao}
+                          {config.description}
                         </p>
                       )}
                       

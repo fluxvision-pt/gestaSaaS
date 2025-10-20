@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -15,7 +15,7 @@ import {
   DollarSign, 
   Calendar,
   Search,
-  Filter,
+  Filter, 
   MoreHorizontal,
   Edit,
   Trash2,
@@ -55,7 +55,6 @@ export default function TenantManagement() {
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
 
   const { data: tenantsData, loading: tenantsLoading, refetch: refetchTenants } = useApi<TenantDetails[]>(() => adminApi.getAllTenants());
-  const { data: planosData } = useApi<any[]>('/admin/planos');
 
   useEffect(() => {
     if (tenantsData) {
@@ -197,7 +196,7 @@ export default function TenantManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {tenants.filter(t => t.status === 'ATIVO').length}
+              {tenants.filter(t => t.status === 'active').length}
             </div>
           </CardContent>
         </Card>
@@ -405,7 +404,7 @@ export default function TenantManagement() {
           <DialogHeader>
             <DialogTitle>Detalhes da Empresa</DialogTitle>
             <DialogDescription>
-              Informações detalhadas sobre {selectedTenant?.nomeFantasia}
+              Informações detalhadas sobre {selectedTenant?.name}
             </DialogDescription>
           </DialogHeader>
           {selectedTenant && (
@@ -421,7 +420,7 @@ export default function TenantManagement() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
                     <Label>Nome Fantasia</Label>
-                    <p className="text-sm">{selectedTenant.nomeFantasia}</p>
+                    <p className="text-sm">{selectedTenant.name}</p>
                   </div>
                   <div>
                     <Label>Razão Social</Label>

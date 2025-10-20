@@ -28,46 +28,11 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   
   // Buscar dados do dashboard usando a API de admin
-  const { data: stats, loading } = useApi<DashboardStats>({
-    initialData: {
-      totalTenants: 0,
-      activeTenants: 0,
-      totalUsers: 0,
-      activeUsers: 0,
-      totalRevenue: 0,
-      monthlyRevenue: 0,
-      totalSubscriptions: 0,
-      activeSubscriptions: 0
-    },
-    fetchFn: async () => {
-      return await adminApi.getDashboardStats();
-    }
-  });
+  const { data: stats, loading } = useApi<DashboardStats>(() => adminApi.getDashboardStats());
 
-  const { data: health } = useApi<SystemHealth>({
-    initialData: {
-      status: 'healthy',
-      database: true,
-      redis: true,
-      storage: true,
-      uptime: 0,
-      version: '',
-      timestamp: ''
-    },
-    fetchFn: async () => {
-      return await adminApi.getSystemHealth();
-    }
-  });
+  const { data: health } = useApi<SystemHealth>(() => adminApi.getSystemHealth());
 
-  const { data: tenantStats } = useApi<TenantStats>({
-    initialData: {
-      topTenantsByRevenue: [],
-      topTenantsByUsers: []
-    },
-    fetchFn: async () => {
-      return await adminApi.getTenantStats();
-    }
-  });
+  const { data: tenantStats } = useApi<TenantStats>(() => adminApi.getTenantStats());
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {

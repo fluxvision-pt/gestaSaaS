@@ -8,6 +8,10 @@ export interface SystemHealth {
   uptime: number
   version: string
   timestamp: string
+  avgResponseTime: number
+  dbConnections: number
+  memoryUsage: number
+  errors24h: number
 }
 
 export interface DashboardStats {
@@ -19,6 +23,10 @@ export interface DashboardStats {
   monthlyRevenue: number
   totalSubscriptions: number
   activeSubscriptions: number
+  novosTenants30Dias: number
+  totalTransacoes: number
+  totalKmRegistrados: number
+  assinaturasCanceladas: number
 }
 
 export interface TenantStats {
@@ -74,6 +82,10 @@ export interface TenantDetails {
   revenue: number
   createdAt: string
   lastActivity: string
+  razaoSocial?: string
+  cnpj?: string
+  email?: string
+  telefone?: string
 }
 
 export const adminApi = {

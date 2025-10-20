@@ -51,7 +51,7 @@ export default function MainLayout() {
   ]
 
   // Verificar se o usuário é super admin
-  const isSuperAdmin = user?.role === 'SUPER_ADMIN'
+  const isSuperAdmin = user?.role === 'admin' && user?.tenantId === null
 
   const handleLogout = () => {
     logout()
