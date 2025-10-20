@@ -54,10 +54,11 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      // Token expirado ou invalido
+      // Token expirado ou invalido - apenas limpar tokens
+      // Deixar que o contexto de autenticação e rotas protegidas gerenciem o redirecionamento
       localStorage.removeItem('token')
+      localStorage.removeItem('refreshToken')
       localStorage.removeItem('user')
-      window.location.href = '/login'
     }
     return Promise.reject(error)
   }
@@ -92,6 +93,42 @@ export const authService = {
 
   impersonate: async (tenantId: string): Promise<LoginResponse> => {
     const response = await api.post(`/auth/impersonate/${tenantId}`)
+    return response.data
+  },
+
+  register: async (data: {
+    nome: string
+    email: string
+    senha: string
+    telefoneE164?: string
+  }): Promise<{
+    message: string
+    usuario: {
+      id: string
+      nome: string
+      email: string
+      emailVerificado: boolean
+    }
+  }> => {
+    const response = await api.post('/auth/register', data)
+    return response.data
+  },
+
+  forgotPassword: async (data: { email: string }): Promise<{ message: string }> => {
+    const response = await api.post('/auth/forgot-password', data)
+    return response.data
+  },
+
+  resetPassword: async (data: {
+    token: string
+    novaSenha: string
+  }): Promise<{ message: string }> => {
+    const response = await api.post('/auth/reset-password', data)
+    return response.data
+  },
+
+  verifyEmail: async (token: string): Promise<{ message: string }> => {
+    const response = await api.get(`/auth/verify-email/${token}`)
     return response.data
   }
 }

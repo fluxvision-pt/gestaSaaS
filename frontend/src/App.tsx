@@ -3,6 +3,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Login from './pages/Login'
+import Register from './pages/Register'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import Dashboard from './pages/Dashboard'
 import Usuarios from './pages/Usuarios'
 import Empresas from './pages/Empresas'
@@ -28,7 +31,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     )
   }
   
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />
+  // Se não autenticado, redirecionar para login
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+  
+  return <>{children}</>
 }
 
 // Componente para rotas públicas (redireciona se já autenticado)
@@ -43,19 +51,35 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     )
   }
   
-  return !isAuthenticated ? <>{children}</> : <Navigate to="/dashboard" />
+  // Se já autenticado, redirecionar para dashboard
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />
+  }
+  
+  return <>{children}</>
 }
 
 function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Rota pública */}
+        {/* Rotas públicas */}
         <Route path="/login" element={
           <PublicRoute>
             <Login />
           </PublicRoute>
         } />
+        <Route path="/register" element={
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        } />
+        <Route path="/forgot-password" element={
+          <PublicRoute>
+            <ForgotPassword />
+          </PublicRoute>
+        } />
+        <Route path="/reset-password" element={<ResetPassword />} />
         
         {/* Rotas protegidas */}
         <Route path="/" element={

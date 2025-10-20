@@ -43,7 +43,7 @@ export class Usuario {
   nome: string;
 
   @ApiProperty({ description: 'Email do usuário' })
-  @Column({ type: 'text' })
+  @Column({ type: 'text', unique: true })
   email: string;
 
   @ApiProperty({ description: 'Telefone no formato E.164 (opcional)' })
@@ -75,12 +75,16 @@ export class Usuario {
   @Column({ type: 'text', default: StatusUsuario.ATIVO })
   status: StatusUsuario;
 
+  @ApiProperty({ description: 'Email verificado' })
+  @Column({ name: 'email_verificado', type: 'boolean', default: false })
+  emailVerificado: boolean;
+
   @ApiProperty({ description: 'Data de criação' })
-  @CreateDateColumn({ name: 'criado_em', type: 'timestamp' })
+  @CreateDateColumn({ name: 'criado_em', type: 'datetime' })
   criadoEm: Date;
 
   @ApiProperty({ description: 'Data da última atualização' })
-  @UpdateDateColumn({ name: 'atualizado_em', type: 'timestamp' })
+  @UpdateDateColumn({ name: 'atualizado_em', type: 'datetime' })
   atualizadoEm: Date;
 
   // Relacionamentos

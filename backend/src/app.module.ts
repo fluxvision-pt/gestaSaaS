@@ -48,32 +48,48 @@ import { Auditoria } from './modules/auditoria/entities/auditoria.entity';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres' as const,
-        host: configService.get('DB_HOST'),
-        port: parseInt(configService.get('DB_PORT')) || 5432,
-        username: configService.get('DB_USERNAME'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_DATABASE') as string,
-        entities: [
-          Tenant,
-          Usuario,
-          Plano,
-          Recurso,
-          PlanoRecurso,
-          Assinatura,
-          Gateway,
-          CredencialGateway,
-          Pagamento,
-          Transacao,
-          KmDiario,
-          Configuracao,
-          Auditoria,
-        ],
-        synchronize: true,
-        logging: configService.get('NODE_ENV') === 'development',
-        ssl: false, // Desabilitado conforme configuração do VPS
-      }),
+      useFactory: (configService: ConfigService) => {
+        const dbType = configService.get('DB_TYPE') || 'postgres';
+        
+        const baseConfig = {
+          entities: [
+            Tenant,
+            Usuario,
+            Plano,
+            Recurso,
+            PlanoRecurso,
+            Assinatura,
+            Gateway,
+            CredencialGateway,
+            Pagamento,
+            Transacao,
+            KmDiario,
+            Configuracao,
+            Auditoria,
+          ],
+          synchronize: true,
+          logging: configService.get('NODE_ENV') === 'development',
+        };
+
+        if (dbType === 'sqlite') {
+          return {
+            ...baseConfig,
+            type: 'sqlite' as const,
+            database: configService.get('DB_DATABASE') as string,
+          };
+        }
+
+        return {
+          ...baseConfig,
+          type: 'postgres' as const,
+          host: configService.get('DB_HOST'),
+          port: parseInt(configService.get('DB_PORT')) || 5432,
+          username: configService.get('DB_USERNAME'),
+          password: configService.get('DB_PASSWORD'),
+          database: configService.get('DB_DATABASE') as string,
+          ssl: false, // Desabilitado conforme configuração do VPS
+        };
+      },
     }),
 
     // Rate limiting

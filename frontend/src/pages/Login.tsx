@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -23,8 +23,12 @@ export default function Login() {
 
     try {
       await login({ email, senha: password })
-      navigate('/dashboard')
+      // Aguardar um pouco para garantir que o contexto seja atualizado
+      setTimeout(() => {
+        navigate('/dashboard')
+      }, 100)
     } catch (error: any) {
+      console.error('Erro no login:', error)
       setError(error.response?.data?.message || t('auth.loginError'))
     }
   }
@@ -161,9 +165,9 @@ export default function Login() {
                     <input type="checkbox" className="rounded border-gray-300" />
                     <span className="text-gray-600">Lembrar de mim</span>
                   </label>
-                  <a href="#" className="text-sm text-blue-600 hover:text-blue-500">
+                  <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
                     Esqueceu a senha?
-                  </a>
+                  </Link>
                 </div>
 
                 <Button 
@@ -178,9 +182,9 @@ export default function Login() {
               <div className="mt-6 text-center">
                 <p className="text-sm text-gray-600">
                   Não tem uma conta?{' '}
-                  <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">
-                    Solicite acesso
-                  </a>
+                  <Link to="/register" className="text-blue-600 hover:text-blue-500 font-medium">
+                    Cadastre-se
+                  </Link>
                 </p>
               </div>
             </CardContent>
