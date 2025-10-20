@@ -16,7 +16,8 @@ import {
   Menu,
   X,
   LogOut,
-  User
+  User,
+  Shield
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -41,6 +42,16 @@ export default function MainLayout() {
     { name: t('navigation.settings'), href: '/configuracoes', icon: Settings },
     { name: 'Auditoria', href: '/auditoria', icon: History },
   ]
+
+  // Navegação específica para Super Admin
+  const adminNavigation = [
+    { name: 'Painel Admin', href: '/admin', icon: Shield },
+    { name: 'Gestão de Empresas', href: '/admin/tenants', icon: Building2 },
+    { name: 'Configurações Sistema', href: '/admin/settings', icon: Settings },
+  ]
+
+  // Verificar se o usuário é super admin
+  const isSuperAdmin = user?.role === 'SUPER_ADMIN'
 
   const handleLogout = () => {
     logout()
@@ -97,6 +108,43 @@ export default function MainLayout() {
               )
             })}
           </div>
+
+          {/* Seção Super Admin */}
+          {isSuperAdmin && (
+            <div className="mt-8">
+              <div className="px-3 mb-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Super Admin
+                </h3>
+              </div>
+              <div className="space-y-2">
+                {adminNavigation.map((item) => {
+                  const isActive = location.pathname === item.href
+                  return (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className={cn(
+                        "group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200",
+                        isActive
+                          ? "bg-red-600 text-white shadow-sm"
+                          : "text-muted-foreground hover:bg-red-50 hover:text-red-700"
+                      )}
+                      onClick={() => setSidebarOpen(false)}
+                    >
+                      <item.icon
+                        className={cn(
+                          "mr-3 h-5 w-5 flex-shrink-0 transition-colors",
+                          isActive ? "text-white" : "text-muted-foreground group-hover:text-red-700"
+                        )}
+                      />
+                      {item.name}
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </nav>
       </div>
 

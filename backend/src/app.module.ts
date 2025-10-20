@@ -19,6 +19,7 @@ import { KmModule } from './modules/km/km.module';
 import { RelatoriosModule } from './modules/relatorios/relatorios.module';
 import { ConfiguracoesModule } from './modules/configuracoes/configuracoes.module';
 import { AuditoriaModule } from './modules/auditoria/auditoria.module';
+import { AdminModule } from './modules/admin/admin.module';
 import { HealthModule } from './health/health.module';
 
 // Guards
@@ -123,6 +124,7 @@ import { TokenRecuperacao } from './modules/auth/entities/token-recuperacao.enti
     RelatoriosModule,
     ConfiguracoesModule,
     AuditoriaModule,
+    AdminModule,
   ],
   providers: [
     // Guard global para JWT

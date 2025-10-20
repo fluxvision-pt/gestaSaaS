@@ -17,6 +17,7 @@ import Km from './pages/Km'
 import Relatorios from './pages/Relatorios'
 import Configuracoes from './pages/Configuracoes'
 import Auditoria from './pages/Auditoria'
+import { AdminDashboard, TenantManagement, SystemSettings } from './pages/admin'
 import MainLayout from './components/layout/MainLayout'
 
 // Componente para rotas protegidas
@@ -99,6 +100,11 @@ function AppRoutes() {
           <Route path="relatorios" element={<Relatorios />} />
           <Route path="configuracoes" element={<Configuracoes />} />
           <Route path="auditoria" element={<Auditoria />} />
+          
+          {/* Rotas do painel admin (super admin) */}
+          <Route path="admin" element={<AdminDashboard />} />
+          <Route path="admin/tenants" element={<TenantManagement />} />
+          <Route path="admin/settings" element={<SystemSettings />} />
         </Route>
         
         {/* Rota padrão */}
