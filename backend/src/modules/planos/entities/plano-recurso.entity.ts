@@ -9,7 +9,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Plano } from './plano.entity';
 import { Recurso } from './recurso.entity';
 
-@Entity('plano_recursos')
+@Entity({ name: 'plano_recursos', schema: 'public' })
 export class PlanoRecurso {
   @ApiProperty({ description: 'ID do plano' })
   @PrimaryColumn({ name: 'plano_id', type: 'uuid' })

@@ -9,7 +9,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Tenant } from '../../tenancy/entities/tenant.entity';
 
-@Entity('configuracoes')
+@Entity({ name: 'configuracoes', schema: 'public' })
 @Unique(['tenantId', 'chave'])
 export class Configuracao {
   @ApiProperty({ description: 'ID único da configuração' })

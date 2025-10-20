@@ -12,8 +12,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Tenant } from '../../tenancy/entities/tenant.entity';
 import { Usuario } from '../../usuarios/entities/usuario.entity';
 
-@Entity('km_diario')
-@Unique(['tenantId', 'data'])
+@Entity({ name: 'km_diario', schema: 'public' })
+@Unique(['tenantId', 'usuarioId', 'data'])
 export class KmDiario {
   @ApiProperty({ description: 'ID único do registro de KM diário' })
   @PrimaryGeneratedColumn('uuid')
@@ -40,11 +40,11 @@ export class KmDiario {
   kmFim?: number;
 
   @ApiProperty({ description: 'Data de criação' })
-  @CreateDateColumn({ name: 'criado_em', type: 'datetime' })
+  @CreateDateColumn({ name: 'criado_em', type: 'timestamp' })
   criadoEm: Date;
 
   @ApiProperty({ description: 'Data da última atualização' })
-  @UpdateDateColumn({ name: 'atualizado_em', type: 'datetime' })
+  @UpdateDateColumn({ name: 'atualizado_em', type: 'timestamp' })
   atualizadoEm: Date;
 
   // Relacionamentos

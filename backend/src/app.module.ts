@@ -38,6 +38,7 @@ import { Transacao } from './modules/financeiro/entities/transacao.entity';
 import { KmDiario } from './modules/km/entities/km-diario.entity';
 import { Configuracao } from './modules/configuracoes/entities/configuracao.entity';
 import { Auditoria } from './modules/auditoria/entities/auditoria.entity';
+import { TokenRecuperacao } from './modules/auth/entities/token-recuperacao.entity';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { Auditoria } from './modules/auditoria/entities/auditoria.entity';
             KmDiario,
             Configuracao,
             Auditoria,
+            TokenRecuperacao,
           ],
           synchronize: true,
           logging: configService.get('NODE_ENV') === 'development',

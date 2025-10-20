@@ -14,7 +14,7 @@ export enum TipoToken {
   EMAIL_VERIFICATION = 'email_verification',
 }
 
-@Entity('tokens_recuperacao')
+@Entity({ name: 'tokens_recuperacao', schema: 'public' })
 export class TokenRecuperacao {
   @ApiProperty({ description: 'ID único do token' })
   @PrimaryGeneratedColumn('uuid')

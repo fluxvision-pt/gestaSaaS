@@ -33,7 +33,7 @@ export enum StatusPagamentoAssinatura {
   FALHOU = 'falhou',
 }
 
-@Entity('assinaturas')
+@Entity({ name: 'assinaturas', schema: 'public' })
 export class Assinatura {
   @ApiProperty({ description: 'ID único da assinatura' })
   @PrimaryGeneratedColumn('uuid')
@@ -80,11 +80,11 @@ export class Assinatura {
   renovacaoAutomatica: boolean;
 
   @ApiProperty({ description: 'Data de criação' })
-  @CreateDateColumn({ name: 'criado_em', type: 'datetime' })
+  @CreateDateColumn({ name: 'criado_em', type: 'timestamp' })
   criadoEm: Date;
 
-  @ApiProperty({ description: 'Data da última atualização' })
-  @UpdateDateColumn({ name: 'atualizado_em', type: 'datetime' })
+  @ApiProperty({ description: 'Data de atualização da assinatura' })
+  @UpdateDateColumn({ name: 'atualizado_em', type: 'timestamp' })
   atualizadoEm: Date;
 
   // Relacionamentos

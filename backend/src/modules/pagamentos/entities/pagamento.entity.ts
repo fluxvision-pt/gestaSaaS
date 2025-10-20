@@ -18,7 +18,7 @@ export enum StatusPagamento {
   ESTORNADO = 'estornado',
 }
 
-@Entity('pagamentos')
+@Entity({ name: 'pagamentos', schema: 'public' })
 export class Pagamento {
   @ApiProperty({ description: 'ID único do pagamento' })
   @PrimaryGeneratedColumn('uuid')
@@ -53,11 +53,11 @@ export class Pagamento {
   comprovanteUrl?: string;
 
   @ApiProperty({ description: 'Data de criação' })
-  @CreateDateColumn({ name: 'criado_em', type: 'datetime' })
+  @CreateDateColumn({ name: 'criado_em', type: 'timestamp' })
   criadoEm: Date;
 
-  @ApiProperty({ description: 'Data da última atualização' })
-  @UpdateDateColumn({ name: 'atualizado_em', type: 'datetime' })
+  @ApiProperty({ description: 'Data de atualização do pagamento' })
+  @UpdateDateColumn({ name: 'atualizado_em', type: 'timestamp' })
   atualizadoEm: Date;
 
   // Relacionamentos

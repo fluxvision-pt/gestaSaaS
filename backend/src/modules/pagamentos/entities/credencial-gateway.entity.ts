@@ -10,7 +10,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { Gateway } from './gateway.entity';
 
-@Entity('credenciais_gateway')
+@Entity({ name: 'credenciais_gateway', schema: 'public' })
 @Unique(['gatewayId', 'chave'])
 export class CredencialGateway {
   @ApiProperty({ description: 'ID único da credencial' })

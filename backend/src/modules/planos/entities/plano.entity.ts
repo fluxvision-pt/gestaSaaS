@@ -15,7 +15,7 @@ export enum StatusPlano {
   INATIVO = 'inativo',
 }
 
-@Entity('planos')
+@Entity({ name: 'planos', schema: 'public' })
 export class Plano {
   @ApiProperty({ description: 'ID único do plano' })
   @PrimaryGeneratedColumn('uuid')
@@ -30,11 +30,11 @@ export class Plano {
   status: StatusPlano;
 
   @ApiProperty({ description: 'Data de criação' })
-  @CreateDateColumn({ name: 'criado_em', type: 'datetime' })
+  @CreateDateColumn({ name: 'criado_em', type: 'timestamp' })
   criadoEm: Date;
 
-  @ApiProperty({ description: 'Data da última atualização' })
-  @UpdateDateColumn({ name: 'atualizado_em', type: 'datetime' })
+  @ApiProperty({ description: 'Data de atualização do plano' })
+  @UpdateDateColumn({ name: 'atualizado_em', type: 'timestamp' })
   atualizadoEm: Date;
 
   // Relacionamentos

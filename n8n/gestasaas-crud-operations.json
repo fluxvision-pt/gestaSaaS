@@ -1,0 +1,519 @@
+{
+  "name": "GestaSaaS - CRUD Operations",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "gestasaas-crud",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-crud",
+      "name": "Webhook CRUD",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "gestasaas-crud"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Processar dados para operações CRUD\nconst body = $input.all()[0].json.body;\n\n// Validar estrutura básica\nif (!body || !body.operation || !body.user_id || !body.tenant_id) {\n  return {\n    error: true,\n    message: 'Dados obrigatórios ausentes: operation, user_id, tenant_id',\n    data: body\n  };\n}\n\nconst operation = body.operation.toLowerCase();\nconst validOperations = ['create', 'update', 'delete', 'search'];\n\nif (!validOperations.includes(operation)) {\n  return {\n    error: true,\n    message: `Operação inválida. Use: ${validOperations.join(', ')}`,\n    operation: operation\n  };\n}\n\n// Validar dados específicos por operação\nif (operation === 'create') {\n  const required = ['tipo', 'categoria', 'valor_cents', 'descricao'];\n  const missing = required.filter(field => !body.data || !body.data[field]);\n  \n  if (missing.length > 0) {\n    return {\n      error: true,\n      message: `Campos obrigatórios ausentes para criação: ${missing.join(', ')}`,\n      missing_fields: missing\n    };\n  }\n}\n\nif (operation === 'update' || operation === 'delete') {\n  if (!body.transaction_id) {\n    return {\n      error: true,\n      message: 'transaction_id é obrigatório para update/delete',\n      operation: operation\n    };\n  }\n}\n\nreturn {\n  error: false,\n  operation: operation,\n  user_id: body.user_id,\n  tenant_id: body.tenant_id,\n  transaction_id: body.transaction_id || null,\n  data: body.data || {},\n  search_params: body.search_params || {},\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "process-crud-data",
+      "name": "Processar Dados CRUD",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.error }}",
+              "value2": false
+            }
+          ]
+        }
+      },
+      "id": "validate-crud-data",
+      "name": "Validar Dados CRUD",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*) as count FROM public.usuarios \nWHERE id = '{{ $json.user_id }}' \n    AND tenant_id = '{{ $json.tenant_id }}' \n    AND status = 'ativo';",
+        "additionalFields": {}
+      },
+      "id": "validate-user-tenant",
+      "name": "Validar Usuário/Tenant",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [900, 200],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-gestasaas",
+          "name": "PostgreSQL GestaSaaS"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.count }}",
+              "operation": "equal",
+              "value2": 1
+            }
+          ]
+        }
+      },
+      "id": "check-user-valid",
+      "name": "Usuário Válido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "dataPropertyName": "data",
+        "value1": "={{ $('Processar Dados CRUD').item.json.operation }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "create",
+              "output": 0
+            },
+            {
+              "value2": "update",
+              "output": 1
+            },
+            {
+              "value2": "delete",
+              "output": 2
+            },
+            {
+              "value2": "search",
+              "output": 3
+            }
+          ]
+        },
+        "fallbackOutput": 4
+      },
+      "id": "operation-switch",
+      "name": "Switch Operações",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [1340, 100]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Preparar dados para inserção de transação\nconst crudData = $('Processar Dados CRUD').item.json;\nconst data = crudData.data;\n\n// Validar e converter valor\nlet valorCents;\nif (typeof data.valor_cents === 'number') {\n  valorCents = data.valor_cents;\n} else if (typeof data.valor_reais === 'number') {\n  valorCents = Math.round(data.valor_reais * 100);\n} else {\n  return {\n    error: true,\n    message: 'Valor inválido. Use valor_cents (inteiro) ou valor_reais (decimal)'\n  };\n}\n\n// Validar tipo\nif (!['entrada', 'saida'].includes(data.tipo)) {\n  return {\n    error: true,\n    message: 'Tipo deve ser \"entrada\" ou \"saida\"'\n  };\n}\n\n// Validar categoria\nconst categoriasEntrada = ['plataforma', 'gorjeta', 'bonus', 'outros_ganhos'];\nconst categoriasSaida = ['combustivel', 'manutencao', 'taxas', 'pedagio', 'alimentacao', 'estacionamento', 'outros_gastos'];\nconst categoriasValidas = data.tipo === 'entrada' ? categoriasEntrada : categoriasSaida;\n\nif (!categoriasValidas.includes(data.categoria)) {\n  return {\n    error: true,\n    message: `Categoria inválida para ${data.tipo}. Use: ${categoriasValidas.join(', ')}`,\n    categorias_validas: categoriasValidas\n  };\n}\n\n// Preparar data\nlet dataTransacao;\nif (data.data) {\n  dataTransacao = new Date(data.data).toISOString().split('T')[0];\n} else {\n  dataTransacao = new Date().toISOString().split('T')[0];\n}\n\nreturn {\n  error: false,\n  user_id: crudData.user_id,\n  tenant_id: crudData.tenant_id,\n  tipo: data.tipo,\n  categoria: data.categoria,\n  valor_cents: valorCents,\n  descricao: data.descricao,\n  km: data.km || null,\n  data: dataTransacao,\n  observacoes: data.observacoes || null\n};"
+      },
+      "id": "prepare-create-data",
+      "name": "Preparar Dados Criação",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1560, 0]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.transacoes (\n    tenant_id, usuario_id, tipo, categoria, \n    valor_cents, descricao, km, data, observacoes\n) VALUES (\n    '{{ $json.tenant_id }}',\n    '{{ $json.user_id }}',\n    '{{ $json.tipo }}',\n    '{{ $json.categoria }}',\n    {{ $json.valor_cents }},\n    '{{ $json.descricao }}',\n    {{ $json.km || 'NULL' }},\n    '{{ $json.data }}',\n    {{ $json.observacoes ? \"'\" + $json.observacoes + \"'\" : 'NULL' }}\n) RETURNING id, tipo, categoria, valor_cents, descricao, km, data, criado_em;",
+        "additionalFields": {}
+      },
+      "id": "create-transaction",
+      "name": "Criar Transação",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1780, 0],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-gestasaas",
+          "name": "PostgreSQL GestaSaaS"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Preparar dados para atualização\nconst crudData = $('Processar Dados CRUD').item.json;\nconst data = crudData.data;\nconst transactionId = crudData.transaction_id;\n\n// Construir campos para atualização\nlet updateFields = [];\nlet updateValues = {};\n\nif (data.tipo && ['entrada', 'saida'].includes(data.tipo)) {\n  updateFields.push('tipo = $tipo');\n  updateValues.tipo = data.tipo;\n}\n\nif (data.categoria) {\n  updateFields.push('categoria = $categoria');\n  updateValues.categoria = data.categoria;\n}\n\nif (data.valor_cents !== undefined) {\n  updateFields.push('valor_cents = $valor_cents');\n  updateValues.valor_cents = data.valor_cents;\n} else if (data.valor_reais !== undefined) {\n  updateFields.push('valor_cents = $valor_cents');\n  updateValues.valor_cents = Math.round(data.valor_reais * 100);\n}\n\nif (data.descricao) {\n  updateFields.push('descricao = $descricao');\n  updateValues.descricao = data.descricao;\n}\n\nif (data.km !== undefined) {\n  updateFields.push('km = $km');\n  updateValues.km = data.km;\n}\n\nif (data.data) {\n  updateFields.push('data = $data');\n  updateValues.data = new Date(data.data).toISOString().split('T')[0];\n}\n\nif (data.observacoes !== undefined) {\n  updateFields.push('observacoes = $observacoes');\n  updateValues.observacoes = data.observacoes;\n}\n\nif (updateFields.length === 0) {\n  return {\n    error: true,\n    message: 'Nenhum campo válido para atualização fornecido'\n  };\n}\n\n// Adicionar timestamp de atualização\nupdateFields.push('atualizado_em = NOW()');\n\nreturn {\n  error: false,\n  transaction_id: transactionId,\n  user_id: crudData.user_id,\n  tenant_id: crudData.tenant_id,\n  update_fields: updateFields.join(', '),\n  update_values: updateValues\n};"
+      },
+      "id": "prepare-update-data",
+      "name": "Preparar Dados Atualização",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1560, 100]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE public.transacoes SET {{ $json.update_fields }}\nWHERE id = '{{ $json.transaction_id }}'\n    AND tenant_id = '{{ $json.tenant_id }}'\n    AND usuario_id = '{{ $json.user_id }}'\nRETURNING id, tipo, categoria, valor_cents, descricao, km, data, atualizado_em;",
+        "additionalFields": {}
+      },
+      "id": "update-transaction",
+      "name": "Atualizar Transação",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1780, 100],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-gestasaas",
+          "name": "PostgreSQL GestaSaaS"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM public.transacoes \nWHERE id = '{{ $('Processar Dados CRUD').item.json.transaction_id }}'\n    AND tenant_id = '{{ $('Processar Dados CRUD').item.json.tenant_id }}'\n    AND usuario_id = '{{ $('Processar Dados CRUD').item.json.user_id }}'\nRETURNING id, tipo, categoria, valor_cents, descricao, data;",
+        "additionalFields": {}
+      },
+      "id": "delete-transaction",
+      "name": "Excluir Transação",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1560, 200],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-gestasaas",
+          "name": "PostgreSQL GestaSaaS"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Preparar parâmetros de busca\nconst crudData = $('Processar Dados CRUD').item.json;\nconst searchParams = crudData.search_params;\n\n// Construir WHERE clause\nlet whereConditions = [\n  `tenant_id = '${crudData.tenant_id}'`,\n  `usuario_id = '${crudData.user_id}'`\n];\n\n// Adicionar filtros opcionais\nif (searchParams.tipo && ['entrada', 'saida'].includes(searchParams.tipo)) {\n  whereConditions.push(`tipo = '${searchParams.tipo}'`);\n}\n\nif (searchParams.categoria) {\n  whereConditions.push(`categoria = '${searchParams.categoria}'`);\n}\n\nif (searchParams.data_inicio) {\n  whereConditions.push(`data >= '${searchParams.data_inicio}'`);\n}\n\nif (searchParams.data_fim) {\n  whereConditions.push(`data <= '${searchParams.data_fim}'`);\n}\n\nif (searchParams.valor_min_cents) {\n  whereConditions.push(`valor_cents >= ${searchParams.valor_min_cents}`);\n}\n\nif (searchParams.valor_max_cents) {\n  whereConditions.push(`valor_cents <= ${searchParams.valor_max_cents}`);\n}\n\nif (searchParams.descricao) {\n  whereConditions.push(`descricao ILIKE '%${searchParams.descricao}%'`);\n}\n\n// Ordenação\nlet orderBy = 'data DESC, criado_em DESC';\nif (searchParams.order_by) {\n  const validOrders = ['data', 'valor_cents', 'categoria', 'criado_em'];\n  const direction = searchParams.order_direction === 'ASC' ? 'ASC' : 'DESC';\n  if (validOrders.includes(searchParams.order_by)) {\n    orderBy = `${searchParams.order_by} ${direction}`;\n  }\n}\n\n// Limite\nconst limit = searchParams.limit && searchParams.limit <= 100 ? searchParams.limit : 20;\nconst offset = searchParams.offset || 0;\n\nreturn {\n  error: false,\n  where_clause: whereConditions.join(' AND '),\n  order_by: orderBy,\n  limit: limit,\n  offset: offset,\n  user_id: crudData.user_id,\n  tenant_id: crudData.tenant_id\n};"
+      },
+      "id": "prepare-search-params",
+      "name": "Preparar Parâmetros Busca",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    id, tipo, categoria, descricao, \n    valor_cents, \n    ROUND(valor_cents / 100.0, 2) as valor_reais,\n    km, data, observacoes, \n    criado_em, atualizado_em\nFROM public.transacoes \nWHERE {{ $json.where_clause }}\nORDER BY {{ $json.order_by }}\nLIMIT {{ $json.limit }} OFFSET {{ $json.offset }};",
+        "additionalFields": {}
+      },
+      "id": "search-transactions",
+      "name": "Buscar Transações",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1780, 300],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-gestasaas",
+          "name": "PostgreSQL GestaSaaS"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Resposta de erro para dados inválidos\nconst errorData = $('Processar Dados CRUD').item.json;\n\nreturn {\n  success: false,\n  error: true,\n  message: errorData.message,\n  details: errorData,\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "error-response-crud",
+      "name": "Resposta Erro CRUD",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Resposta de erro para usuário inválido\nconst crudData = $('Processar Dados CRUD').item.json;\n\nreturn {\n  success: false,\n  error: true,\n  message: 'Usuário não encontrado ou inativo para este tenant',\n  user_id: crudData.user_id,\n  tenant_id: crudData.tenant_id,\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "invalid-user-response",
+      "name": "Resposta Usuário Inválido",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Resposta de operação inválida\nconst crudData = $('Processar Dados CRUD').item.json;\n\nreturn {\n  success: false,\n  error: true,\n  message: 'Operação não reconhecida',\n  operation: crudData.operation,\n  valid_operations: ['create', 'update', 'delete', 'search'],\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "invalid-operation-response",
+      "name": "Resposta Operação Inválida",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1560, 400]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Formatar resposta de sucesso\nconst operation = $('Processar Dados CRUD').item.json.operation;\nconst data = $input.all()[0].json;\n\nlet response = {\n  success: true,\n  error: false,\n  operation: operation,\n  timestamp: new Date().toISOString()\n};\n\nswitch (operation) {\n  case 'create':\n    response.message = 'Transação criada com sucesso';\n    response.data = {\n      id: data.id,\n      tipo: data.tipo,\n      categoria: data.categoria,\n      valor_reais: Math.round(data.valor_cents / 100 * 100) / 100,\n      descricao: data.descricao,\n      km: data.km,\n      data: data.data,\n      criado_em: data.criado_em\n    };\n    break;\n    \n  case 'update':\n    response.message = 'Transação atualizada com sucesso';\n    response.data = {\n      id: data.id,\n      tipo: data.tipo,\n      categoria: data.categoria,\n      valor_reais: Math.round(data.valor_cents / 100 * 100) / 100,\n      descricao: data.descricao,\n      km: data.km,\n      data: data.data,\n      atualizado_em: data.atualizado_em\n    };\n    break;\n    \n  case 'delete':\n    response.message = 'Transação excluída com sucesso';\n    response.data = {\n      id: data.id,\n      tipo: data.tipo,\n      categoria: data.categoria,\n      valor_reais: Math.round(data.valor_cents / 100 * 100) / 100,\n      descricao: data.descricao,\n      data: data.data\n    };\n    break;\n    \n  case 'search':\n    const transactions = $input.all();\n    response.message = `${transactions.length} transação(ões) encontrada(s)`;\n    response.data = transactions.map(item => ({\n      id: item.json.id,\n      tipo: item.json.tipo,\n      categoria: item.json.categoria,\n      valor_reais: item.json.valor_reais,\n      descricao: item.json.descricao,\n      km: item.json.km,\n      data: item.json.data,\n      observacoes: item.json.observacoes,\n      criado_em: item.json.criado_em,\n      atualizado_em: item.json.atualizado_em\n    }));\n    response.total = transactions.length;\n    break;\n}\n\nreturn response;"
+      },
+      "id": "format-success-response",
+      "name": "Formatar Resposta Sucesso",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [2000, 150]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "webhook-response-crud",
+      "name": "Resposta Webhook CRUD",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2220, 300]
+    }
+  ],
+  "connections": {
+    "Webhook CRUD": {
+      "main": [
+        [
+          {
+            "node": "Processar Dados CRUD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar Dados CRUD": {
+      "main": [
+        [
+          {
+            "node": "Validar Dados CRUD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Dados CRUD": {
+      "main": [
+        [
+          {
+            "node": "Validar Usuário/Tenant",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resposta Erro CRUD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Usuário/Tenant": {
+      "main": [
+        [
+          {
+            "node": "Usuário Válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Usuário Válido?": {
+      "main": [
+        [
+          {
+            "node": "Switch Operações",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resposta Usuário Inválido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Operações": {
+      "main": [
+        [
+          {
+            "node": "Preparar Dados Criação",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar Dados Atualização",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Excluir Transação",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar Parâmetros Busca",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resposta Operação Inválida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Dados Criação": {
+      "main": [
+        [
+          {
+            "node": "Criar Transação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Dados Atualização": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Transação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Parâmetros Busca": {
+      "main": [
+        [
+          {
+            "node": "Buscar Transações",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Transação": {
+      "main": [
+        [
+          {
+            "node": "Formatar Resposta Sucesso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Transação": {
+      "main": [
+        [
+          {
+            "node": "Formatar Resposta Sucesso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excluir Transação": {
+      "main": [
+        [
+          {
+            "node": "Formatar Resposta Sucesso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Transações": {
+      "main": [
+        [
+          {
+            "node": "Formatar Resposta Sucesso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resposta Erro CRUD": {
+      "main": [
+        [
+          {
+            "node": "Resposta Webhook CRUD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resposta Usuário Inválido": {
+      "main": [
+        [
+          {
+            "node": "Resposta Webhook CRUD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resposta Operação Inválida": {
+      "main": [
+        [
+          {
+            "node": "Resposta Webhook CRUD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Resposta Sucesso": {
+      "main": [
+        [
+          {
+            "node": "Resposta Webhook CRUD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "gestasaas",
+      "name": "GestaSaaS"
+    },
+    {
+      "id": "crud",
+      "name": "CRUD"
+    },
+    {
+      "id": "api",
+      "name": "API"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2024-10-20T18:45:00.000Z",
+  "versionId": "1"
+}

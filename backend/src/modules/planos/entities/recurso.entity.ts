@@ -13,7 +13,7 @@ export enum TipoRecurso {
   TEXT = 'text',
 }
 
-@Entity('recursos')
+@Entity({ name: 'recursos', schema: 'public' })
 export class Recurso {
   @ApiProperty({ description: 'ID único do recurso' })
   @PrimaryGeneratedColumn('uuid')

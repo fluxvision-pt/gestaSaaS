@@ -39,7 +39,7 @@ export enum OrigemTransacao {
   IMPORTACAO = 'importacao',
 }
 
-@Entity('transacoes')
+@Entity({ name: 'transacoes', schema: 'public' })
 export class Transacao {
   @ApiProperty({ description: 'ID único da transação' })
   @PrimaryGeneratedColumn('uuid')
@@ -82,11 +82,11 @@ export class Transacao {
   origem: OrigemTransacao;
 
   @ApiProperty({ description: 'Data de criação' })
-  @CreateDateColumn({ name: 'criado_em', type: 'datetime' })
+  @CreateDateColumn({ name: 'criado_em', type: 'timestamp' })
   criadoEm: Date;
 
-  @ApiProperty({ description: 'Data da última atualização' })
-  @UpdateDateColumn({ name: 'atualizado_em', type: 'datetime' })
+  @ApiProperty({ description: 'Data de atualização da transação' })
+  @UpdateDateColumn({ name: 'atualizado_em', type: 'timestamp' })
   atualizadoEm: Date;
 
   // Relacionamentos
