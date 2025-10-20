@@ -129,7 +129,7 @@ export class AdminController {
   async createSuperAdmin(@Body() dto: CreateSuperAdminDto, @Request() req) {
     const user = await this.adminService.createSuperAdmin(dto, req.user.id);
     // Remover senha da resposta
-    const { senha, ...userWithoutPassword } = user;
+    const { senhaHash, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
 

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, MoreThan } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 // Entities
 import { Usuario, PerfilUsuario, StatusUsuario } from '../usuarios/entities/usuario.entity';
@@ -356,7 +356,7 @@ export class AdminService {
     const superAdmin = this.usuarioRepository.create({
       nome: dto.nome,
       email: dto.email,
-      senha: hashedPassword,
+      senhaHash: hashedPassword,
       perfil: PerfilUsuario.SUPER_ADMIN,
       status: StatusUsuario.ATIVO,
       tenantId: null, // Super admin não pertence a nenhum tenant
@@ -391,14 +391,10 @@ export class AdminService {
 
     if (config) {
       config.valor = dto.valor;
-      config.descricao = dto.descricao || config.descricao;
-      config.publica = dto.publica ?? config.publica;
     } else {
       config = this.configuracaoRepository.create({
         chave: dto.chave,
         valor: dto.valor,
-        descricao: dto.descricao,
-        publica: dto.publica || false,
         tenantId: null,
       });
     }
@@ -502,10 +498,13 @@ export class AdminService {
   ): Promise<void> {
     const auditoria = this.auditoriaRepository.create({
       acao,
-      usuarioId,
       tenantId,
-      descricao,
-      detalhes: detalhes ? JSON.stringify(detalhes) : null,
+      tabela: 'admin_actions',
+      dados: {
+        usuarioId,
+        descricao,
+        detalhes: detalhes || null,
+      },
     });
 
     await this.auditoriaRepository.save(auditoria);
