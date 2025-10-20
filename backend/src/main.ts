@@ -7,6 +7,7 @@ import * as compression from 'compression';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.useLogger(['log', 'error', 'warn', 'debug', 'verbose']);
 
   app.use(helmet());
   app.use(compression());
@@ -50,8 +51,8 @@ async function bootstrap() {
     app.enableCors({ origin: ['https://app.fluxvision.cloud'], credentials: true });
   }
 
-  const port = process.env.PORT || 3001;
-  await app.listen(port);
+const port = process.env.PORT || 3001;
+await app.listen(port);
   
   if (process.env.NODE_ENV === 'development') {
     const baseUrl = process.env.BASE_URL || `http://localhost:${port}`;
