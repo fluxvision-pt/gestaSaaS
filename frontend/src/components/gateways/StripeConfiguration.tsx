@@ -11,7 +11,7 @@ import { toast } from 'sonner'
 import { useApi, useApiMutation } from '@/hooks/useApi'
 import { gatewayService } from '@/services/api'
 import { stripeService } from '@/services/stripe.service'
-import type { AppGateway, AppCredencialGateway } from '@/types'
+import type { AppGateway } from '@/types'
 import { 
   CreditCard, 
   Key, 
@@ -26,7 +26,6 @@ import {
 
 interface StripeConfigurationProps {
   gateway: AppGateway
-  onUpdate?: () => void
 }
 
 interface StripeCredentials {
@@ -35,7 +34,7 @@ interface StripeCredentials {
   webhook_secret: string
 }
 
-const StripeConfiguration: React.FC<StripeConfigurationProps> = ({ gateway, onUpdate }) => {
+const StripeConfiguration: React.FC<StripeConfigurationProps> = ({ gateway }) => {
   const [credentials, setCredentials] = useState<StripeCredentials>({
     publishable_key: '',
     secret_key: '',
@@ -51,9 +50,13 @@ const StripeConfiguration: React.FC<StripeConfigurationProps> = ({ gateway, onUp
 
   // Buscar credenciais existentes
   const { data: existingCredentials, refetch: refetchCredentials } = useApi(
-    () => gatewayService.getCredenciais(gateway.id),
-    [gateway.id]
+    () => gatewayService.getCredenciais(gateway.id)
   )
+
+  // Refazer busca quando gateway.id mudar
+  useEffect(() => {
+    refetchCredentials()
+  }, [gateway.id, refetchCredentials])
 
   // Mutation para salvar credenciais
   const saveCredentialMutation = useApiMutation(
@@ -63,19 +66,6 @@ const StripeConfiguration: React.FC<StripeConfigurationProps> = ({ gateway, onUp
         return gatewayService.updateCredencial(existingCred.id, { chave, valor })
       } else {
         return gatewayService.createCredencial({ gatewayId: gateway.id, chave, valor })
-      }
-    },
-    {
-      onSuccess: () => {
-        refetchCredentials()
-        checkStripeStatus()
-      },
-      onError: (error) => {
-        toast({ 
-          title: 'Erro ao salvar credencial', 
-          description: error.message, 
-          variant: 'destructive' 
-        })
       }
     }
   )
@@ -124,15 +114,18 @@ const StripeConfiguration: React.FC<StripeConfigurationProps> = ({ gateway, onUp
   const handleSaveCredential = async (key: keyof StripeCredentials) => {
     const value = credentials[key]
     if (!value.trim()) {
-      toast({
-        title: 'Erro',
-        description: 'O valor da credencial não pode estar vazio',
-        variant: 'destructive'
-      })
+      toast.error('O valor da credencial não pode estar vazio')
       return
     }
 
-    saveCredentialMutation.mutate({ chave: key, valor: value })
+    try {
+      await saveCredentialMutation.mutate({ chave: key, valor: value })
+      refetchCredentials()
+      checkStripeStatus()
+      toast.success('Credencial salva com sucesso')
+    } catch (error: any) {
+      toast.error(`Erro ao salvar credencial: ${error.message || 'Erro desconhecido'}`)
+    }
   }
 
   const toggleShowSecret = (key: string) => {
@@ -235,9 +228,9 @@ const StripeConfiguration: React.FC<StripeConfigurationProps> = ({ gateway, onUp
                 type="button"
                 size="icon"
                 onClick={() => handleSaveCredential('publishable_key')}
-                disabled={saveCredentialMutation.isPending}
+                disabled={saveCredentialMutation.loading}
               >
-                {saveCredentialMutation.isPending ? (
+                {saveCredentialMutation.loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <Save className="w-4 h-4" />
@@ -271,9 +264,9 @@ const StripeConfiguration: React.FC<StripeConfigurationProps> = ({ gateway, onUp
                 type="button"
                 size="icon"
                 onClick={() => handleSaveCredential('secret_key')}
-                disabled={saveCredentialMutation.isPending}
+                disabled={saveCredentialMutation.loading}
               >
-                {saveCredentialMutation.isPending ? (
+                {saveCredentialMutation.loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <Save className="w-4 h-4" />
@@ -305,9 +298,9 @@ const StripeConfiguration: React.FC<StripeConfigurationProps> = ({ gateway, onUp
                 type="button"
                 size="icon"
                 onClick={() => handleSaveCredential('webhook_secret')}
-                disabled={saveCredentialMutation.isPending}
+                disabled={saveCredentialMutation.loading}
               >
-                {saveCredentialMutation.isPending ? (
+                {saveCredentialMutation.loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <Save className="w-4 h-4" />

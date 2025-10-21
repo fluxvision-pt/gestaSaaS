@@ -16,8 +16,7 @@ import {
   MapPin,
   FileText
 } from 'lucide-react'
-import { useAuth } from '@/contexts/AuthContext'
-import { useTranslation } from 'react-i18next'
+
 
 interface OnboardingStep {
   id: string
@@ -38,8 +37,6 @@ interface OnboardingTourProps {
 export default function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourProps) {
   const [currentStep, setCurrentStep] = useState(0)
   const [isCompleted, setIsCompleted] = useState(false)
-  const { user } = useAuth()
-  const { t } = useTranslation()
 
   const steps: OnboardingStep[] = [
     {

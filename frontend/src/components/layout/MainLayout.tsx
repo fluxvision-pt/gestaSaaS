@@ -37,7 +37,6 @@ export default function MainLayout() {
   const { t } = useTranslation()
   const { 
     isOnboardingOpen, 
-    isOnboardingCompleted, 
     startOnboarding, 
     closeOnboarding, 
     completeOnboarding 

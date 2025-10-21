@@ -1,5 +1,4 @@
-import React, { useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { 
@@ -19,10 +18,9 @@ import {
 } from 'lucide-react'
 import { useApi } from '@/hooks/useApi'
 import { dashboardFinanceiroService, type DashboardFinanceiroData, type GraficoReceitasDespesas } from '@/services/api'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts'
 
 export default function DashboardFinanceiro() {
-  const { t } = useTranslation()
   const [mesesGrafico, setMesesGrafico] = useState(6)
 
   // Buscar dados do dashboard
@@ -31,10 +29,14 @@ export default function DashboardFinanceiro() {
   )
 
   // Buscar dados do gráfico
-  const { data: graficoData, loading: graficoLoading } = useApi<GraficoReceitasDespesas[]>(
-    () => dashboardFinanceiroService.getGraficoReceitasDespesas(mesesGrafico),
-    [mesesGrafico]
+  const { data: graficoData, loading: graficoLoading, refetch: refetchGrafico } = useApi<GraficoReceitasDespesas[]>(
+    () => dashboardFinanceiroService.getGraficoReceitasDespesas(mesesGrafico)
   )
+
+  // Refazer busca quando mesesGrafico mudar
+  useEffect(() => {
+    refetchGrafico()
+  }, [mesesGrafico, refetchGrafico])
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -229,7 +231,7 @@ export default function DashboardFinanceiro() {
                 <div className="h-80 flex items-center justify-center">
                   <div className="text-center text-gray-500">Carregando gráfico...</div>
                 </div>
-              ) : (
+              ) : graficoData && graficoData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={320}>
                   <BarChart data={graficoData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -259,6 +261,10 @@ export default function DashboardFinanceiro() {
                     <Bar dataKey="despesas" fill="#ef4444" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
+              ) : (
+                <div className="h-80 flex items-center justify-center">
+                  <div className="text-center text-gray-500">Nenhum dado disponível para o gráfico</div>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -371,9 +377,9 @@ export default function DashboardFinanceiro() {
                       <div className="flex items-center space-x-4">
                         <div className={`p-2 rounded-lg ${transacao.tipo === 'ENTRADA' ? 'bg-green-200' : 'bg-red-200'}`}>
                           {transacao.tipo === 'ENTRADA' ? (
-                            <TrendingUp className={`h-4 w-4 ${transacao.tipo === 'ENTRADA' ? 'text-green-700' : 'text-red-700'}`} />
+                            <TrendingUp className="h-4 w-4 text-green-700" />
                           ) : (
-                            <TrendingDown className={`h-4 w-4 ${transacao.tipo === 'ENTRADA' ? 'text-green-700' : 'text-red-700'}`} />
+                            <TrendingDown className="h-4 w-4 text-red-700" />
                           )}
                         </div>
                         <div>

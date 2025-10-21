@@ -16,7 +16,16 @@ async function bootstrap() {
   // Configurar middleware para raw body nos webhooks do Stripe
   app.use('/api/webhooks/stripe', json({ verify: (req: any, res, buf) => { req.rawBody = buf; } }));
   
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: false,
+    transform: true,
+    disableErrorMessages: false,
+    validationError: {
+      target: false,
+      value: false,
+    },
+  }));
 
   // 🚀 Prefixo global para todas as rotas da API
   app.setGlobalPrefix('api');

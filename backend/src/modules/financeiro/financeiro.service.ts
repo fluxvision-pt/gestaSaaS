@@ -249,7 +249,7 @@ export class FinanceiroService {
   async getSaldoAtual(usuario: Usuario): Promise<number> {
     const result = await this.transacaoRepository
       .createQueryBuilder('transacao')
-      .select('SUM(CASE WHEN transacao.tipo = :entrada THEN transacao.valorCents ELSE -transacao.valorCents END)', 'saldo')
+      .select('SUM(CASE WHEN transacao.tipo = :entrada THEN transacao.valor_cents ELSE -transacao.valor_cents END)', 'saldo')
       .where('transacao.tenantId = :tenantId', { tenantId: usuario.tenantId })
       .setParameter('entrada', TipoTransacao.ENTRADA)
       .getRawOne();
@@ -261,7 +261,7 @@ export class FinanceiroService {
     const result = await this.transacaoRepository
       .createQueryBuilder('transacao')
       .select([
-        'SUM(transacao.valorCents) as total',
+        'SUM(transacao.valor_cents) as total',
         'COUNT(*) as quantidade'
       ])
       .where('transacao.tenantId = :tenantId', { tenantId: usuario.tenantId })
@@ -280,7 +280,7 @@ export class FinanceiroService {
     const result = await this.transacaoRepository
       .createQueryBuilder('transacao')
       .select([
-        'SUM(transacao.valorCents) as total',
+        'SUM(transacao.valor_cents) as total',
         'COUNT(*) as quantidade'
       ])
       .where('transacao.tenantId = :tenantId', { tenantId: usuario.tenantId })
@@ -315,7 +315,7 @@ export class FinanceiroService {
       .createQueryBuilder('transacao')
       .select([
         'EXTRACT(DOW FROM transacao.data) as dia_semana',
-        'SUM(transacao.valorCents) as total'
+        'SUM(transacao.valor_cents) as total'
       ])
       .where('transacao.tenantId = :tenantId', { tenantId: usuario.tenantId })
       .andWhere('transacao.tipo = :tipo', { tipo: TipoTransacao.ENTRADA })
@@ -330,7 +330,7 @@ export class FinanceiroService {
     const kmEuroMedio = await this.transacaoRepository
       .createQueryBuilder('transacao')
       .select([
-        'AVG(transacao.valorCents / NULLIF(transacao.km, 0)) as km_euro_medio'
+        'AVG(transacao.valor_cents / NULLIF(transacao.km, 0)) as km_euro_medio'
       ])
       .where('transacao.tenantId = :tenantId', { tenantId: usuario.tenantId })
       .andWhere('transacao.tipo = :tipo', { tipo: TipoTransacao.ENTRADA })

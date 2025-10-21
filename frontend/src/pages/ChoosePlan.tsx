@@ -240,7 +240,11 @@ const ChoosePlan: React.FC = () => {
     name: plan.name,
     description: plan.description || '',
     price: plan.price || 0,
+    originalPrice: undefined,
     billingCycle: plan.interval as 'monthly' | 'yearly' || 'monthly',
+    badge: undefined,
+    badgeColor: undefined,
+    popular: false,
     cardStyle: {
       background: 'bg-blue-50',
       border: 'border-blue-300'

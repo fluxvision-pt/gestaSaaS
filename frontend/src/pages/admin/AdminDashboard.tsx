@@ -108,7 +108,7 @@ export default function AdminDashboard() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard SuperAdmin</h1>
           <p className="text-muted-foreground">
-            Bem-vindo, {user?.nome}. Aqui está uma visão geral do sistema.
+            Bem-vindo, {user?.name}. Aqui está uma visão geral do sistema.
           </p>
         </div>
         <div className="flex items-center space-x-4">
@@ -118,7 +118,7 @@ export default function AdminDashboard() {
           </Badge>
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-              {user?.nome?.charAt(0) || 'A'}
+              {user?.name?.charAt(0) || 'A'}
             </div>
             <Button variant="ghost" size="sm">
               <Settings className="h-4 w-4" />
@@ -397,12 +397,12 @@ export default function AdminDashboard() {
                     <span className="font-medium">{stats?.totalTenants || 0}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm">Empresas Ativas</span>
-                    <span className="font-medium">{stats?.activeTenants || 0}</span>
+                    <span className="text-sm">Novos Tenants (30 dias)</span>
+                    <span className="font-medium">{stats?.novosTenants30Dias || 0}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Total de Usuários</span>
-                    <span className="font-medium">{stats?.totalUsers || 0}</span>
+                    <span className="font-medium">{stats?.totalUsuarios || 0}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Total de Transações</span>

@@ -53,21 +53,28 @@ export default function Gateways() {
   })
 
   // Hooks de API
-  const { data: gateways, isLoading, refetch } = useApi(gatewayService.getGateways)
+  const { data: gateways, loading, refetch } = useApi(gatewayService.getGateways)
   const { data: credentials, refetch: refetchCredentials } = useApi(
     () => selectedGateway ? gatewayService.getCredenciais(selectedGateway.id) : Promise.resolve([]),
-    [selectedGateway?.id]
+    { immediate: false }
   )
+
+  // Refetch credentials when selectedGateway changes
+  useEffect(() => {
+    if (selectedGateway) {
+      refetchCredentials()
+    }
+  }, [selectedGateway?.id, refetchCredentials])
 
   const createGatewayMutation = useApiMutation(gatewayService.createGateway, {
     onSuccess: () => {
-      toast({ title: 'Gateway criado com sucesso!' })
+      toast.success('Gateway criado com sucesso!')
       setIsCreateDialogOpen(false)
       resetGatewayForm()
       refetch()
     },
     onError: (error) => {
-      toast({ title: 'Erro ao criar gateway', description: error.message, variant: 'destructive' })
+      toast.error(`Erro ao criar gateway: ${error.message || 'Erro desconhecido'}`)
     }
   })
 
@@ -75,39 +82,39 @@ export default function Gateways() {
     ({ id, data }: { id: string; data: UpdateGatewayRequest }) => gatewayService.updateGateway(id, data),
     {
       onSuccess: () => {
-        toast({ title: 'Gateway atualizado com sucesso!' })
+        toast.success('Gateway atualizado com sucesso!')
         setIsEditDialogOpen(false)
         resetGatewayForm()
         refetch()
       },
       onError: (error) => {
-        toast({ title: 'Erro ao atualizar gateway', description: error.message, variant: 'destructive' })
+        toast.error(`Erro ao atualizar gateway: ${error.message || 'Erro desconhecido'}`)
       }
     }
   )
 
   const deleteGatewayMutation = useApiMutation(gatewayService.deleteGateway, {
     onSuccess: () => {
-      toast({ title: 'Gateway excluído com sucesso!' })
+      toast.success('Gateway excluído com sucesso!')
       refetch()
       if (selectedGateway) {
         setSelectedGateway(null)
       }
     },
     onError: (error) => {
-      toast({ title: 'Erro ao excluir gateway', description: error.message, variant: 'destructive' })
+      toast.error(`Erro ao excluir gateway: ${error.message || 'Erro desconhecido'}`)
     }
   })
 
   const createCredentialMutation = useApiMutation(gatewayService.createCredencial, {
     onSuccess: () => {
-      toast({ title: 'Credencial criada com sucesso!' })
+      toast.success('Credencial criada com sucesso!')
       setIsCredentialDialogOpen(false)
       resetCredentialForm()
       refetchCredentials()
     },
     onError: (error) => {
-      toast({ title: 'Erro ao criar credencial', description: error.message, variant: 'destructive' })
+      toast.error(`Erro ao criar credencial: ${error.message || 'Erro desconhecido'}`)
     }
   })
 
@@ -115,25 +122,25 @@ export default function Gateways() {
     ({ id, data }: { id: string; data: UpdateCredencialGatewayRequest }) => gatewayService.updateCredencial(id, data),
     {
       onSuccess: () => {
-        toast({ title: 'Credencial atualizada com sucesso!' })
+        toast.success('Credencial atualizada com sucesso!')
         setIsCredentialDialogOpen(false)
         setEditingCredential(null)
         resetCredentialForm()
         refetchCredentials()
       },
       onError: (error) => {
-        toast({ title: 'Erro ao atualizar credencial', description: error.message, variant: 'destructive' })
+        toast.error(`Erro ao atualizar credencial: ${error.message || 'Erro desconhecido'}`)
       }
     }
   )
 
   const deleteCredentialMutation = useApiMutation(gatewayService.deleteCredencial, {
     onSuccess: () => {
-      toast({ title: 'Credencial excluída com sucesso!' })
+      toast.success('Credencial excluída com sucesso!')
       refetchCredentials()
     },
     onError: (error) => {
-      toast({ title: 'Erro ao excluir credencial', description: error.message, variant: 'destructive' })
+      toast.error(`Erro ao excluir credencial: ${error.message || 'Erro desconhecido'}`)
     }
   })
 
@@ -245,7 +252,7 @@ export default function Gateways() {
     }
   }
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -321,9 +328,9 @@ export default function Gateways() {
               </Button>
               <Button 
                 onClick={handleCreateGateway}
-                disabled={createGatewayMutation.isPending}
+                disabled={createGatewayMutation.loading}
               >
-                {createGatewayMutation.isPending ? 'Criando...' : 'Criar Gateway'}
+                {createGatewayMutation.loading ? 'Criando...' : 'Criar Gateway'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -489,9 +496,9 @@ export default function Gateways() {
                             </Button>
                             <Button 
                               onClick={editingCredential ? handleUpdateCredential : handleCreateCredential}
-                              disabled={createCredentialMutation.isPending || updateCredentialMutation.isPending}
+                              disabled={createCredentialMutation.loading || updateCredentialMutation.loading}
                             >
-                              {(createCredentialMutation.isPending || updateCredentialMutation.isPending) 
+                              {(createCredentialMutation.loading || updateCredentialMutation.loading) 
                                 ? 'Salvando...' 
                                 : editingCredential ? 'Atualizar' : 'Criar'
                               }
@@ -596,7 +603,6 @@ export default function Gateways() {
                             <h3 className="text-lg font-medium mb-2">Configuração do Stripe</h3>
                             <StripeConfiguration 
                               gateway={selectedGateway} 
-                              onUpdate={refetchGateways}
                             />
                           </div>
                           <Separator />
@@ -611,7 +617,7 @@ export default function Gateways() {
                             <MercadoPagoConfiguration 
                               gatewayId={selectedGateway.id}
                               credentials={selectedGateway.credenciais || []}
-                              onCredentialsUpdate={refetchGateways}
+                              onCredentialsUpdate={refetch}
                             />
                           </div>
                           <Separator />
@@ -707,9 +713,9 @@ export default function Gateways() {
             </Button>
             <Button 
               onClick={handleUpdateGateway}
-              disabled={updateGatewayMutation.isPending}
+              disabled={updateGatewayMutation.loading}
             >
-              {updateGatewayMutation.isPending ? 'Atualizando...' : 'Atualizar Gateway'}
+              {updateGatewayMutation.loading ? 'Atualizando...' : 'Atualizar Gateway'}
             </Button>
           </DialogFooter>
         </DialogContent>

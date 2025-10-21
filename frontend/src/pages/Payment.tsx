@@ -98,7 +98,7 @@ const Payment: React.FC = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState<'card' | 'pix' | 'boleto'>('card')
+  const [activeTab, setActiveTab] = useState<'card' | 'mercadopago' | 'pix' | 'boleto'>('card')
   const [pixTimer, setPixTimer] = useState(600) // 10 minutos
   const [pixCode, setPixCode] = useState('')
   const [pixCopied, setPixCopied] = useState(false)

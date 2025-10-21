@@ -16,17 +16,15 @@ export interface SystemHealth {
 
 export interface DashboardStats {
   totalTenants: number
-  activeTenants: number
-  totalUsers: number
-  activeUsers: number
-  totalRevenue: number
-  monthlyRevenue: number
-  totalSubscriptions: number
-  activeSubscriptions: number
-  novosTenants30Dias: number
+  totalUsuarios: number
+  assinaturasAtivas: number
+  assinaturasCanceladas: number
+  receitaTotal: number
+  receitaMesAtual: number
   totalTransacoes: number
   totalKmRegistrados: number
-  assinaturasCanceladas: number
+  novosTenants30Dias: number
+  novosUsuarios30Dias: number
 }
 
 export interface TenantStats {

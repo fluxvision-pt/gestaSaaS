@@ -13,8 +13,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, CreditCard, CheckCircle, XCircle } from 'lucide-react'
 import { stripeService, type CreatePaymentIntentRequest } from '@/services/stripe.service'
 
-// Configurar Stripe (substitua pela sua chave pública)
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '')
+// Configurar Stripe
+const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null
 
 interface PaymentFormProps {
   amount: number
@@ -222,14 +223,17 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = (props) => {
     )
   }
 
-  if (!stripeConfigured) {
+  if (!stripeConfigured || !stripePublishableKey) {
     return (
       <Card className="w-full max-w-md mx-auto">
         <CardContent className="pt-6">
           <Alert variant="destructive">
             <XCircle className="h-4 w-4" />
             <AlertDescription>
-              Sistema de pagamento não está configurado. Entre em contato com o suporte.
+              {!stripePublishableKey 
+                ? 'Chave pública do Stripe não configurada. Verifique as variáveis de ambiente.'
+                : 'Sistema de pagamento não está configurado. Entre em contato com o suporte.'
+              }
             </AlertDescription>
           </Alert>
         </CardContent>

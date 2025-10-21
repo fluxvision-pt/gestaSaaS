@@ -51,8 +51,14 @@ export function useApi<T>(
   }
 }
 
+interface UseApiMutationOptions<T> {
+  onSuccess?: (data: T) => void
+  onError?: (error: any) => void
+}
+
 export function useApiMutation<T, P = any>(
-  apiFunction: (params: P) => Promise<T>
+  apiFunction: (params: P) => Promise<T>,
+  options?: UseApiMutationOptions<T>
 ) {
   const [state, setState] = useState<UseApiState<T>>({
     data: null,
@@ -66,13 +72,25 @@ export function useApiMutation<T, P = any>(
     try {
       const result = await apiFunction(params)
       setState({ data: result, loading: false, error: null })
+      
+      // Call onSuccess callback if provided
+      if (options?.onSuccess) {
+        options.onSuccess(result)
+      }
+      
       return result
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message || 'Erro desconhecido'
       setState(prev => ({ ...prev, loading: false, error: errorMessage }))
+      
+      // Call onError callback if provided
+      if (options?.onError) {
+        options.onError(error)
+      }
+      
       throw error
     }
-  }, [])
+  }, [options])
 
   const reset = useCallback(() => {
     setState({ data: null, loading: false, error: null })

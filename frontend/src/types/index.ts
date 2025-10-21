@@ -130,6 +130,7 @@ export interface CreatePlanRequest {
   maxUsers: number | null
   maxStorage: number | null
   features: string[]
+  isActive: boolean
 }
 
 export interface UpdatePlanRequest {

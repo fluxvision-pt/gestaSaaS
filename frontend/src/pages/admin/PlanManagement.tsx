@@ -321,7 +321,7 @@ export default function PlanManagement() {
             </div>
 
             {/* Filtro por status */}
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'all' | 'active' | 'inactive')}>
               <SelectTrigger>
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
