@@ -9,6 +9,7 @@ import {
   Calendar, 
   MapPin, 
   Fuel,
+  TrendingUp,
   MoreVertical,
   Edit,
   Trash2
@@ -250,24 +251,30 @@ const Veiculos = () => {
                   </div>
                 )}
                 
-                <div className="flex gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1"
                     onClick={() => navigate(`/veiculos/${veiculo.id}/manutencoes`)}
                   >
-                    <Wrench className="h-4 w-4 mr-2" />
+                    <Wrench className="h-4 w-4 mr-1" />
                     Manutenções
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1"
                     onClick={() => navigate(`/veiculos/${veiculo.id}/combustivel`)}
                   >
-                    <Fuel className="h-4 w-4 mr-2" />
+                    <Fuel className="h-4 w-4 mr-1" />
                     Combustível
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/veiculos/${veiculo.id}/rentabilidade`)}
+                  >
+                    <TrendingUp className="h-4 w-4 mr-1" />
+                    Rentabilidade
                   </Button>
                 </div>
               </CardContent>
