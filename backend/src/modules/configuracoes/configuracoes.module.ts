@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
-// import { ConfiguracoesController } from './configuracoes.controller';
-// import { ConfiguracoesService } from './configuracoes.service';
 import { Configuracao } from './entities/configuracao.entity';
+import { ConfiguracoesService } from './configuracoes.service';
+import { ConfiguracoesController } from './configuracoes.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Configuracao])],
-  // controllers: [ConfiguracoesController],
-  // providers: [ConfiguracoesService],
-  // exports: [ConfiguracoesService],
+  controllers: [ConfiguracoesController],
+  providers: [ConfiguracoesService],
+  exports: [ConfiguracoesService],
 })
 export class ConfiguracoesModule {}

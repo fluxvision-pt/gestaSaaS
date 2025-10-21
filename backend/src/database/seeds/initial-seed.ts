@@ -7,6 +7,7 @@ import { Plano } from '../../modules/planos/entities/plano.entity';
 import { Recurso, TipoRecurso } from '../../modules/planos/entities/recurso.entity';
 import { PlanoRecurso } from '../../modules/planos/entities/plano-recurso.entity';
 import { Gateway, TipoGateway } from '../../modules/pagamentos/entities/gateway.entity';
+import { Configuracao } from '../../modules/configuracoes/entities/configuracao.entity';
 import { PerfilUsuario, StatusUsuario } from '../../modules/usuarios/entities/usuario.entity';
 import { StatusPlano } from '../../modules/planos/entities/plano.entity';
 
@@ -19,6 +20,7 @@ export async function runInitialSeed(dataSource: DataSource) {
   const recursoRepository = dataSource.getRepository(Recurso);
   const planoRecursoRepository = dataSource.getRepository(PlanoRecurso);
   const gatewayRepository = dataSource.getRepository(Gateway);
+  const configuracaoRepository = dataSource.getRepository(Configuracao);
 
   // 1. Criar Super Admin
   console.log('👤 Criando Super Admin...');
@@ -67,6 +69,13 @@ export async function runInitialSeed(dataSource: DataSource) {
   // 3. Criar Planos
   console.log('📋 Criando planos...');
   
+  // Plano Gratuito
+  const planoGratuito = planoRepository.create({
+    nome: 'Gratuito',
+    status: StatusPlano.ATIVO,
+  });
+  const savedPlanoGratuito = await planoRepository.save(planoGratuito);
+
   // Plano Básico
   const planoBasico = planoRepository.create({
     nome: 'Básico',
@@ -92,6 +101,20 @@ export async function runInitialSeed(dataSource: DataSource) {
 
   // 4. Associar Recursos aos Planos
   console.log('🔗 Associando recursos aos planos...');
+
+  // Configurações do Plano Gratuito
+  const configGratuito = [
+    { recurso: 'usuarios_max', valor: '1' },
+    { recurso: 'transacoes_max_mes', valor: '50' },
+    { recurso: 'km_tracking', valor: 'true' },
+    { recurso: 'relatorios_avancados', valor: 'false' },
+    { recurso: 'api_integracoes', valor: 'false' },
+    { recurso: 'whatsapp_bot', valor: 'false' },
+    { recurso: 'backup_automatico', valor: 'false' },
+    { recurso: 'suporte_prioritario', valor: 'false' },
+    { recurso: 'multi_moeda', valor: 'false' },
+    { recurso: 'auditoria_completa', valor: 'false' },
+  ];
 
   // Configurações do Plano Básico
   const configBasico = [
@@ -150,13 +173,73 @@ export async function runInitialSeed(dataSource: DataSource) {
     }
   };
 
+  await associarRecursos(savedPlanoGratuito, configGratuito);
   await associarRecursos(savedPlanoBasico, configBasico);
   await associarRecursos(savedPlanoProfissional, configProfissional);
   await associarRecursos(savedPlanoEmpresarial, configEmpresarial);
 
   console.log('✅ Recursos associados aos planos com sucesso');
 
-  // 5. Criar Gateway de Transferência
+  // 5. Criar Configurações Globais
+  console.log('⚙️ Criando configurações globais...');
+  const configuracoesGlobais = [
+    // Configurações Gerais
+    { chave: 'app_name', valor: 'GestaSaaS' },
+    { chave: 'app_url', valor: 'https://localhost:3000' },
+    { chave: 'timezone', valor: 'America/Sao_Paulo' },
+    { chave: 'default_language', valor: 'pt-BR' },
+    { chave: 'default_currency', valor: 'BRL' },
+    { chave: 'default_country', valor: 'BR' },
+    
+    // Configurações de Segurança
+    { chave: 'session_timeout', valor: '3600' }, // 1 hora em segundos
+    { chave: 'max_login_attempts', valor: '5' },
+    { chave: 'password_min_length', valor: '8' },
+    { chave: 'require_email_verification', valor: 'true' },
+    { chave: 'enable_2fa', valor: 'false' },
+    
+    // Configurações de Email
+    { chave: 'smtp_host', valor: '' },
+    { chave: 'smtp_port', valor: '587' },
+    { chave: 'smtp_user', valor: '' },
+    { chave: 'smtp_from_name', valor: 'GestaSaaS' },
+    { chave: 'smtp_from_email', valor: 'noreply@gestasaas.com' },
+    
+    // Configurações de Pagamento
+    { chave: 'stripe_enabled', valor: 'false' },
+    { chave: 'mercadopago_enabled', valor: 'false' },
+    { chave: 'pix_enabled', valor: 'true' },
+    { chave: 'boleto_enabled', valor: 'true' },
+    
+    // Configurações de Backup
+    { chave: 'backup_enabled', valor: 'true' },
+    { chave: 'backup_frequency', valor: 'daily' },
+    { chave: 'backup_retention_days', valor: '30' },
+    
+    // Configurações de Notificações
+    { chave: 'email_notifications', valor: 'true' },
+    { chave: 'push_notifications', valor: 'false' },
+    { chave: 'sms_notifications', valor: 'false' },
+    
+    // Configurações de Limites
+    { chave: 'max_file_upload_size', valor: '10485760' }, // 10MB em bytes
+    { chave: 'max_users_per_tenant', valor: '1000' },
+    { chave: 'max_transactions_per_month', valor: '10000' },
+  ];
+
+  const configuracoesCreated = [];
+  for (const config of configuracoesGlobais) {
+    const configuracao = configuracaoRepository.create({
+      chave: config.chave,
+      valor: config.valor,
+      tenantId: null, // Configuração global
+    });
+    const saved = await configuracaoRepository.save(configuracao);
+    configuracoesCreated.push(saved);
+  }
+  console.log(`✅ ${configuracoesCreated.length} configurações globais criadas com sucesso`);
+
+  // 6. Criar Gateway de Transferência
   console.log('💳 Criando gateway de transferência...');
   const gatewayTransferencia = gatewayRepository.create({
     nome: 'Transferência Bancária',
@@ -170,7 +253,8 @@ export async function runInitialSeed(dataSource: DataSource) {
   console.log('');
   console.log('📋 Resumo:');
   console.log(`👤 Super Admin criado com email: ${adminEmail}`);
-  console.log(`📋 Planos: ${savedPlanoBasico.nome}, ${savedPlanoProfissional.nome}, ${savedPlanoEmpresarial.nome}`);
+  console.log(`📋 Planos: ${savedPlanoGratuito.nome}, ${savedPlanoBasico.nome}, ${savedPlanoProfissional.nome}, ${savedPlanoEmpresarial.nome}`);
   console.log(`🔧 Recursos: ${recursosCreated.length} recursos criados`);
+  console.log(`⚙️ Configurações: ${configuracoesCreated.length} configurações globais criadas`);
   console.log(`💳 Gateway: ${gatewayTransferencia.nome}`);
 }
