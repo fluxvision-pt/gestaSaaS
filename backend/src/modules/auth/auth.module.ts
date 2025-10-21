@@ -10,11 +10,13 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { Usuario } from '../usuarios/entities/usuario.entity';
 import { TokenRecuperacao } from './entities/token-recuperacao.entity';
+import { Tenant } from '../tenancy/entities/tenant.entity';
 import { UsuariosModule } from '../usuarios/usuarios.module';
+import { TenancyModule } from '../tenancy/tenancy.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Usuario, TokenRecuperacao]),
+    TypeOrmModule.forFeature([Usuario, TokenRecuperacao, Tenant]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -27,6 +29,7 @@ import { UsuariosModule } from '../usuarios/usuarios.module';
       }),
     }),
     UsuariosModule,
+    TenancyModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, LocalStrategy],

@@ -901,7 +901,7 @@ Transformar o sistema atual em uma plataforma de gestão financeira pessoal foca
   - [x] Botões: Visualizar, Exportar PDF, Exportar Excel, Enviar Email
   - [x] Histórico de relatórios gerados
 
-- [ ] **📄 RELATÓRIOS AVANÇADOS** (`/relatorios/avancados`)
+- [x] **📄 RELATÓRIOS AVANÇADOS** (`/relatorios/avancados`)
   **Componentes da Página:**
   - [ ] Sidebar com tipos de análise
   - [ ] Área principal com gráficos interativos:

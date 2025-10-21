@@ -6,7 +6,7 @@ import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 
 import { Usuario, PerfilUsuario, StatusUsuario } from '../usuarios/entities/usuario.entity';
-import { StatusTenant } from '../tenancy/entities/tenant.entity';
+import { Tenant, StatusTenant } from '../tenancy/entities/tenant.entity';
 import { TokenRecuperacao, TipoToken } from './entities/token-recuperacao.entity';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -21,6 +21,8 @@ export class AuthService {
     private readonly usuarioRepository: Repository<Usuario>,
     @InjectRepository(TokenRecuperacao)
     private readonly tokenRecuperacaoRepository: Repository<TokenRecuperacao>,
+    @InjectRepository(Tenant)
+    private readonly tenantRepository: Repository<Tenant>,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -187,12 +189,29 @@ export class AuthService {
     // Hash da senha
     const senhaHash = await this.hashPassword(senha);
 
-    // Criar usuário
+    // Criar tenant automaticamente para o novo usuário
+    const tenant = this.tenantRepository.create({
+      nome: `${nome} - Empresa`, // Nome padrão baseado no nome do usuário
+      email: email,
+      documento: '', // Documento vazio inicialmente, pode ser preenchido depois
+      telefone: telefoneE164 || '',
+      status: StatusTenant.ATIVO,
+      configuracoes: {
+        idioma: 'pt-BR',
+        moeda: 'BRL',
+        fuso_horario: 'America/Sao_Paulo'
+      }
+    });
+
+    const savedTenant = await this.tenantRepository.save(tenant);
+
+    // Criar usuário com o tenant associado
     const usuario = this.usuarioRepository.create({
       nome,
       email,
       senhaHash,
       telefoneE164,
+      tenantId: savedTenant.id, // Associar o usuário ao tenant criado
       perfil: PerfilUsuario.CLIENTE_ADMIN, // Por padrão, novos usuários são admins de cliente
       status: StatusUsuario.ATIVO,
       emailVerificado: false, // Email não verificado inicialmente
@@ -208,6 +227,7 @@ export class AuthService {
 
     // TODO: Enviar email de verificação
     console.log(`Token de verificação de email para ${email}: ${verificationToken.token}`);
+    console.log(`Tenant criado automaticamente: ${savedTenant.id} para usuário: ${savedUser.id}`);
 
     return {
       message: 'Usuário cadastrado com sucesso. Verifique seu email para ativar a conta.',
@@ -216,6 +236,7 @@ export class AuthService {
         nome: savedUser.nome,
         email: savedUser.email,
         emailVerificado: savedUser.emailVerificado,
+        tenantId: savedUser.tenantId,
       },
     };
   }

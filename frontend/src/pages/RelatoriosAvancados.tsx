@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Select, 
   SelectContent, 
@@ -13,14 +13,6 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { 
   Dialog, 
   DialogContent, 
   DialogHeader, 
@@ -28,591 +20,646 @@ import {
   DialogTrigger,
   DialogFooter 
 } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
+import { Separator } from '@/components/ui/separator';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Cell
+} from 'recharts';
 import {
   FileText,
   Download,
   Calendar,
   BarChart3,
   Settings,
-  Play,
-  Pause,
-  Trash2,
-  Eye,
-  Plus,
   Filter,
   RefreshCw,
   Loader2,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Users,
+  TrendingUp,
   DollarSign,
-  TrendingUp
+  Fuel,
+  Target,
+  Clock,
+  FileSpreadsheet,
+  FileImage,
+  Mail,
+  Smartphone,
+  Car,
+  MapPin,
+  Activity
 } from 'lucide-react';
-import { format, addDays, subDays } from 'date-fns';
+import { format, subDays, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { relatoriosService } from '../services/api'
-import type { RelatorioRequest, RelatorioResponse, DashboardData, RelatorioAgendado } from '../services/api'
 import { toast } from 'sonner';
 
+interface VeiculoOption {
+  id: string;
+  placa: string;
+  modelo: string;
+}
 
+interface FiltrosAvancados {
+  veiculos: string[];
+  categorias: string[];
+  periodo: {
+    inicio: string;
+    fim: string;
+  };
+  aplicativos: string[];
+}
 
-export default function RelatoriosAvancados() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+const RelatoriosAvancados: React.FC = () => {
+  const [tipoAnaliseAtivo, setTipoAnaliseAtivo] = useState('rentabilidade');
   const [loading, setLoading] = useState(false);
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
-  const [relatoriosAgendados, setRelatoriosAgendados] = useState<RelatorioAgendado[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
-
-  // Estados para geração de relatórios
-  const [reportType, setReportType] = useState<'usuarios' | 'empresas' | 'assinaturas' | 'auditoria' | 'financeiro' | ''>('');
-  const [reportFormat, setReportFormat] = useState<'pdf' | 'excel' | 'csv' | 'json'>('pdf');
-  const [dateRange, setDateRange] = useState({
-    inicio: format(subDays(new Date(), 30), 'yyyy-MM-dd'),
-    fim: format(new Date(), 'yyyy-MM-dd')
-  });
-  const [filters, setFilters] = useState({
-    empresaId: '',
-    usuarioId: '',
-    status: ''
+  const [dialogExportOpen, setDialogExportOpen] = useState(false);
+  const [dialogAgendamentoOpen, setDialogAgendamentoOpen] = useState(false);
+  
+  // Estados para filtros avançados
+  const [filtros, setFiltros] = useState<FiltrosAvancados>({
+    veiculos: [],
+    categorias: [],
+    periodo: {
+      inicio: format(subMonths(new Date(), 3), 'yyyy-MM-dd'),
+      fim: format(new Date(), 'yyyy-MM-dd')
+    },
+    aplicativos: []
   });
 
-  // Estados para agendamento
-  const [scheduleName, setScheduleName] = useState('');
-  const [scheduleFrequency, setScheduleFrequency] = useState<'diario' | 'semanal' | 'mensal' | ''>('');
-  const [scheduleTime, setScheduleTime] = useState('09:00');
-  const [scheduleDescription, setScheduleDescription] = useState('');
+  // Dados mockados para os gráficos
+  const dadosRentabilidadeApp = [
+    { aplicativo: 'Uber', receita: 15000, custos: 8500, lucro: 6500 },
+    { aplicativo: '99', receita: 12000, custos: 7200, lucro: 4800 },
+    { aplicativo: 'iFood', receita: 8000, custos: 4800, lucro: 3200 },
+    { aplicativo: 'Rappi', receita: 5500, custos: 3300, lucro: 2200 },
+    { aplicativo: 'Loggi', receita: 4000, custos: 2800, lucro: 1200 }
+  ];
 
-  useEffect(() => {
-    loadDashboardData();
-    loadScheduledReports();
-  }, []);
+  const dadosEficienciaCombustivel = [
+    { mes: 'Set', eficiencia: 11.2, meta: 12.0 },
+    { mes: 'Out', eficiencia: 11.8, meta: 12.0 },
+    { mes: 'Nov', eficiencia: 12.3, meta: 12.0 },
+    { mes: 'Dez', eficiencia: 11.9, meta: 12.0 },
+    { mes: 'Jan', eficiencia: 12.5, meta: 12.0 }
+  ];
 
-  const loadDashboardData = async () => {
-    try {
-      setLoading(true);
-      const data = await relatoriosService.getDashboardData();
-      setDashboardData(data);
-    } catch (error) {
-      console.error('Erro ao carregar dados do dashboard:', error);
-      toast.error('Erro ao carregar dados do dashboard');
-    } finally {
+  const dadosProjecoesFinanceiras = [
+    { mes: 'Jan', receita: 25000, projecao: 28000 },
+    { mes: 'Fev', receita: 27000, projecao: 30000 },
+    { mes: 'Mar', receita: 29000, projecao: 32000 },
+    { mes: 'Abr', receita: 31000, projecao: 34000 },
+    { mes: 'Mai', receita: 33000, projecao: 36000 },
+    { mes: 'Jun', receita: 35000, projecao: 38000 }
+  ];
+
+  const dadosSazonalidade = [
+    { dia: 'Seg', h6: 120, h7: 180, h8: 250, h9: 200, h10: 150, h11: 180, h12: 220, h13: 200, h14: 180, h15: 160, h16: 190, h17: 240, h18: 280, h19: 220, h20: 180, h21: 140, h22: 100 },
+    { dia: 'Ter', h6: 110, h7: 170, h8: 240, h9: 190, h10: 140, h11: 170, h12: 210, h13: 190, h14: 170, h15: 150, h16: 180, h17: 230, h18: 270, h19: 210, h20: 170, h21: 130, h22: 90 },
+    { dia: 'Qua', h6: 115, h7: 175, h8: 245, h9: 195, h10: 145, h11: 175, h12: 215, h13: 195, h14: 175, h15: 155, h16: 185, h17: 235, h18: 275, h19: 215, h20: 175, h21: 135, h22: 95 },
+    { dia: 'Qui', h6: 125, h7: 185, h8: 255, h9: 205, h10: 155, h11: 185, h12: 225, h13: 205, h14: 185, h15: 165, h16: 195, h17: 245, h18: 285, h19: 225, h20: 185, h21: 145, h22: 105 },
+    { dia: 'Sex', h6: 140, h7: 200, h8: 270, h9: 220, h10: 170, h11: 200, h12: 240, h13: 220, h14: 200, h15: 180, h16: 210, h17: 260, h18: 300, h19: 240, h20: 200, h21: 160, h22: 120 },
+    { dia: 'Sáb', h6: 80, h7: 120, h8: 200, h9: 180, h10: 160, h11: 190, h12: 230, h13: 210, h14: 190, h15: 170, h16: 200, h17: 250, h18: 290, h19: 230, h20: 190, h21: 150, h22: 110 },
+    { dia: 'Dom', h6: 60, h7: 100, h8: 160, h9: 140, h10: 120, h11: 150, h12: 190, h13: 170, h14: 150, h15: 130, h16: 160, h17: 210, h18: 250, h19: 190, h20: 150, h21: 110, h22: 80 }
+  ];
+
+  const veiculosDisponiveis: VeiculoOption[] = [
+    { id: '1', placa: 'ABC-1234', modelo: 'Honda Civic' },
+    { id: '2', placa: 'DEF-5678', modelo: 'Toyota Corolla' },
+    { id: '3', placa: 'GHI-9012', modelo: 'Nissan Sentra' },
+    { id: '4', placa: 'JKL-3456', modelo: 'Hyundai HB20' }
+  ];
+
+  const categoriasDisponiveis = [
+    'Transporte de Passageiros',
+    'Delivery de Comida',
+    'Transporte de Carga',
+    'Serviços Executivos'
+  ];
+
+  const aplicativosDisponiveis = [
+    'Uber',
+    '99',
+    'iFood',
+    'Rappi',
+    'Loggi',
+    'Cabify'
+  ];
+
+  const tiposAnalise = [
+    {
+      id: 'rentabilidade',
+      nome: 'Rentabilidade por App',
+      icone: <DollarSign className="w-5 h-5" />,
+      descricao: 'Análise de lucro por aplicativo'
+    },
+    {
+      id: 'eficiencia',
+      nome: 'Eficiência Combustível',
+      icone: <Fuel className="w-5 h-5" />,
+      descricao: 'Consumo e eficiência por período'
+    },
+    {
+      id: 'projecoes',
+      nome: 'Projeções Financeiras',
+      icone: <TrendingUp className="w-5 h-5" />,
+      descricao: 'Previsões de receita futura'
+    },
+    {
+      id: 'sazonalidade',
+      nome: 'Sazonalidade',
+      icone: <Activity className="w-5 h-5" />,
+      descricao: 'Padrões de demanda por horário'
+    }
+  ];
+
+  const handleVeiculoChange = (veiculoId: string, checked: boolean) => {
+    setFiltros(prev => ({
+      ...prev,
+      veiculos: checked 
+        ? [...prev.veiculos, veiculoId]
+        : prev.veiculos.filter(id => id !== veiculoId)
+    }));
+  };
+
+  const handleCategoriaChange = (categoria: string, checked: boolean) => {
+    setFiltros(prev => ({
+      ...prev,
+      categorias: checked 
+        ? [...prev.categorias, categoria]
+        : prev.categorias.filter(cat => cat !== categoria)
+    }));
+  };
+
+  const handleAplicativoChange = (aplicativo: string, checked: boolean) => {
+    setFiltros(prev => ({
+      ...prev,
+      aplicativos: checked 
+        ? [...prev.aplicativos, aplicativo]
+        : prev.aplicativos.filter(app => app !== aplicativo)
+    }));
+  };
+
+  const handleExportarRelatorio = (formato: 'pdf' | 'excel' | 'csv') => {
+    setLoading(true);
+    // Simular exportação
+    setTimeout(() => {
       setLoading(false);
-    }
+      toast.success(`Relatório exportado em ${formato.toUpperCase()} com sucesso!`);
+      setDialogExportOpen(false);
+    }, 2000);
   };
 
-  const loadScheduledReports = async () => {
-    try {
-      const reports = await relatoriosService.listarAgendados();
-      setRelatoriosAgendados(reports);
-    } catch (error) {
-      console.error('Erro ao carregar relatórios agendados:', error);
-      toast.error('Erro ao carregar relatórios agendados');
-    }
-  };
-
-  const handleGenerateReport = async () => {
-    if (!reportType) {
-      toast.error('Selecione um tipo de relatório');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const request: RelatorioRequest = {
-        tipo: reportType,
-        formato: reportFormat,
-        filtros: {
-          dataInicio: dateRange.inicio,
-          dataFim: dateRange.fim,
-          empresaId: filters.empresaId || undefined,
-          usuarioId: filters.usuarioId || undefined,
-          status: filters.status || undefined
-        }
-      };
-
-      const response = await relatoriosService.gerarRelatorio(request);
-      
-      if (response.url) {
-        // Download direto
-        window.open(response.url, '_blank');
-        toast.success('Relatório gerado com sucesso!');
-      } else {
-        toast.success('Relatório está sendo processado. Você será notificado quando estiver pronto.');
-      }
-      
-      setIsDialogOpen(false);
-      loadDashboardData();
-    } catch (error) {
-      console.error('Erro ao gerar relatório:', error);
-      toast.error('Erro ao gerar relatório');
-    } finally {
+  const handleAgendarRelatorio = () => {
+    setLoading(true);
+    // Simular agendamento
+    setTimeout(() => {
       setLoading(false);
-    }
-  };
-
-  const handleScheduleReport = async () => {
-    if (!scheduleName || !reportType || !scheduleFrequency) {
-      toast.error('Preencha todos os campos obrigatórios');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const request: RelatorioRequest = {
-        tipo: reportType,
-        formato: reportFormat,
-        filtros: {
-          dataInicio: dateRange.inicio,
-          dataFim: dateRange.fim,
-          empresaId: filters.empresaId || undefined,
-          usuarioId: filters.usuarioId || undefined,
-          status: filters.status || undefined
-        },
-        agendamento: {
-          frequencia: scheduleFrequency,
-          hora: scheduleTime,
-          ativo: true
-        }
-      };
-
-      await relatoriosService.agendarRelatorio(request);
-
       toast.success('Relatório agendado com sucesso!');
-      setIsScheduleDialogOpen(false);
-      loadScheduledReports();
-      
-      // Reset form
-      setScheduleName('');
-      setScheduleDescription('');
-      setScheduleFrequency('');
-    } catch (error) {
-      console.error('Erro ao agendar relatório:', error);
-      toast.error('Erro ao agendar relatório');
-    } finally {
-      setLoading(false);
+      setDialogAgendamentoOpen(false);
+    }, 1500);
+  };
+
+  const renderGraficoAtivo = () => {
+    switch (tipoAnaliseAtivo) {
+      case 'rentabilidade':
+        return (
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={dadosRentabilidadeApp}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="aplicativo" />
+              <YAxis />
+              <Tooltip 
+                formatter={(value, name) => [
+                  `R$ ${Number(value).toLocaleString('pt-BR')}`,
+                  name === 'receita' ? 'Receita' : name === 'custos' ? 'Custos' : 'Lucro'
+                ]}
+              />
+              <Legend />
+              <Bar dataKey="receita" fill="#3b82f6" name="Receita" />
+              <Bar dataKey="custos" fill="#ef4444" name="Custos" />
+              <Bar dataKey="lucro" fill="#10b981" name="Lucro" />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+
+      case 'eficiencia':
+        return (
+          <ResponsiveContainer width="100%" height={400}>
+            <LineChart data={dadosEficienciaCombustivel}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="mes" />
+              <YAxis domain={[10, 14]} />
+              <Tooltip 
+                formatter={(value, name) => [
+                  `${Number(value).toFixed(1)} km/l`,
+                  name === 'eficiencia' ? 'Eficiência Real' : 'Meta'
+                ]}
+              />
+              <Legend />
+              <Line 
+                type="monotone" 
+                dataKey="eficiencia" 
+                stroke="#3b82f6" 
+                strokeWidth={3}
+                name="Eficiência Real"
+              />
+              <Line 
+                type="monotone" 
+                dataKey="meta" 
+                stroke="#ef4444" 
+                strokeDasharray="5 5"
+                name="Meta"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        );
+
+      case 'projecoes':
+        return (
+          <ResponsiveContainer width="100%" height={400}>
+            <AreaChart data={dadosProjecoesFinanceiras}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="mes" />
+              <YAxis />
+              <Tooltip 
+                formatter={(value, name) => [
+                  `R$ ${Number(value).toLocaleString('pt-BR')}`,
+                  name === 'receita' ? 'Receita Real' : 'Projeção'
+                ]}
+              />
+              <Legend />
+              <Area 
+                type="monotone" 
+                dataKey="receita" 
+                stackId="1"
+                stroke="#3b82f6" 
+                fill="#3b82f6"
+                fillOpacity={0.6}
+                name="Receita Real"
+              />
+              <Area 
+                type="monotone" 
+                dataKey="projecao" 
+                stackId="2"
+                stroke="#10b981" 
+                fill="#10b981"
+                fillOpacity={0.4}
+                name="Projeção"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        );
+
+      case 'sazonalidade':
+        return (
+          <div className="space-y-4">
+            <div className="text-sm text-gray-600 mb-4">
+              Heatmap de demanda por dia da semana e horário (corridas por hora)
+            </div>
+            <div className="grid grid-cols-8 gap-1 text-xs">
+              <div></div>
+              {Array.from({ length: 17 }, (_, i) => (
+                <div key={i} className="text-center font-medium p-1">
+                  {6 + i}h
+                </div>
+              ))}
+              {dadosSazonalidade.map((dia, diaIndex) => (
+                <React.Fragment key={dia.dia}>
+                  <div className="font-medium p-2 text-right">{dia.dia}</div>
+                  {Object.entries(dia).slice(1).map(([hora, valor], horaIndex) => {
+                    const intensity = Math.min(valor / 300, 1);
+                    const backgroundColor = `rgba(59, 130, 246, ${intensity})`;
+                    return (
+                      <div
+                        key={`${diaIndex}-${horaIndex}`}
+                        className="aspect-square flex items-center justify-center text-xs rounded border"
+                        style={{ backgroundColor }}
+                        title={`${dia.dia} ${6 + horaIndex}h: ${valor} corridas`}
+                      >
+                        {valor}
+                      </div>
+                    );
+                  })}
+                </React.Fragment>
+              ))}
+            </div>
+            <div className="flex items-center gap-4 text-xs text-gray-600">
+              <span>Baixa demanda</span>
+              <div className="flex gap-1">
+                {[0.2, 0.4, 0.6, 0.8, 1.0].map((opacity) => (
+                  <div
+                    key={opacity}
+                    className="w-4 h-4 rounded border"
+                    style={{ backgroundColor: `rgba(59, 130, 246, ${opacity})` }}
+                  />
+                ))}
+              </div>
+              <span>Alta demanda</span>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
     }
-  };
-
-  const handleToggleSchedule = async (id: string, ativo: boolean) => {
-    try {
-      await relatoriosService.atualizarAgendamento(id, ativo);
-      toast.success(`Relatório ${ativo ? 'ativado' : 'pausado'} com sucesso!`);
-      loadScheduledReports();
-    } catch (error) {
-      console.error('Erro ao atualizar agendamento:', error);
-      toast.error('Erro ao atualizar agendamento');
-    }
-  };
-
-  const handleDeleteSchedule = async (id: string) => {
-    try {
-      await relatoriosService.cancelarAgendamento(id);
-      toast.success('Agendamento removido com sucesso!');
-      loadScheduledReports();
-    } catch (error) {
-      console.error('Erro ao remover agendamento:', error);
-      toast.error('Erro ao remover agendamento');
-    }
-  };
-
-  const getStatusBadge = (status: string | undefined) => {
-    const statusConfig = {
-      ativo: { variant: 'default' as const, label: 'Ativo', icon: CheckCircle },
-      pausado: { variant: 'secondary' as const, label: 'Pausado', icon: Pause },
-      erro: { variant: 'destructive' as const, label: 'Erro', icon: AlertTriangle }
-    };
-
-    const normalizedStatus = status || 'ativo';
-    const config = statusConfig[normalizedStatus as keyof typeof statusConfig] || statusConfig.ativo;
-    const Icon = config.icon;
-
-    return (
-      <Badge variant={config.variant} className="flex items-center gap-1">
-        <Icon className="h-3 w-3" />
-        {config.label}
-      </Badge>
-    );
-  };
-
-  const getFrequencyLabel = (frequency: string) => {
-    const labels = {
-      daily: 'Diário',
-      weekly: 'Semanal',
-      monthly: 'Mensal',
-      quarterly: 'Trimestral'
-    };
-    return labels[frequency as keyof typeof labels] || frequency;
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Relatórios Avançados</h1>
-          <p className="text-muted-foreground">
-            Gere relatórios personalizados e configure agendamentos automáticos
-          </p>
+    <div className="min-h-screen bg-gray-50">
+      <div className="flex">
+        {/* Sidebar */}
+        <div className="w-80 bg-white shadow-sm border-r min-h-screen p-6">
+          <div className="space-y-6">
+            {/* Header da Sidebar */}
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                Tipos de Análise
+              </h2>
+              <p className="text-sm text-gray-600">
+                Selecione o tipo de relatório que deseja visualizar
+              </p>
+            </div>
+
+            {/* Lista de Tipos de Análise */}
+            <div className="space-y-2">
+              {tiposAnalise.map((tipo) => (
+                <button
+                  key={tipo.id}
+                  onClick={() => setTipoAnaliseAtivo(tipo.id)}
+                  className={`w-full p-4 rounded-lg border text-left transition-all ${
+                    tipoAnaliseAtivo === tipo.id
+                      ? 'bg-blue-50 border-blue-200 text-blue-900'
+                      : 'bg-white border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className={`${
+                      tipoAnaliseAtivo === tipo.id ? 'text-blue-600' : 'text-gray-500'
+                    }`}>
+                      {tipo.icone}
+                    </div>
+                    <span className="font-medium">{tipo.nome}</span>
+                  </div>
+                  <p className="text-sm text-gray-600">{tipo.descricao}</p>
+                </button>
+              ))}
+            </div>
+
+            <Separator />
+
+            {/* Filtros Avançados */}
+            <div className="space-y-4">
+              <h3 className="font-medium text-gray-900 flex items-center gap-2">
+                <Filter className="w-4 h-4" />
+                Filtros Avançados
+              </h3>
+
+              {/* Período */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Período</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    type="date"
+                    value={filtros.periodo.inicio}
+                    onChange={(e) => setFiltros(prev => ({
+                      ...prev,
+                      periodo: { ...prev.periodo, inicio: e.target.value }
+                    }))}
+                    className="text-xs"
+                  />
+                  <Input
+                    type="date"
+                    value={filtros.periodo.fim}
+                    onChange={(e) => setFiltros(prev => ({
+                      ...prev,
+                      periodo: { ...prev.periodo, fim: e.target.value }
+                    }))}
+                    className="text-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Veículos */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Veículos</Label>
+                <div className="space-y-2 max-h-32 overflow-y-auto">
+                  {veiculosDisponiveis.map((veiculo) => (
+                    <div key={veiculo.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`veiculo-${veiculo.id}`}
+                        checked={filtros.veiculos.includes(veiculo.id)}
+                        onCheckedChange={(checked) => 
+                          handleVeiculoChange(veiculo.id, checked as boolean)
+                        }
+                      />
+                      <Label 
+                        htmlFor={`veiculo-${veiculo.id}`}
+                        className="text-xs cursor-pointer"
+                      >
+                        {veiculo.placa} - {veiculo.modelo}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Categorias */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Categorias</Label>
+                <div className="space-y-2">
+                  {categoriasDisponiveis.map((categoria) => (
+                    <div key={categoria} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`categoria-${categoria}`}
+                        checked={filtros.categorias.includes(categoria)}
+                        onCheckedChange={(checked) => 
+                          handleCategoriaChange(categoria, checked as boolean)
+                        }
+                      />
+                      <Label 
+                        htmlFor={`categoria-${categoria}`}
+                        className="text-xs cursor-pointer"
+                      >
+                        {categoria}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Aplicativos */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Aplicativos</Label>
+                <div className="space-y-2">
+                  {aplicativosDisponiveis.map((aplicativo) => (
+                    <div key={aplicativo} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`app-${aplicativo}`}
+                        checked={filtros.aplicativos.includes(aplicativo)}
+                        onCheckedChange={(checked) => 
+                          handleAplicativoChange(aplicativo, checked as boolean)
+                        }
+                      />
+                      <Label 
+                        htmlFor={`app-${aplicativo}`}
+                        className="text-xs cursor-pointer"
+                      >
+                        {aplicativo}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={() => setIsScheduleDialogOpen(true)} variant="outline">
-            <Clock className="h-4 w-4 mr-2" />
-            Agendar Relatório
-          </Button>
-          <Button onClick={() => setIsDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Relatório
-          </Button>
+
+        {/* Área Principal */}
+        <div className="flex-1 p-6">
+          <div className="space-y-6">
+            {/* Header */}
+            <div className="flex justify-between items-start">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Relatórios Avançados
+                </h1>
+                <p className="text-gray-600 mt-1">
+                  Análises detalhadas com gráficos interativos e filtros avançados
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline"
+                  onClick={() => setDialogAgendamentoOpen(true)}
+                >
+                  <Clock className="w-4 h-4 mr-2" />
+                  Agendar
+                </Button>
+                <Button onClick={() => setDialogExportOpen(true)}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Exportar
+                </Button>
+              </div>
+            </div>
+
+            {/* Área do Gráfico */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  {tiposAnalise.find(t => t.id === tipoAnaliseAtivo)?.icone}
+                  {tiposAnalise.find(t => t.id === tipoAnaliseAtivo)?.nome}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="flex justify-center items-center h-96">
+                    <Loader2 className="w-8 h-8 animate-spin" />
+                  </div>
+                ) : (
+                  renderGraficoAtivo()
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="agendados">Agendados</TabsTrigger>
-          <TabsTrigger value="historico">Histórico</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="dashboard" className="space-y-6">
-          {loading && !dashboardData ? (
-            <div className="flex justify-center items-center h-64">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total de Relatórios</CardTitle>
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{dashboardData?.totalRelatorios || 0}</div>
-                    <p className="text-xs text-muted-foreground">Gerados até agora</p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Hoje</CardTitle>
-                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{dashboardData?.relatoriosHoje || 0}</div>
-                    <p className="text-xs text-muted-foreground">Relatórios gerados hoje</p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Agendados</CardTitle>
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{dashboardData?.relatoriosAgendados || 0}</div>
-                    <p className="text-xs text-muted-foreground">Execuções automáticas</p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Formato Popular</CardTitle>
-                    <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">PDF</div>
-                    <p className="text-xs text-muted-foreground">Mais utilizado</p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Relatórios Recentes</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Nome</TableHead>
-                        <TableHead>Tipo</TableHead>
-                        <TableHead>Data</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Ações</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {dashboardData?.relatoriosRecentes?.map((relatorio) => (
-                        <TableRow key={relatorio.id}>
-                          <TableCell className="font-medium">{relatorio.nome}</TableCell>
-                          <TableCell>{relatorio.tipo}</TableCell>
-                          <TableCell>
-                            {format(new Date(relatorio.dataGeracao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={relatorio.status === 'concluido' ? 'default' : 'secondary'}>
-                              {relatorio.status || 'Pendente'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex gap-2">
-                              <Button variant="ghost" size="sm">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm">
-                                <Download className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )) || (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center text-muted-foreground">
-                            Nenhum relatório encontrado
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </>
-          )}
-        </TabsContent>
-
-        <TabsContent value="agendados" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Relatórios Agendados</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Frequência</TableHead>
-                    <TableHead>Próxima Execução</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {relatoriosAgendados.map((relatorio) => (
-                    <TableRow key={relatorio.id}>
-                      <TableCell className="font-medium">{relatorio.nome}</TableCell>
-                      <TableCell>{relatorio.tipo}</TableCell>
-                      <TableCell>{getFrequencyLabel(relatorio.frequencia)}</TableCell>
-                      <TableCell>
-                        {format(new Date(relatorio.proximaExecucao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
-                      </TableCell>
-                      <TableCell>{getStatusBadge(relatorio.status)}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleToggleSchedule(relatorio.id, !relatorio.ativo)}
-                          >
-                            {relatorio.ativo ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteSchedule(relatorio.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {relatoriosAgendados.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground">
-                        Nenhum relatório agendado
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="historico" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Histórico de Relatórios</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center text-muted-foreground py-8">
-                Histórico de relatórios será implementado em breve
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      {/* Dialog para gerar novo relatório */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
+      {/* Dialog de Exportação */}
+      <Dialog open={dialogExportOpen} onOpenChange={setDialogExportOpen}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>Gerar Novo Relatório</DialogTitle>
+            <DialogTitle>Exportar Relatório</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="reportType">Tipo de Relatório</Label>
-                <Select value={reportType} onValueChange={(value: 'usuarios' | 'empresas' | 'assinaturas' | 'auditoria' | 'financeiro') => setReportType(value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="usuarios">Usuários</SelectItem>
-                    <SelectItem value="empresas">Empresas</SelectItem>
-                    <SelectItem value="assinaturas">Assinaturas</SelectItem>
-                    <SelectItem value="financeiro">Financeiro</SelectItem>
-                    <SelectItem value="auditoria">Auditoria</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="reportFormat">Formato</Label>
-                <Select value={reportFormat} onValueChange={(value: 'pdf' | 'excel' | 'csv' | 'json') => setReportFormat(value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pdf">PDF</SelectItem>
-                    <SelectItem value="excel">Excel</SelectItem>
-                    <SelectItem value="csv">CSV</SelectItem>
-                    <SelectItem value="json">JSON</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="dateStart">Data Início</Label>
-                <Input
-                  type="date"
-                  value={dateRange.inicio}
-                  onChange={(e) => setDateRange(prev => ({ ...prev, inicio: e.target.value }))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="dateEnd">Data Fim</Label>
-                <Input
-                  type="date"
-                  value={dateRange.fim}
-                  onChange={(e) => setDateRange(prev => ({ ...prev, fim: e.target.value }))}
-                />
-              </div>
+            <p className="text-sm text-gray-600">
+              Escolha o formato para exportar o relatório atual
+            </p>
+            <div className="grid grid-cols-3 gap-3">
+              <Button
+                variant="outline"
+                onClick={() => handleExportarRelatorio('pdf')}
+                disabled={loading}
+                className="h-20 flex-col"
+              >
+                <FileText className="w-6 h-6 mb-2" />
+                PDF
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleExportarRelatorio('excel')}
+                disabled={loading}
+                className="h-20 flex-col"
+              >
+                <FileSpreadsheet className="w-6 h-6 mb-2" />
+                Excel
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleExportarRelatorio('csv')}
+                disabled={loading}
+                className="h-20 flex-col"
+              >
+                <FileImage className="w-6 h-6 mb-2" />
+                CSV
+              </Button>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleGenerateReport} disabled={loading}>
-              {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Gerar Relatório
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Dialog para agendar relatório */}
-      <Dialog open={isScheduleDialogOpen} onOpenChange={setIsScheduleDialogOpen}>
-        <DialogContent className="max-w-2xl">
+      {/* Dialog de Agendamento */}
+      <Dialog open={dialogAgendamentoOpen} onOpenChange={setDialogAgendamentoOpen}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>Agendar Relatório</DialogTitle>
+            <DialogTitle>Agendar Relatório Automático</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="scheduleName">Nome do Agendamento</Label>
-              <Input
-                value={scheduleName}
-                onChange={(e) => setScheduleName(e.target.value)}
-                placeholder="Ex: Relatório Mensal de Usuários"
-              />
+              <Label>Frequência</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a frequência" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="diario">Diário</SelectItem>
+                  <SelectItem value="semanal">Semanal</SelectItem>
+                  <SelectItem value="mensal">Mensal</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            
             <div className="space-y-2">
-              <Label htmlFor="scheduleDescription">Descrição</Label>
-              <Textarea
-                value={scheduleDescription}
-                onChange={(e) => setScheduleDescription(e.target.value)}
-                placeholder="Descrição opcional do relatório"
-              />
+              <Label>Horário</Label>
+              <Input type="time" defaultValue="09:00" />
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="reportType">Tipo de Relatório</Label>
-                <Select value={reportType} onValueChange={(value: string) => setReportType(value as 'usuarios' | 'empresas' | 'assinaturas' | 'auditoria' | 'financeiro')}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="usuarios">Usuários</SelectItem>
-                    <SelectItem value="assinaturas">Assinaturas</SelectItem>
-                    <SelectItem value="financeiro">Financeiro</SelectItem>
-                    <SelectItem value="auditoria">Auditoria</SelectItem>
-                    <SelectItem value="performance">Performance</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="reportFormat">Formato</Label>
-                <Select value={reportFormat} onValueChange={(value: string) => setReportFormat(value as 'pdf' | 'excel' | 'csv' | 'json')}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pdf">PDF</SelectItem>
-                    <SelectItem value="excel">Excel</SelectItem>
-                    <SelectItem value="csv">CSV</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="scheduleFrequency">Frequência</Label>
-                <Select value={scheduleFrequency} onValueChange={(value: string) => setScheduleFrequency(value as 'diario' | 'semanal' | 'mensal')}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a frequência" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="diario">Diário</SelectItem>
-                    <SelectItem value="semanal">Semanal</SelectItem>
-                    <SelectItem value="mensal">Mensal</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="scheduleTime">Horário</Label>
-                <Input
-                  type="time"
-                  value={scheduleTime}
-                  onChange={(e) => setScheduleTime(e.target.value)}
-                />
+            <div className="space-y-2">
+              <Label>Enviar por</Label>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm">
+                  <Mail className="w-4 h-4 mr-2" />
+                  Email
+                </Button>
+                <Button variant="outline" size="sm">
+                  <Smartphone className="w-4 h-4 mr-2" />
+                  WhatsApp
+                </Button>
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsScheduleDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleScheduleReport} disabled={loading}>
-              {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            <Button 
+              onClick={handleAgendarRelatorio}
+              disabled={loading}
+            >
+              {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Agendar Relatório
             </Button>
           </DialogFooter>
@@ -620,4 +667,6 @@ export default function RelatoriosAvancados() {
       </Dialog>
     </div>
   );
-}
+};
+
+export default RelatoriosAvancados;
