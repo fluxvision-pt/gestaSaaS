@@ -264,9 +264,10 @@ const Veiculos = () => {
                     variant="outline"
                     size="sm"
                     className="flex-1"
+                    onClick={() => navigate(`/veiculos/${veiculo.id}/combustivel`)}
                   >
                     <Fuel className="h-4 w-4 mr-2" />
-                    Abastecimentos
+                    Combustível
                   </Button>
                 </div>
               </CardContent>
