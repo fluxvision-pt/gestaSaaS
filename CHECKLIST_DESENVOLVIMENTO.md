@@ -763,143 +763,143 @@ Transformar o sistema atual em uma plataforma de gestão financeira pessoal foca
     - [x] Ações
   - [x] Modal "Nova Despesa" com upload de comprovante
 
-- [ ] **📄 DESPESAS RECORRENTES** (`/despesas/recorrentes`)
+- [x] **📄 DESPESAS RECORRENTES** (`/despesas/recorrentes`)
   **Componentes da Página:**
-  - [ ] Header com botão "Nova Despesa Recorrente"
-  - [ ] Cards de despesas ativas:
-    - [ ] Nome da despesa
-    - [ ] Valor mensal
-    - [ ] Próximo vencimento
-    - [ ] Status (ativa/pausada)
-    - [ ] Botões: Editar, Pausar, Excluir
-  - [ ] Modal de criação com:
-    - [ ] Nome da despesa
-    - [ ] Categoria
-    - [ ] Valor
-    - [ ] Frequência (mensal, semanal, anual)
-    - [ ] Data início
-    - [ ] Notificação (dias antes do vencimento)
-  - [ ] Histórico de pagamentos por despesa
+  - [x] Header com botão "Nova Despesa Recorrente"
+  - [x] Cards de despesas ativas:
+    - [x] Nome da despesa
+    - [x] Valor mensal
+    - [x] Próximo vencimento
+    - [x] Status (ativa/pausada)
+    - [x] Botões: Editar, Pausar, Excluir
+  - [x] Modal de criação com:
+    - [x] Nome da despesa
+    - [x] Categoria
+    - [x] Valor
+    - [x] Frequência (mensal, semanal, anual)
+    - [x] Data início
+    - [x] Notificação (dias antes do vencimento)
+  - [x] Histórico de pagamentos por despesa
 
 ### **🚗 Módulo de Veículos**
-- [ ] **📄 GESTÃO DE VEÍCULOS** (`/veiculos`)
+- [x] **📄 GESTÃO DE VEÍCULOS** (`/veiculos`)
   **Componentes da Página:**
-  - [ ] Header com botão "Adicionar Veículo"
-  - [ ] Grid de cards de veículos (responsivo):
-    - [ ] Foto do veículo (placeholder se não tiver)
-    - [ ] Marca + Modelo + Ano
-    - [ ] Placa (formatada)
-    - [ ] KM atual
-    - [ ] Status (ativo/inativo)
-    - [ ] Rentabilidade mensal (€/mês)
-    - [ ] Botões: Ver Detalhes, Editar, Inativar
-  - [ ] Modal "Novo Veículo" com:
-    - [ ] Upload de foto
-    - [ ] Marca (select com autocomplete)
-    - [ ] Modelo (dependente da marca)
-    - [ ] Ano (select)
-    - [ ] Placa (máscara automática)
-    - [ ] Cor
-    - [ ] KM inicial
-    - [ ] Tipo (Carro, Moto, Bicicleta)
-    - [ ] Combustível (Gasolina, Diesel, Elétrico, Híbrido)
+  - [x] Header com botão "Adicionar Veículo"
+  - [x] Grid de cards de veículos (responsivo):
+    - [x] Foto do veículo (placeholder se não tiver)
+    - [x] Marca + Modelo + Ano
+    - [x] Placa (formatada)
+    - [x] KM atual
+    - [x] Status (ativo/inativo)
+    - [x] Rentabilidade mensal (€/mês)
+    - [x] Botões: Ver Detalhes, Editar, Inativar
+  - [x] Modal "Novo Veículo" com:
+    - [x] Upload de foto
+    - [x] Marca (select com autocomplete)
+    - [x] Modelo (dependente da marca)
+    - [x] Ano (select)
+    - [x] Placa (máscara automática)
+    - [x] Cor
+    - [x] KM inicial
+    - [x] Tipo (Carro, Moto, Bicicleta)
+    - [x] Combustível (Gasolina, Diesel, Elétrico, Híbrido)
 
-- [ ] **📄 DETALHES DO VEÍCULO** (`/veiculos/:id`)
+- [x] **📄 DETALHES DO VEÍCULO** (`/veiculos/:id`)
   **Componentes da Página:**
-  - [ ] Header com breadcrumb + foto do veículo
-  - [ ] Tabs principais:
-    - [ ] "Visão Geral" (dados básicos + KPIs)
-    - [ ] "Manutenções" (histórico + próximas)
-    - [ ] "Combustível" (abastecimentos + consumo)
-    - [ ] "Rentabilidade" (receitas vs custos)
-  - [ ] Tab Visão Geral:
-    - [ ] Cards de KPIs (KM total, consumo médio, custo/km)
-    - [ ] Gráfico de KM por mês
-    - [ ] Próximas manutenções (alertas)
-  - [ ] Botão "Registrar KM" (modal rápido)
+  - [x] Header com breadcrumb + foto do veículo
+  - [x] Tabs principais:
+    - [x] "Visão Geral" (dados básicos + KPIs)
+    - [x] "Manutenções" (histórico + próximas)
+    - [x] "Combustível" (abastecimentos + consumo)
+    - [x] "Rentabilidade" (receitas vs custos)
+  - [x] Tab Visão Geral:
+    - [x] Cards de KPIs (KM total, consumo médio, custo/km)
+    - [x] Gráfico de KM por mês
+    - [x] Próximas manutenções (alertas)
+  - [x] Botão "Registrar KM" (modal rápido)
 
-- [ ] **📄 MANUTENÇÕES** (`/veiculos/:id/manutencoes`)
+- [x] **📄 MANUTENÇÕES** (`/veiculos/:id/manutencoes`)
   **Componentes da Página:**
-  - [ ] Header com botão "Nova Manutenção"
-  - [ ] Timeline de manutenções (vertical):
-    - [ ] Data + KM
-    - [ ] Tipo de manutenção (ícone específico)
-    - [ ] Descrição
-    - [ ] Valor gasto
-    - [ ] Próxima manutenção sugerida
-  - [ ] Cards de alertas:
-    - [ ] "Troca de Óleo" (baseado em KM)
-    - [ ] "Revisão Geral" (baseado em tempo)
-    - [ ] "Pneus" (baseado em KM)
-  - [ ] Modal "Nova Manutenção" com:
-    - [ ] Tipo (select pré-definido + "Outro")
-    - [ ] Data
-    - [ ] KM atual
-    - [ ] Descrição
-    - [ ] Valor
-    - [ ] Oficina/Local
-    - [ ] Upload de nota fiscal
-    - [ ] Próxima manutenção (auto-calculada)
+  - [x] Header com botão "Nova Manutenção"
+  - [x] Timeline de manutenções (vertical):
+    - [x] Data + KM
+    - [x] Tipo de manutenção (ícone específico)
+    - [x] Descrição
+    - [x] Valor gasto
+    - [x] Próxima manutenção sugerida
+  - [x] Cards de alertas:
+    - [x] "Troca de Óleo" (baseado em KM)
+    - [x] "Revisão Geral" (baseado em tempo)
+    - [x] "Pneus" (baseado em KM)
+  - [x] Modal "Nova Manutenção" com:
+    - [x] Tipo (select pré-definido + "Outro")
+    - [x] Data
+    - [x] KM atual
+    - [x] Descrição
+    - [x] Valor
+    - [x] Oficina/Local
+    - [x] Upload de nota fiscal
+    - [x] Próxima manutenção (auto-calculada)
 
-- [ ] **📄 CONTROLE DE COMBUSTÍVEL** (`/veiculos/:id/combustivel`)
+- [x] **📄 CONTROLE DE COMBUSTÍVEL** (`/veiculos/:id/combustivel`)
   **Componentes da Página:**
-  - [ ] Header com botão "Novo Abastecimento"
-  - [ ] Cards de resumo:
-    - [ ] Consumo Médio (L/100km ou kWh/100km)
-    - [ ] Gasto Mensal
-    - [ ] Eficiência vs Mês Anterior
-  - [ ] Gráfico de consumo (últimos 6 meses)
-  - [ ] Tabela de abastecimentos:
-    - [ ] Data
-    - [ ] Posto/Local
-    - [ ] Litros/kWh
-    - [ ] Preço/Litro
-    - [ ] Total pago
-    - [ ] KM no momento
-    - [ ] Consumo calculado
-  - [ ] Modal "Novo Abastecimento" com:
-    - [ ] Data/hora
-    - [ ] KM atual
-    - [ ] Quantidade (litros/kWh)
-    - [ ] Preço por unidade
-    - [ ] Total pago
-    - [ ] Posto/local
-    - [ ] Tanque cheio? (checkbox)
-    - [ ] Upload de comprovante
+  - [x] Header com botão "Novo Abastecimento"
+  - [x] Cards de resumo:
+    - [x] Consumo Médio (L/100km ou kWh/100km)
+    - [x] Gasto Mensal
+    - [x] Eficiência vs Mês Anterior
+  - [x] Gráfico de consumo (últimos 6 meses)
+  - [x] Tabela de abastecimentos:
+    - [x] Data
+    - [x] Posto/Local
+    - [x] Litros/kWh
+    - [x] Preço/Litro
+    - [x] Total pago
+    - [x] KM no momento
+    - [x] Consumo calculado
+  - [x] Modal "Novo Abastecimento" com:
+    - [x] Data/hora
+    - [x] KM atual
+    - [x] Quantidade (litros/kWh)
+    - [x] Preço por unidade
+    - [x] Total pago
+    - [x] Posto/local
+    - [x] Tanque cheio? (checkbox)
+    - [x] Upload de comprovante
 
-- [ ] **📄 ANÁLISE DE RENTABILIDADE** (`/veiculos/:id/rentabilidade`)
+- [x] **📄 ANÁLISE DE RENTABILIDADE** (`/veiculos/:id/rentabilidade`)
   **Componentes da Página:**
-  - [ ] Filtros: período, tipo de análise
-  - [ ] Cards de KPIs:
-    - [ ] Receita Total
-    - [ ] Custos Totais
-    - [ ] Lucro Líquido
-    - [ ] ROI (%)
-  - [ ] Gráfico "Receitas vs Custos" (mensal)
-  - [ ] Breakdown de custos (pizza chart):
-    - [ ] Combustível
-    - [ ] Manutenção
-    - [ ] Depreciação
-    - [ ] Outros
-  - [ ] Tabela de rentabilidade mensal
-  - [ ] Projeções futuras (baseado em histórico)
+  - [x] Filtros: período, tipo de análise
+  - [x] Cards de KPIs:
+    - [x] Receita Total
+    - [x] Custos Totais
+    - [x] Lucro Líquido
+    - [x] ROI (%)
+  - [x] Gráfico "Receitas vs Custos" (mensal)
+  - [x] Breakdown de custos (pizza chart):
+    - [x] Combustível
+    - [x] Manutenção
+    - [x] Depreciação
+    - [x] Outros
+  - [x] Tabela de rentabilidade mensal
+  - [x] Projeções futuras (baseado em histórico)
 
 ---
 
 ## 📈 **FASE 4 - RELATÓRIOS E ANÁLISES (Semana 5-6)**
 
 ### **📊 Sistema de Relatórios**
-- [ ] **📄 RELATÓRIOS BÁSICOS** (`/relatorios`)
+- [x] **📄 RELATÓRIOS BÁSICOS** (`/relatorios`)
   **Componentes da Página:**
-  - [ ] Header com filtros globais: período, veículo, tipo
-  - [ ] Grid de cards de relatórios disponíveis:
-    - [ ] "Demonstrativo Mensal" (bg-blue-50, ícone FileText)
-    - [ ] "Rentabilidade por Veículo" (bg-emerald-50, ícone Car)
-    - [ ] "Análise de Tendências" (bg-purple-50, ícone TrendingUp)
-    - [ ] "Comparativo de Períodos" (bg-orange-50, ícone BarChart)
-  - [ ] Preview do relatório selecionado
-  - [ ] Botões: Visualizar, Exportar PDF, Exportar Excel, Enviar Email
-  - [ ] Histórico de relatórios gerados
+  - [x] Header com filtros globais: período, veículo, tipo
+  - [x] Grid de cards de relatórios disponíveis:
+    - [x] "Demonstrativo Mensal" (bg-blue-50, ícone FileText)
+    - [x] "Rentabilidade por Veículo" (bg-emerald-50, ícone Car)
+    - [x] "Análise de Tendências" (bg-purple-50, ícone TrendingUp)
+    - [x] "Comparativo de Períodos" (bg-orange-50, ícone BarChart)
+  - [x] Preview do relatório selecionado
+  - [x] Botões: Visualizar, Exportar PDF, Exportar Excel, Enviar Email
+  - [x] Histórico de relatórios gerados
 
 - [ ] **📄 RELATÓRIOS AVANÇADOS** (`/relatorios/avancados`)
   **Componentes da Página:**
@@ -914,23 +914,23 @@ Transformar o sistema atual em uma plataforma de gestão financeira pessoal foca
   - [ ] Agendamento de relatórios automáticos
 
 ### **🎯 Metas e Objetivos**
-- [ ] **📄 GESTÃO DE METAS** (`/metas`)
+- [x] **📄 GESTÃO DE METAS** (`/metas`)
   **Componentes da Página:**
-  - [ ] Header com botão "Nova Meta"
-  - [ ] Cards de metas ativas (grid responsivo):
-    - [ ] Título da meta
-    - [ ] Progress bar circular com %
-    - [ ] Valor atual vs objetivo
-    - [ ] Prazo restante
-    - [ ] Status (em andamento/concluída/atrasada)
-  - [ ] Seção "Metas Concluídas" (colapsável)
-  - [ ] Modal "Nova Meta" com:
-    - [ ] Tipo (receita, economia, KM, eficiência)
-    - [ ] Título personalizado
-    - [ ] Valor objetivo
-    - [ ] Período (diário/semanal/mensal)
-    - [ ] Data limite
-    - [ ] Notificações (checkbox)
+  - [x] Header com botão "Nova Meta"
+  - [x] Cards de metas ativas (grid responsivo):
+    - [x] Título da meta
+    - [x] Progress bar circular com %
+    - [x] Valor atual vs objetivo
+    - [x] Prazo restante
+    - [x] Status (em andamento/concluída/atrasada)
+  - [x] Seção "Metas Concluídas" (colapsável)
+  - [x] Modal "Nova Meta" com:
+    - [x] Tipo (receita, economia, KM, eficiência)
+    - [x] Título personalizado
+    - [x] Valor objetivo
+    - [x] Período (diário/semanal/mensal)
+    - [x] Data limite
+    - [x] Notificações (checkbox)
 
 - [ ] **📄 CONQUISTAS** (`/conquistas`)
   **Componentes da Página:**

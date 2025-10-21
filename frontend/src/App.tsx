@@ -26,6 +26,7 @@ import Manutencoes from './pages/Manutencoes'
 import ControleCombustivel from './pages/ControleCombustivel'
 import AnaliseRentabilidade from './pages/AnaliseRentabilidade'
 import Metas from './pages/Metas'
+import Conquistas from './pages/Conquistas'
 import Relatorios from './pages/Relatorios'
 import RelatoriosAvancados from './pages/RelatoriosAvancados'
 import Configuracoes from './pages/Configuracoes'
@@ -126,6 +127,7 @@ function AppRoutes() {
           <Route path="veiculos/:id/combustivel" element={<ControleCombustivel />} />
           <Route path="veiculos/:id/rentabilidade" element={<AnaliseRentabilidade />} />
           <Route path="metas" element={<Metas />} />
+          <Route path="conquistas" element={<Conquistas />} />
           <Route path="relatorios" element={<Relatorios />} />
           <Route path="relatorios/avancados" element={<RelatoriosAvancados />} />
           <Route path="configuracoes" element={<Configuracoes />} />
