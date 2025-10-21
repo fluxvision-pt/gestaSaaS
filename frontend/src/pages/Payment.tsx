@@ -15,6 +15,8 @@ import {
   CheckCircle
 } from 'lucide-react'
 import { toast } from 'sonner'
+import StripePaymentForm from '@/components/payments/StripePaymentForm'
+import { MercadoPagoPaymentForm } from '@/components/payments/MercadoPagoPaymentForm'
 
 // Componente Stepper
 interface StepperProps {
@@ -345,7 +347,18 @@ const Payment: React.FC = () => {
                   }`}
                 >
                   <CreditCard className="w-4 h-4 mr-2" />
-                  Cartão de Crédito
+                  Cartão (Stripe)
+                </button>
+                <button
+                  onClick={() => setActiveTab('mercadopago')}
+                  className={`flex-1 flex items-center justify-center py-3 px-4 rounded-lg text-sm font-medium transition-colors ${
+                    activeTab === 'mercadopago'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  Mercado Pago
                 </button>
                 <button
                   onClick={() => setActiveTab('pix')}
@@ -373,69 +386,49 @@ const Payment: React.FC = () => {
 
               {/* Conteúdo das Abas */}
               <div className="space-y-6">
-                {/* Cartão de Crédito */}
+                {/* Cartão de Crédito com Stripe */}
                 {activeTab === 'card' && (
                   <div className="space-y-4">
                     <h4 className="text-lg font-semibold text-gray-900">
-                      Dados do Cartão
+                      Pagamento com Cartão
                     </h4>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Número do Cartão
-                        </label>
-                        <input
-                          type="text"
-                          value={cardData.number}
-                          onChange={(e) => handleCardInputChange('number', e.target.value)}
-                          placeholder="1234 5678 9012 3456"
-                          maxLength={19}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                        />
-                      </div>
-                      
-                      <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Nome no Cartão
-                        </label>
-                        <input
-                          type="text"
-                          value={cardData.name}
-                          onChange={(e) => handleCardInputChange('name', e.target.value.toUpperCase())}
-                          placeholder="NOME COMO NO CARTÃO"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Validade
-                        </label>
-                        <input
-                          type="text"
-                          value={cardData.expiry}
-                          onChange={(e) => handleCardInputChange('expiry', e.target.value)}
-                          placeholder="MM/AA"
-                          maxLength={5}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          CVV
-                        </label>
-                        <input
-                          type="text"
-                          value={cardData.cvv}
-                          onChange={(e) => handleCardInputChange('cvv', e.target.value)}
-                          placeholder="123"
-                          maxLength={4}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                        />
-                      </div>
-                    </div>
+                    <StripePaymentForm
+                      amount={selectedPlan.price * 100} // Converter para centavos
+                      currency="brl"
+                      description={`Assinatura ${selectedPlan.name} - ${selectedPlan.billingCycle === 'monthly' ? 'Mensal' : 'Anual'}`}
+                      onSuccess={(paymentIntent) => {
+                        toast.success('Pagamento realizado com sucesso!')
+                        // Redirecionar para página de sucesso ou dashboard
+                        navigate('/dashboard')
+                      }}
+                      onError={(error) => {
+                        toast.error(`Erro no pagamento: ${error}`)
+                      }}
+                    />
+                  </div>
+                )}
+
+                {/* Mercado Pago */}
+                {activeTab === 'mercadopago' && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold text-gray-900">
+                      Pagamento via Mercado Pago
+                    </h4>
+                    
+                    <MercadoPagoPaymentForm
+                      amount={selectedPlan.price}
+                      currency="BRL"
+                      description={`Assinatura ${selectedPlan.name} - ${selectedPlan.billingCycle === 'monthly' ? 'Mensal' : 'Anual'}`}
+                      onSuccess={(payment) => {
+                        toast.success('Pagamento realizado com sucesso!')
+                        // Redirecionar para página de sucesso ou dashboard
+                        navigate('/dashboard')
+                      }}
+                      onError={(error) => {
+                        toast.error(`Erro no pagamento: ${error}`)
+                      }}
+                    />
                   </div>
                 )}
 

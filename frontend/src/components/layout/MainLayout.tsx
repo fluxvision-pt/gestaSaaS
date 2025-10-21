@@ -9,6 +9,8 @@ import {
   CreditCard,
   FileText,
   DollarSign,
+  TrendingUp,
+  TrendingDown,
   MapPin,
   BarChart3,
   Settings,
@@ -18,7 +20,8 @@ import {
   LogOut,
   User,
   Shield,
-  HelpCircle
+  HelpCircle,
+  Smartphone
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -47,7 +50,10 @@ export default function MainLayout() {
     { name: t('navigation.plans'), href: '/planos', icon: CreditCard, dataTour: 'plans' },
     { name: t('navigation.subscriptions'), href: '/assinaturas', icon: FileText, dataTour: 'subscriptions' },
     { name: 'Pagamentos', href: '/pagamentos', icon: DollarSign, dataTour: 'payments' },
+    { name: 'Gateways', href: '/gateways', icon: Smartphone, dataTour: 'gateways' },
     { name: 'Financeiro', href: '/financeiro', icon: DollarSign, dataTour: 'financial' },
+    { name: 'Receitas', href: '/receitas', icon: TrendingUp, dataTour: 'receitas' },
+    { name: 'Despesas', href: '/despesas', icon: TrendingDown, dataTour: 'despesas' },
     { name: 'KM Tracking', href: '/km', icon: MapPin, dataTour: 'km' },
     { name: 'Relatórios', href: '/relatorios', icon: BarChart3, dataTour: 'reports' },
     { name: t('navigation.settings'), href: '/configuracoes', icon: Settings, dataTour: 'settings' },

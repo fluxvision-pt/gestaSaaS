@@ -239,15 +239,42 @@ export async function runInitialSeed(dataSource: DataSource) {
   }
   console.log(`✅ ${configuracoesCreated.length} configurações globais criadas com sucesso`);
 
-  // 6. Criar Gateway de Transferência
-  console.log('💳 Criando gateway de transferência...');
+  // 6. Criar Gateways de Pagamento
+  console.log('💳 Criando gateways de pagamento...');
+  
+  // Gateway Stripe
+  const gatewayStripe = gatewayRepository.create({
+    nome: 'Stripe',
+    tipo: TipoGateway.ONLINE,
+    ativo: false, // Inativo até ser configurado
+  });
+  await gatewayRepository.save(gatewayStripe);
+  
+  // Gateway Mercado Pago
+  const gatewayMercadoPago = gatewayRepository.create({
+    nome: 'Mercado Pago',
+    tipo: TipoGateway.ONLINE,
+    ativo: false, // Inativo até ser configurado
+  });
+  await gatewayRepository.save(gatewayMercadoPago);
+  
+  // Gateway PIX
+  const gatewayPix = gatewayRepository.create({
+    nome: 'PIX',
+    tipo: TipoGateway.OFFLINE,
+    ativo: true,
+  });
+  await gatewayRepository.save(gatewayPix);
+  
+  // Gateway Transferência Bancária
   const gatewayTransferencia = gatewayRepository.create({
     nome: 'Transferência Bancária',
     tipo: TipoGateway.OFFLINE,
     ativo: true,
   });
   await gatewayRepository.save(gatewayTransferencia);
-  console.log('✅ Gateway de transferência criado com sucesso');
+  
+  console.log('✅ Gateways de pagamento criados com sucesso');
 
   console.log('🎉 Seeds iniciais executados com sucesso!');
   console.log('');
@@ -256,5 +283,5 @@ export async function runInitialSeed(dataSource: DataSource) {
   console.log(`📋 Planos: ${savedPlanoGratuito.nome}, ${savedPlanoBasico.nome}, ${savedPlanoProfissional.nome}, ${savedPlanoEmpresarial.nome}`);
   console.log(`🔧 Recursos: ${recursosCreated.length} recursos criados`);
   console.log(`⚙️ Configurações: ${configuracoesCreated.length} configurações globais criadas`);
-  console.log(`💳 Gateway: ${gatewayTransferencia.nome}`);
+  console.log(`💳 Gateways: ${gatewayStripe.nome}, ${gatewayMercadoPago.nome}, ${gatewayPix.nome}, ${gatewayTransferencia.nome}`);
 }

@@ -16,7 +16,10 @@ import Empresas from './pages/Empresas'
 import Planos from './pages/Planos'
 import Assinaturas from './pages/Assinaturas'
 import Pagamentos from './pages/Pagamentos'
+import Gateways from './pages/Gateways'
 import Financeiro from './pages/Financeiro'
+import Receitas from './pages/Receitas'
+import Despesas from './pages/Despesas'
 import Km from './pages/Km'
 import Relatorios from './pages/Relatorios'
 import RelatoriosAvancados from './pages/RelatoriosAvancados'
@@ -108,7 +111,10 @@ function AppRoutes() {
           <Route path="planos" element={<Planos />} />
           <Route path="assinaturas" element={<Assinaturas />} />
           <Route path="pagamentos" element={<Pagamentos />} />
+          <Route path="gateways" element={<Gateways />} />
           <Route path="financeiro" element={<Financeiro />} />
+          <Route path="receitas" element={<Receitas />} />
+          <Route path="despesas" element={<Despesas />} />
           <Route path="km" element={<Km />} />
           <Route path="relatorios" element={<Relatorios />} />
           <Route path="relatorios/avancados" element={<RelatoriosAvancados />} />

@@ -4,13 +4,18 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import * as compression from 'compression';
+import { json } from 'express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   app.useLogger(['log', 'error', 'warn', 'debug', 'verbose']);
 
   app.use(helmet());
   app.use(compression());
+  
+  // Configurar middleware para raw body nos webhooks do Stripe
+  app.use('/api/webhooks/stripe', json({ verify: (req: any, res, buf) => { req.rawBody = buf; } }));
+  
   app.useGlobalPipes(new ValidationPipe());
 
   // 🚀 Prefixo global para todas as rotas da API

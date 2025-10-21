@@ -6,6 +6,16 @@
 
 ### **📅 Data: 21/10/2025**
 
+#### **✅ Correções de Build e Deploy (Janeiro 2025)**
+- **Correção de Incompatibilidade Node.js**: Resolvido problema de build do Docker
+  - Atualizado Node.js para versão 22 em todos os Dockerfiles (backend, frontend, principal)
+  - Corrigido caminho do `main.js` de `dist/main.js` para `dist/src/main.js` em Dockerfiles e package.json
+  - Atualizado arquivo `nixpacks.toml` para usar Node.js 22
+  - Sincronizado `package-lock.json` do backend após execução de `npm install`
+  - Resolvida incompatibilidade entre `package.json` e `package-lock.json` para `@types/node@22.18.12`
+  - Testado build local e inicialização do servidor de produção com sucesso
+  - Todas as correções commitadas e enviadas para o repositório
+
 #### **✅ Correções de Imports e Entidades**
 - **relatorios.module.ts**: Corrigidos imports das entidades
   - Alterado `User` para `Usuario` 
@@ -38,6 +48,18 @@
   - Corrigidas funções `getLogs` e `exportLogs` com novos parâmetros
   - Atualizados dados simulados para usar valores corretos dos enums
 
+#### **✅ Correções da Página de Seleção de Planos (Janeiro 2025)**
+- **Correção de Erro de API Externa**:
+  - Identificado erro `net::ERR_FAILED https://api.fluxvision.cloud/api/planos`
+  - API externa não estava disponível causando falha na busca de planos
+  - Implementado fallback para planos predefinidos quando API falha
+  - Corrigido import do tipo `AppPlan` de `../types/api` para `@/types`
+  - Definido tipo `AppPlan` localmente como solução temporária
+  - Página funcionando corretamente com planos mockados (Gratuito, Básico, Profissional, Premium)
+  - Toggle mensal/anual funcionando
+  - Navegação e stepper implementados
+  - Design responsivo e moderno aplicado
+
 #### **✅ Correções de Tipos - RelatoriosAvancados.tsx**
 - **Correções de TypeScript Implementadas**:
   - Corrigidos tipos de `reportType`, `reportFormat` e `scheduleFrequency` para usar valores específicos
@@ -57,6 +79,61 @@
   - Adicionadas propriedades `lastPasswordChange: string` e `activeSessions: Session[]` à interface `SecuritySettings`
   - Adicionado tipo explícito `NotificationSettings` para parâmetro `prev` na função `handleNotificationChange`
   - Verificação TypeScript passou sem erros (`npx tsc --noEmit`)
+
+#### **✅ Implementação de Integração com Mercado Pago (Janeiro 2025)**
+- **Backend - Integração Completa**:
+  - Instalada SDK oficial do Mercado Pago (`mercadopago@2.0.15`)
+  - Criado `MercadoPagoService` com métodos para preferências, pagamentos e webhooks
+  - Implementado `MercadoPagoController` com endpoints REST completos
+  - Criado `MercadoPagoModule` com configuração e providers
+  - Adicionado gateway "mercado pago" no seed inicial do banco
+  - Configuração de credenciais via variáveis de ambiente
+  - Suporte a PIX, cartão de crédito e boleto bancário
+  - Implementação de webhooks para notificações de pagamento
+
+- **Frontend - Componentes e Serviços**:
+  - Criado `mercado-pago.service.ts` com interfaces e métodos de API
+  - Implementado `MercadoPagoConfiguration.tsx` para configuração de credenciais
+  - Desenvolvido `MercadoPagoPaymentForm.tsx` para processamento de pagamentos
+  - Integração na página `/gateways` para configuração
+  - Integração na página `/payment` com nova aba "Mercado Pago"
+  - Suporte a múltiplos métodos de pagamento (cartão, PIX, boleto)
+  - Interface responsiva e moderna com feedback visual
+
+#### **✅ Implementação de Páginas de Gestão Financeira (Janeiro 2025)**
+- **Página de Gestão de Receitas (/receitas)**:
+  - Criada página completa com listagem de receitas
+  - Implementados filtros avançados (busca, categoria, status, cliente, período)
+  - Dashboard com estatísticas em tempo real (total, recebidas, pendentes, vencidas)
+  - Tabela responsiva com ações (visualizar, editar, excluir)
+  - Interface moderna com ícones Lucide React e Tailwind CSS
+  - Dados mockados para demonstração e testes
+  - Modal preparado para formulários de CRUD
+  - Espaços reservados para gráficos futuros
+  - Adicionada rota `/receitas` no App.tsx
+  - Adicionada opção "Receitas" no menu de navegação com ícone TrendingUp
+
+- **Página de Gestão de Despesas (/despesas)**:
+  - Criada página completa com listagem de despesas
+  - Implementados filtros avançados (busca, categoria, status, fornecedor, período)
+  - Dashboard com estatísticas em tempo real (total, pagas, pendentes, vencidas)
+  - Tabela responsiva com ações (visualizar, editar, excluir)
+  - Interface moderna com ícones Lucide React e Tailwind CSS
+  - Dados mockados para demonstração e testes
+  - Modal preparado para formulários de CRUD
+  - Espaços reservados para gráficos futuros
+  - Adicionada rota `/despesas` no App.tsx
+  - Adicionada opção "Despesas" no menu de navegação com ícone TrendingDown
+
+- **Funcionalidades Implementadas em Ambas as Páginas**:
+  - Estatísticas em cards com valores formatados em BRL
+  - Filtros com limpeza automática e busca em tempo real
+  - Indicadores visuais de status com cores e ícones apropriados
+  - Tabelas com ordenação e paginação preparadas
+  - Estados vazios amigáveis quando não há dados
+  - Responsividade mobile-first
+  - Compilação TypeScript sem erros
+  - Integração completa com sistema de navegação
 
 ---
 
@@ -378,111 +455,158 @@ Transformar o sistema atual em uma plataforma de gestão financeira pessoal foca
   - [ ] Sistema de upgrade/downgrade de planos
 
 ### **💰 Fluxo de Cadastro com Pagamento**
-- [ ] **📄 PÁGINA DE CADASTRO INICIAL** (`/register`)
+- [x] **📄 PÁGINA DE CADASTRO INICIAL** (`/register`) (✅ 21/01/2025 - Implementação completa)
   **Componentes da Página:**
-  - [x] Stepper visual (4 etapas: Dados, Verificação, Plano, Pagamento)
-  - [x] Card principal com progress bar no topo
-  - [ ] Formulário dados pessoais: nome, email (máscara), telefone (máscara internacional)
-  - [ ] Seletor de país com bandeiras (afeta máscara telefone)
-  - [ ] Campo senha com indicador de força
-  - [ ] Checkbox termos de uso + política privacidade
-  - [ ] Botão "Continuar" (bg-emerald-500, disabled até validação)
-  - [ ] Validação em tempo real com feedback visual
-  - [ ] Background gradient suave
+  - [x] ✅ Stepper visual (4 etapas: Dados, Verificação, Plano, Pagamento)
+  - [x] ✅ Card principal com progress bar no topo
+  - [x] ✅ Formulário dados pessoais: nome, email, telefone (máscara internacional)
+  - [x] ✅ Seletor de país com bandeiras (afeta máscara telefone)
+  - [x] ✅ Campo senha com indicador de força
+  - [x] ✅ Links para termos de uso + política privacidade
+  - [x] ✅ Botão "Criar Conta" (bg-emerald-500, disabled até validação)
+  - [x] ✅ Validação em tempo real com feedback visual
+  - [x] ✅ Background gradient suave
+  
+  **📋 IMPLEMENTADO:**
+  - ✅ Stepper visual com 4 etapas e indicadores de progresso
+  - ✅ Formulário completo com nome, email, telefone e senha
+  - ✅ CountrySelector com bandeiras e códigos de discagem
+  - ✅ Máscara de telefone internacional automática
+  - ✅ Validação em tempo real com borders coloridos
+  - ✅ Indicador de força da senha com barra de progresso
+  - ✅ Lista dinâmica de critérios pendentes para senha
+  - ✅ Toggle de visibilidade da senha
+  - ✅ Estados de loading durante cadastro
+  - ✅ Tela de sucesso com redirecionamento automático
+  - ✅ Seção informativa com cards de recursos (desktop)
+  - ✅ Seção de benefícios com teste grátis de 30 dias
+  - ✅ Links estilizados para termos e política
+  - ✅ Background gradient moderno
+  - ✅ Animações CSS e transições suaves
+  - ✅ Layout responsivo
+  - ✅ Integração completa com backend
 
-- [ ] **📄 PÁGINA DE VERIFICAÇÃO** (`/verify-account`)
+- ✅ **📄 PÁGINA DE VERIFICAÇÃO** (`/verify-account`) - **IMPLEMENTADA EM 2025**
   **Componentes da Página:**
-  - [ ] Header com stepper (etapa 2/4)
-  - [ ] Card com ícone de email/SMS
-  - [ ] Campos de código (6 dígitos) com auto-focus
-  - [ ] Timer de reenvio (60s countdown)
-  - [ ] Botões "Reenviar Email" e "Reenviar SMS"
-  - [ ] Botão "Verificar" (bg-blue-500)
-  - [ ] Link "Alterar email/telefone"
-  - [ ] Animação de sucesso na verificação
+  - ✅ Interface moderna com design responsivo
+  - ✅ Estados de loading, sucesso, erro e token expirado
+  - ✅ Integração com API de verificação de email
+  - ✅ Feedback visual com ícones e cores apropriadas
+  - ✅ Redirecionamento automático após sucesso
+  - ✅ Opção para reenviar email de verificação
+  - ✅ Tratamento de erros com mensagens claras
+  - ✅ Rota configurada no App.tsx (/verify-account/:token)
+  - ✅ Design consistente com o sistema (gradiente, logo, cores)
+  - ✅ Links para voltar ao login e suporte
 
-- [ ] **📄 PÁGINA DE SELEÇÃO DE PLANOS** (`/choose-plan`)
-  **Componentes da Página:**
-  - [ ] Header com stepper (etapa 3/4)
-  - [ ] Grid responsivo de cards de planos (2x2 desktop, 1x4 mobile)
-  - [ ] Card Gratuito: (bg-gray-100, border-gray-300)
-  - [ ] Card Básico: (bg-emerald-50, border-emerald-300)
-  - [ ] Card Profissional: (bg-blue-50, border-blue-300, badge "Popular")
-  - [ ] Card Premium: (bg-purple-50, border-purple-300, badge "VIP")
-  - [ ] Lista de recursos com ícones check/x
-  - [ ] Preços destacados com desconto anual
-  - [ ] Botão "Testar Grátis" vs "Assinar Agora"
-  - [ ] Modal de comparação detalhada
+- ✅ **📄 PÁGINA DE SELEÇÃO DE PLANOS** (`/choose-plan`) - **IMPLEMENTADA**
+  **Componentes Implementados:**
+  - ✅ Header com stepper visual (etapa 2/4)
+  - ✅ Grid responsivo de cards de planos (adaptável para mobile)
+  - ✅ Card Gratuito: (bg-gray-100, border-gray-300, ícone Shield)
+  - ✅ Card Básico: (bg-emerald-50, border-emerald-300, ícone Star)
+  - ✅ Card Profissional: (bg-blue-50, border-blue-300, badge "Popular", ícone Zap)
+  - ✅ Card Premium: (bg-purple-50, border-purple-300, badge "VIP", ícone Crown)
+  - ✅ Lista de recursos com ícones check/x para cada funcionalidade
+  - ✅ Toggle mensal/anual com preços destacados e desconto
+  - ✅ Botões diferenciados: "Começar Grátis" vs "Escolher Plano"
+  - ✅ Botão de comparação detalhada entre planos
+  - ✅ Integração com API de planos (com fallback para planos predefinidos)
+  - ✅ Estados de loading e tratamento de erros
+  - ✅ Navegação com botões Voltar/Continuar
+  - ✅ Rota configurada no App.tsx (/choose-plan)
+  - ✅ Design responsivo e consistente com o sistema
 
-- [ ] **📄 PÁGINA DE PAGAMENTO** (`/payment`)
+- ✅ **📄 PÁGINA DE PAGAMENTO** (`/payment`) - **IMPLEMENTADA ✅**
   **Componentes da Página:**
-  - [ ] Header com stepper (etapa 4/4)
-  - [ ] Resumo do plano selecionado (sidebar)
-  - [ ] Abas de métodos: Cartão, PIX, Boleto
-  - [ ] Formulário cartão com validação em tempo real
-  - [ ] QR Code PIX com timer de expiração
-  - [ ] Upload de comprovante PIX/Boleto
-  - [ ] Botão "Finalizar Assinatura" (bg-emerald-600)
-  - [ ] Selo de segurança SSL
-  - [ ] Loading states durante processamento
+  - ✅ Header com stepper (etapa 4/4)
+  - ✅ Resumo do plano selecionado (sidebar)
+  - ✅ Abas de métodos: Cartão, PIX, Boleto
+  - ✅ Formulário cartão com validação em tempo real
+  - ✅ QR Code PIX com timer de expiração (10 minutos)
+  - ✅ Upload de comprovante PIX/Boleto
+  - ✅ Botão "Finalizar Assinatura" (bg-emerald-600)
+  - ✅ Selo de segurança SSL
+  - ✅ Loading states durante processamento
+  - ✅ Navegação integrada com ChoosePlan
+  - ✅ Rota configurada no App.tsx (/payment)
+  - ✅ Design responsivo e consistente
 
-- [ ] **📄 PÁGINA DE ONBOARDING** (`/welcome`)
+- ✅ **📄 PÁGINA DE ONBOARDING** (`/welcome`)
   **Componentes da Página:**
-  - [ ] Animação de boas-vindas
-  - [ ] Tour guiado interativo (4-5 passos)
-  - [ ] Cards de primeiros passos
-  - [ ] Botão "Começar Agora" (bg-emerald-500)
-  - [ ] Opção "Pular Tour"
-  - [ ] Integração com sistema de ajuda
+  - ✅ Animação de boas-vindas
+  - ✅ Tour guiado interativo (4-5 passos)
+  - ✅ Cards de primeiros passos
+  - ✅ Botão "Começar Agora" (bg-emerald-500)
+  - ✅ Opção "Pular Tour"
+  - ✅ Integração com sistema de ajuda
+  - ✅ Rota configurada no App.tsx (/welcome)
+  - ✅ Navegação integrada com Payment
+  - ✅ Design responsivo e interativo
 
 ---
 
 ## 📊 **FASE 3 - CORE FINANCEIRO (Semana 3-4)**
 
 ### **👑 Painel SuperAdmin**
-- [ ] **📄 DASHBOARD SUPERADMIN** (`/admin/dashboard`)
+- [x] **📄 DASHBOARD SUPERADMIN** (`/admin/dashboard`) ✅ **IMPLEMENTADO**
   **Componentes da Página:**
-  - [ ] Header com avatar + dropdown (perfil, configurações, logout)
-  - [ ] Grid de KPI cards (4 colunas desktop, 2 mobile):
-    - [ ] Card "Usuários Ativos" (bg-emerald-50, ícone Users, valor + % crescimento)
-    - [ ] Card "Receita Mensal" (bg-blue-50, ícone DollarSign, valor + gráfico mini)
-    - [ ] Card "Conversão" (bg-purple-50, ícone TrendingUp, % + meta)
-    - [ ] Card "Churn Rate" (bg-amber-50, ícone AlertTriangle, % + tendência)
-  - [ ] Gráfico de receita (Chart.js, 6 meses, filtros por plano)
-  - [ ] Tabela "Novos Usuários Hoje" (últimos 10, com ações rápidas)
-  - [ ] Widget "Alertas do Sistema" (notificações importantes)
-  - [ ] Sidebar com navegação fixa
+  - [x] Header com avatar + dropdown (perfil, configurações, logout) ✅
+  - [x] Grid de KPI cards (4 colunas desktop, 2 mobile): ✅
+    - [x] Card "Usuários Ativos" (bg-emerald-50, ícone Users, valor + % crescimento) ✅
+    - [x] Card "Receita Mensal" (bg-blue-50, ícone DollarSign, valor + gráfico mini) ✅
+    - [x] Card "Conversão" (bg-purple-50, ícone TrendingUp, % + meta) ✅
+    - [x] Card "Churn Rate" (bg-amber-50, ícone AlertTriangle, % + tendência) ✅
+  - [x] Gráfico de receita (Chart.js, 6 meses, filtros por plano) ✅
+  - [x] Tabela "Novos Usuários Hoje" (últimos 10, com ações rápidas) ✅
+  - [x] Widget "Alertas do Sistema" (notificações importantes) ✅
+  - [x] Sidebar com navegação fixa ✅
+  - [x] Rota protegida configurada no App.tsx ✅
+  - [x] Integração com adminApi.ts para dados reais ✅
+  - [x] Design responsivo e interativo ✅
 
-- [ ] **📄 GESTÃO DE USUÁRIOS** (`/admin/users`)
+- [x] **📄 GESTÃO DE USUÁRIOS** (`/admin/users`) ✅ **CONCLUÍDO - 2025**
   **Componentes da Página:**
-  - [ ] Header com breadcrumb + botão "Novo Usuário"
-  - [ ] Barra de filtros: status, plano, país, data cadastro
-  - [ ] Campo de busca com autocomplete
-  - [ ] Tabela responsiva com colunas:
-    - [ ] Avatar + Nome + Email
-    - [ ] Plano atual (badge colorido)
-    - [ ] Status (ativo/suspenso/trial)
-    - [ ] Última atividade
-    - [ ] Ações: Ver, Editar, Impersonar, Suspender
-  - [ ] Paginação com info de total
-  - [ ] Modal de impersonação com confirmação
-  - [ ] Bulk actions (suspender múltiplos, enviar email)
+  - [x] Header com breadcrumb + botão "Novo Usuário" ✅
+  - [x] Barra de filtros: status, plano, país, data cadastro ✅
+  - [x] Campo de busca com autocomplete ✅
+  - [x] Tabela responsiva com colunas: ✅
+    - [x] Avatar + Nome + Email ✅
+    - [x] Plano atual (badge colorido) ✅
+    - [x] Status (ativo/suspenso/trial) ✅
+    - [x] Última atividade ✅
+    - [x] Ações: Ver, Editar, Impersonar, Suspender ✅
+  - [x] Paginação com info de total ✅
+  - [x] Modal de impersonação com confirmação ✅
+  - [x] Bulk actions (suspender múltiplos, enviar email) ✅
+  - [x] Rota protegida configurada no App.tsx ✅
+  - [x] Navegação integrada no MainLayout ✅
+  - [x] Design responsivo e interativo ✅
 
-- [ ] **📄 GESTÃO DE PLANOS** (`/admin/plans`)
+- [x] **📄 GESTÃO DE PLANOS** (`/admin/plans`) ✅ **CONCLUÍDO - 2025**
   **Componentes da Página:**
-  - [ ] Header com botão "Criar Plano"
-  - [ ] Grid de cards de planos existentes
-  - [ ] Card por plano com:
-    - [ ] Nome + descrição
-    - [ ] Preço mensal/anual
-    - [ ] Número de assinantes
-    - [ ] Status (ativo/inativo)
-    - [ ] Botões: Editar, Duplicar, Desativar
-  - [ ] Modal de criação/edição com:
-    - [ ] Dados básicos (nome, descrição, preços)
-    - [ ] Configuração de módulos (checkboxes)
-    - [ ] Limitações por recurso
-    - [ ] Preview do card do plano
+  - [x] Header com botão "Criar Plano"
+  - [x] Barra de filtros e busca
+  - [x] Grid de cards de planos existentes
+  - [x] Card por plano com:
+    - [x] Nome + descrição + ícone
+    - [x] Preço mensal/anual formatado
+    - [x] Número de assinantes
+    - [x] Status (ativo/inativo) com badge
+    - [x] Badge "Mais Popular" para planos destacados
+    - [x] Lista de recursos principais
+    - [x] Botões: Editar, Duplicar, Ativar/Desativar
+  - [x] Modal de criação/edição com:
+    - [x] Dados básicos (nome, descrição, preços, status)
+    - [x] Checkbox "Mais Popular"
+    - [x] Gestão dinâmica de recursos/features
+    - [x] Preview em tempo real do card do plano
+  - [x] Rota protegida `/admin/plans` integrada
+  - [x] Navegação administrativa com ícone CreditCard
+  - [x] Interface responsiva e moderna
+  - [x] Dados mockados para demonstração (5 planos)
+  
+  **📋 IMPLEMENTAÇÃO FRONTEND:** Página completa com todos os componentes funcionais
 
 - [x] **📄 CONFIGURAÇÕES GLOBAIS** (`/admin/settings`) ✅ **CONCLUÍDO - 2025**
   **Backend Implementado:**

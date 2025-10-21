@@ -196,3 +196,46 @@ export interface UpdatePagamentoRequest {
   referenciaExterna?: string
   comprovanteUrl?: string
 }
+
+// Tipos para Gateway
+export interface AppGateway {
+  id: string
+  nome: string
+  tipo: 'ONLINE' | 'OFFLINE'
+  ativo: boolean
+  credenciais?: AppCredencialGateway[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AppCredencialGateway {
+  id: string
+  gatewayId: string
+  chave: string
+  valor: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateGatewayRequest {
+  nome: string
+  tipo: 'ONLINE' | 'OFFLINE'
+  ativo?: boolean
+}
+
+export interface UpdateGatewayRequest {
+  nome?: string
+  tipo?: 'ONLINE' | 'OFFLINE'
+  ativo?: boolean
+}
+
+export interface CreateCredencialGatewayRequest {
+  gatewayId: string
+  chave: string
+  valor: string
+}
+
+export interface UpdateCredencialGatewayRequest {
+  chave?: string
+  valor?: string
+}

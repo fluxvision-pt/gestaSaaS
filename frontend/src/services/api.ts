@@ -17,7 +17,13 @@ import type {
   UpdateSubscriptionRequest,
   AppPagamento,
   CreatePagamentoRequest,
-  UpdatePagamentoRequest
+  UpdatePagamentoRequest,
+  AppGateway,
+  AppCredencialGateway,
+  CreateGatewayRequest,
+  UpdateGatewayRequest,
+  CreateCredencialGatewayRequest,
+  UpdateCredencialGatewayRequest
 } from '@/types'
 
 // 🚀 Configuração da URL base da API
@@ -1186,6 +1192,98 @@ export const dashboardFinanceiroService = {
 }
 
 // Exportações explícitas para garantir compatibilidade
+// 🔧 Gateway Service
+export const gatewayService = {
+  getGateways: async (): Promise<AppGateway[]> => {
+    try {
+      const response = await api.get('/gateways')
+      return response.data
+    } catch (error: any) {
+      console.error('Erro ao buscar gateways:', error)
+      throw new Error(error.response?.data?.message || 'Erro ao buscar gateways')
+    }
+  },
+
+  getGatewayById: async (id: string): Promise<AppGateway> => {
+    try {
+      const response = await api.get(`/gateways/${id}`)
+      return response.data
+    } catch (error: any) {
+      console.error('Erro ao buscar gateway:', error)
+      throw new Error(error.response?.data?.message || 'Erro ao buscar gateway')
+    }
+  },
+
+  createGateway: async (data: CreateGatewayRequest): Promise<AppGateway> => {
+    try {
+      const response = await api.post('/gateways', data)
+      return response.data
+    } catch (error: any) {
+      console.error('Erro ao criar gateway:', error)
+      throw new Error(error.response?.data?.message || 'Erro ao criar gateway')
+    }
+  },
+
+  updateGateway: async (id: string, data: UpdateGatewayRequest): Promise<AppGateway> => {
+    try {
+      const response = await api.patch(`/gateways/${id}`, data)
+      return response.data
+    } catch (error: any) {
+      console.error('Erro ao atualizar gateway:', error)
+      throw new Error(error.response?.data?.message || 'Erro ao atualizar gateway')
+    }
+  },
+
+  deleteGateway: async (id: string): Promise<void> => {
+    try {
+      await api.delete(`/gateways/${id}`)
+    } catch (error: any) {
+      console.error('Erro ao deletar gateway:', error)
+      throw new Error(error.response?.data?.message || 'Erro ao deletar gateway')
+    }
+  },
+
+  // Credenciais de Gateway
+  getCredenciais: async (gatewayId: string): Promise<AppCredencialGateway[]> => {
+    try {
+      const response = await api.get(`/gateways/${gatewayId}/credenciais`)
+      return response.data
+    } catch (error: any) {
+      console.error('Erro ao buscar credenciais:', error)
+      throw new Error(error.response?.data?.message || 'Erro ao buscar credenciais')
+    }
+  },
+
+  createCredencial: async (data: CreateCredencialGatewayRequest): Promise<AppCredencialGateway> => {
+    try {
+      const response = await api.post('/gateways/credenciais', data)
+      return response.data
+    } catch (error: any) {
+      console.error('Erro ao criar credencial:', error)
+      throw new Error(error.response?.data?.message || 'Erro ao criar credencial')
+    }
+  },
+
+  updateCredencial: async (id: string, data: UpdateCredencialGatewayRequest): Promise<AppCredencialGateway> => {
+    try {
+      const response = await api.patch(`/gateways/credenciais/${id}`, data)
+      return response.data
+    } catch (error: any) {
+      console.error('Erro ao atualizar credencial:', error)
+      throw new Error(error.response?.data?.message || 'Erro ao atualizar credencial')
+    }
+  },
+
+  deleteCredencial: async (id: string): Promise<void> => {
+    try {
+      await api.delete(`/gateways/credenciais/${id}`)
+    } catch (error: any) {
+      console.error('Erro ao deletar credencial:', error)
+      throw new Error(error.response?.data?.message || 'Erro ao deletar credencial')
+    }
+  }
+}
+
 export type { DashboardData, RelatorioAgendado, RelatorioRequest, RelatorioResponse, EstatisticasRelatorio, DashboardFinanceiroData, GraficoReceitasDespesas }
 
 export default api
