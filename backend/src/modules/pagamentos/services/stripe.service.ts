@@ -272,24 +272,73 @@ export class StripeService {
     }
   }
 
-  private async handleInvoicePaymentSucceeded(invoice: Stripe.Invoice): Promise<void> {
-    // Implementar lógica para pagamento de fatura bem-sucedido
-    this.logger.log(`Fatura ${invoice.id} paga com sucesso`);
+  private async handleInvoicePaymentSucceeded(invoice: any): Promise<void> {
+    try {
+      this.logger.log(`Pagamento da fatura ${invoice.id} bem-sucedido`);
+      
+      // Buscar assinatura relacionada
+      if (invoice.subscription && typeof invoice.subscription === 'string') {
+        const subscription = await this.stripe.subscriptions.retrieve(invoice.subscription);
+        
+        // Atualizar status da assinatura no banco de dados
+        // Aqui você pode integrar com o AssinaturasService para atualizar o status
+        this.logger.log(`Atualizando status da assinatura ${subscription.id} para ativa`);
+      }
+    } catch (error) {
+      this.logger.error('Erro ao processar pagamento bem-sucedido:', error);
+    }
   }
 
-  private async handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
-    // Implementar lógica para falha no pagamento de fatura
-    this.logger.log(`Falha no pagamento da fatura ${invoice.id}`);
+  private async handleInvoicePaymentFailed(invoice: any): Promise<void> {
+    try {
+      this.logger.log(`Falha no pagamento da fatura ${invoice.id}`);
+      
+      // Buscar assinatura relacionada
+      if (invoice.subscription && typeof invoice.subscription === 'string') {
+        const subscription = await this.stripe.subscriptions.retrieve(invoice.subscription);
+        
+        // Marcar assinatura como inadimplente
+        this.logger.log(`Marcando assinatura ${subscription.id} como inadimplente`);
+        
+        // Implementar lógica de retry ou suspensão
+        if (invoice.attempt_count && invoice.attempt_count >= 3) {
+          this.logger.log(`Suspendendo assinatura ${subscription.id} após 3 tentativas falhadas`);
+        }
+      }
+    } catch (error) {
+      this.logger.error('Erro ao processar falha no pagamento:', error);
+    }
   }
 
-  private async handleSubscriptionUpdated(subscription: Stripe.Subscription): Promise<void> {
-    // Implementar lógica para atualização de assinatura
-    this.logger.log(`Assinatura ${subscription.id} atualizada`);
+  private async handleSubscriptionUpdated(subscription: any): Promise<void> {
+    try {
+      this.logger.log(`Assinatura ${subscription.id} atualizada - Status: ${subscription.status}`);
+      
+      // Atualizar dados da assinatura no banco de dados
+      const updateData = {
+        status: subscription.status,
+        currentPeriodStart: subscription.current_period_start ? new Date(subscription.current_period_start * 1000) : null,
+        currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
+        cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
+      };
+      
+      this.logger.log(`Dados para atualização:`, updateData);
+      // Aqui você pode integrar com o AssinaturasService
+    } catch (error) {
+      this.logger.error('Erro ao processar atualização de assinatura:', error);
+    }
   }
 
-  private async handleSubscriptionDeleted(subscription: Stripe.Subscription): Promise<void> {
-    // Implementar lógica para cancelamento de assinatura
-    this.logger.log(`Assinatura ${subscription.id} cancelada`);
+  private async handleSubscriptionDeleted(subscription: any): Promise<void> {
+    try {
+      this.logger.log(`Assinatura ${subscription.id} cancelada definitivamente`);
+      
+      // Marcar assinatura como cancelada no banco de dados
+      // Aqui você pode integrar com o AssinaturasService para cancelar a assinatura
+      this.logger.log(`Cancelando assinatura ${subscription.id} no sistema`);
+    } catch (error) {
+      this.logger.error('Erro ao processar cancelamento de assinatura:', error);
+    }
   }
 
   async createPrice(

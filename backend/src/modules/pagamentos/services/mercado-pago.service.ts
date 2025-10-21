@@ -151,7 +151,8 @@ export class MercadoPagoService {
       const preference = new Preference(client)
       
       const preferenceData = {
-        items: data.items.map(item => ({
+        items: data.items.map((item, index) => ({
+          id: `item_${index}`,
           title: item.title,
           quantity: item.quantity,
           unit_price: item.unit_price,
@@ -161,13 +162,25 @@ export class MercadoPagoService {
         notification_url: data.notification_url,
         back_urls: data.back_urls,
         auto_return: data.auto_return || 'approved',
-        payer: data.payer
+        payer: {
+          ...data.payer,
+          address: data.payer?.address ? {
+            ...data.payer.address,
+            street_number: data.payer.address.street_number?.toString()
+          } : undefined
+        }
       }
 
       const response = await preference.create({ body: preferenceData })
       
       this.logger.log(`Preferência criada: ${response.id}`)
-      return response as MercadoPagoPreference
+      return {
+        preference_id: response.id,
+        init_point: response.init_point,
+        sandbox_init_point: response.sandbox_init_point,
+        processing_mode: 'aggregator',
+        merchant_account_id: null
+      } as MercadoPagoPreference
 
     } catch (error) {
       this.logger.error('Erro ao criar preferência:', error)

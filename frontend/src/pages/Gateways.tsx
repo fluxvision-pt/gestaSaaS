@@ -594,7 +594,10 @@ export default function Gateways() {
                         <>
                           <div>
                             <h3 className="text-lg font-medium mb-2">Configuração do Stripe</h3>
-                            <StripeConfiguration gatewayId={selectedGateway.id} />
+                            <StripeConfiguration 
+                              gateway={selectedGateway} 
+                              onUpdate={refetchGateways}
+                            />
                           </div>
                           <Separator />
                         </>

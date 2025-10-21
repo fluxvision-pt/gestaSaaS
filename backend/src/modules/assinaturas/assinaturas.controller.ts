@@ -11,18 +11,24 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AssinaturasService } from './assinaturas.service';
+import { BillingService } from './billing.service';
 import { CreateAssinaturaDto } from './dto/create-assinatura.dto';
 import { UpdateAssinaturaDto } from './dto/update-assinatura.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { Usuario } from '../usuarios/entities/usuario.entity';
+import { Usuario, PerfilUsuario } from '../usuarios/entities/usuario.entity';
 
 @ApiTags('assinaturas')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('assinaturas')
 export class AssinaturasController {
-  constructor(private readonly assinaturasService: AssinaturasService) {}
+  constructor(
+    private readonly assinaturasService: AssinaturasService,
+    private readonly billingService: BillingService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Criar uma nova assinatura' })
@@ -69,5 +75,29 @@ export class AssinaturasController {
   @ApiResponse({ status: 404, description: 'Assinatura não encontrada.' })
   cancel(@Param('id') id: string, @CurrentUser() user: Usuario) {
     return this.assinaturasService.cancel(id, user);
+  }
+
+  @Post(':id/cobranca-manual')
+  @UseGuards(RolesGuard)
+  @Roles(PerfilUsuario.SUPER_ADMIN, PerfilUsuario.CLIENTE_ADMIN)
+  @ApiOperation({ summary: 'Processar cobrança manual de uma assinatura' })
+  @ApiResponse({ status: 200, description: 'Cobrança processada com sucesso.' })
+  @ApiResponse({ status: 404, description: 'Assinatura não encontrada.' })
+  @ApiResponse({ status: 403, description: 'Acesso negado.' })
+  async processarCobrancaManual(@Param('id') id: string) {
+    await this.billingService.processarCobrancaManual(id);
+    return { message: 'Cobrança processada com sucesso' };
+  }
+
+  @Patch(':id/reativar')
+  @UseGuards(RolesGuard)
+  @Roles(PerfilUsuario.SUPER_ADMIN, PerfilUsuario.CLIENTE_ADMIN)
+  @ApiOperation({ summary: 'Reativar uma assinatura suspensa' })
+  @ApiResponse({ status: 200, description: 'Assinatura reativada com sucesso.' })
+  @ApiResponse({ status: 404, description: 'Assinatura não encontrada.' })
+  @ApiResponse({ status: 403, description: 'Acesso negado.' })
+  async reativarAssinatura(@Param('id') id: string) {
+    await this.billingService.reativarAssinatura(id);
+    return { message: 'Assinatura reativada com sucesso' };
   }
 }

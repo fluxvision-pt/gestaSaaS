@@ -42,8 +42,7 @@ import {
 } from 'lucide-react'
 import { subscriptionService, pagamentoService } from '@/services/api'
 import type { AppPagamento, CreatePagamentoRequest } from '@/types'
-import { useApi } from '@/hooks/useApi'
-import { useApiMutation } from '@/hooks/useApiMutation'
+import { useApi, useApiMutation } from '@/hooks/useApi'
 import { toast } from 'sonner'
 
 export default function Pagamentos() {
