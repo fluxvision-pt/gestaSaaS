@@ -50,8 +50,8 @@ export default function Login() {
       setPasswordError('')
       return false
     }
-    if (password.length < 6) {
-      setPasswordError('Senha deve ter pelo menos 6 caracteres')
+    if (password.length < 8) {
+      setPasswordError('Senha deve ter pelo menos 8 caracteres')
       return false
     }
     setPasswordError('')
