@@ -1,17 +1,18 @@
 // Tipos para as entidades
-export interface AppUser {
+export interface AppPlan {
   id: string
   name: string
-  email: string
-  phone?: string
-  tenantId?: string | null  // UUID string ou null para super_admin
-  tenant?: AppTenant
-  role?: 'admin' | 'user'
-  status?: string
+  description?: string
+  price?: number
+  currency?: string
+  interval?: string
+  billingCycle?: 'monthly' | 'yearly'
+  maxUsers?: number
+  maxStorage?: number
+  features?: string[]
   isActive?: boolean
-  lastLogin?: string
-  createdAt: string
-  updatedAt: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface AppTenant {
@@ -29,20 +30,19 @@ export interface AppTenant {
   updatedAt: string
 }
 
-export interface AppPlan {
+export interface AppUser {
   id: string
   name: string
-  description?: string
-  price?: number
-  currency?: string
-  interval?: string
-  billingCycle?: 'monthly' | 'yearly'
-  maxUsers?: number
-  maxStorage?: number
-  features?: string[]
+  email: string
+  phone?: string
+  tenantId?: string | null  // UUID string ou null para super_admin
+  tenant?: AppTenant
+  role?: 'admin' | 'user'
+  status?: string
   isActive?: boolean
-  createdAt?: string
-  updatedAt?: string
+  lastLogin?: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Subscription {

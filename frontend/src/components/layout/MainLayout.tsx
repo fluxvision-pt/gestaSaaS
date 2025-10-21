@@ -58,6 +58,8 @@ export default function MainLayout() {
   // Navegação específica para Super Admin
   const adminNavigation = [
     { name: 'Painel Admin', href: '/admin', icon: Shield },
+    { name: 'Gestão de Usuários', href: '/admin/users', icon: Users },
+    { name: 'Gestão de Planos', href: '/admin/plans', icon: CreditCard },
     { name: 'Gestão de Empresas', href: '/admin/tenants', icon: Building2 },
     { name: 'Configurações Sistema', href: '/admin/settings', icon: Settings },
   ]

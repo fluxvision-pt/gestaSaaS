@@ -4,6 +4,10 @@ import { Toaster } from 'sonner'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import VerifyAccount from './pages/VerifyAccount'
+import ChoosePlan from './pages/ChoosePlan'
+import Payment from './pages/Payment'
+import Welcome from './pages/Welcome'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import DashboardFinanceiro from './pages/DashboardFinanceiro'
@@ -21,7 +25,7 @@ import Profile from './pages/Profile'
 import Auditoria from './pages/Auditoria'
 import AuditoriaLogs from './pages/Auditoria/AuditoriaLogs'
 import SecurityDashboard from './pages/Auditoria/SecurityDashboard'
-import { AdminDashboard, TenantManagement, SystemSettings } from './pages/admin'
+import { AdminDashboard, TenantManagement, SystemSettings, UserManagement, PlanManagement } from './pages/admin'
 import MainLayout from './components/layout/MainLayout'
 import { AdminRoute } from './components/guards/AdminRoute'
 
@@ -80,6 +84,10 @@ function AppRoutes() {
             <Register />
           </PublicRoute>
         } />
+        <Route path="/verify-account/:token" element={<VerifyAccount />} />
+        <Route path="/choose-plan" element={<ChoosePlan />} />
+        <Route path="/payment" element={<Payment />} />
+        <Route path="/welcome" element={<Welcome />} />
         <Route path="/forgot-password" element={
           <PublicRoute>
             <ForgotPassword />
@@ -124,6 +132,16 @@ function AppRoutes() {
           <Route path="admin/settings" element={
             <AdminRoute>
               <SystemSettings />
+            </AdminRoute>
+          } />
+          <Route path="admin/users" element={
+            <AdminRoute>
+              <UserManagement />
+            </AdminRoute>
+          } />
+          <Route path="admin/plans" element={
+            <AdminRoute>
+              <PlanManagement />
             </AdminRoute>
           } />
         </Route>
