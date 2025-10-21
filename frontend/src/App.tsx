@@ -21,6 +21,8 @@ import Financeiro from './pages/Financeiro'
 import Receitas from './pages/Receitas'
 import Despesas from './pages/Despesas'
 import Km from './pages/Km'
+import Veiculos from './pages/Veiculos'
+import Manutencoes from './pages/Manutencoes'
 import Relatorios from './pages/Relatorios'
 import RelatoriosAvancados from './pages/RelatoriosAvancados'
 import Configuracoes from './pages/Configuracoes'
@@ -116,6 +118,8 @@ function AppRoutes() {
           <Route path="receitas" element={<Receitas />} />
           <Route path="despesas" element={<Despesas />} />
           <Route path="km" element={<Km />} />
+          <Route path="veiculos" element={<Veiculos />} />
+          <Route path="veiculos/:id/manutencoes" element={<Manutencoes />} />
           <Route path="relatorios" element={<Relatorios />} />
           <Route path="relatorios/avancados" element={<RelatoriosAvancados />} />
           <Route path="configuracoes" element={<Configuracoes />} />
