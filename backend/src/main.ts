@@ -13,6 +13,9 @@ async function bootstrap() {
   app.use(helmet());
   app.use(compression());
   
+  // Configurar middleware JSON global para parsing do corpo da requisição
+  app.use(json({ limit: '50mb' }));
+  
   // Configurar middleware para raw body nos webhooks do Stripe
   app.use('/api/webhooks/stripe', json({ verify: (req: any, res, buf) => { req.rawBody = buf; } }));
   

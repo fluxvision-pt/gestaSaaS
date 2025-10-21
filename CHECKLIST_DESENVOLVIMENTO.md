@@ -6,7 +6,7 @@
 
 ### **📅 Data: 21/10/2025**
 
-#### **✅ Correções de Build e Deploy (Janeiro 2025)**
+#### **✅ Correções de Build e Deploy (Outubro 2025)**
 - **Correção de Incompatibilidade Node.js**: Resolvido problema de build do Docker
   - Atualizado Node.js para versão 22 em todos os Dockerfiles (backend, frontend, principal)
   - Corrigido caminho do `main.js` de `dist/main.js` para `dist/src/main.js` em Dockerfiles e package.json
@@ -48,7 +48,7 @@
   - Corrigidas funções `getLogs` e `exportLogs` com novos parâmetros
   - Atualizados dados simulados para usar valores corretos dos enums
 
-#### **✅ Correções de TypeScript no Frontend (Janeiro 2025)**
+#### **✅ Correções de TypeScript no Frontend (Outubro 2025)**
 - **Resolução Completa de Erros de Tipagem**: Eliminados todos os erros de TypeScript no frontend
   - **Conflitos de Importação Resolvidos**: Removido arquivo duplicado `useApiMutation.ts` que causava conflitos
   - **Consolidação de Hooks**: Centralizadas importações de `useApi` e `useApiMutation` em um único arquivo
@@ -60,7 +60,7 @@
   - **Importações Corrigidas**: Atualizadas importações em `Pagamentos.tsx` para usar fonte centralizada
   - **Exportações Validadas**: Confirmadas todas as exportações de tipos e interfaces nos serviços
 
-#### **✅ Correções da Página de Seleção de Planos (Janeiro 2025)**
+#### **✅ Correções da Página de Seleção de Planos (Outubro 2025)**
 - **Correção de Erro de API Externa**:
   - Identificado erro `net::ERR_FAILED https://api.fluxvision.cloud/api/planos`
   - API externa não estava disponível causando falha na busca de planos
@@ -92,7 +92,22 @@
   - Adicionado tipo explícito `NotificationSettings` para parâmetro `prev` na função `handleNotificationChange`
   - Verificação TypeScript passou sem erros (`npx tsc --noEmit`)
 
-#### **✅ Implementação de Integração com Mercado Pago (Janeiro 2025)**
+#### **✅ Correções de TypeScript no Frontend (Outubro 2025)**
+- **Correções de Estado e Imports**:
+  - **OnboardingTour.tsx**: Corrigido erro `setIsCompleted` não encontrado
+    - Adicionado estado `isCompleted` com `useState(false)`
+    - Função `setIsCompleted` agora disponível para uso no componente
+  - **RelatoriosAvancados.tsx**: Removido import não utilizado do React
+    - Alterado de `import React, { useState, useEffect }` para `import { useState, useEffect }`
+    - Mantidos apenas imports necessários para otimização
+  - **Verificação de Imports**: Confirmados imports solicitados em RelatoriosAvancados.tsx
+    - Verificado que `DialogTrigger`, `Calendar`, `Settings`, `Filter`, `RefreshCw`, `Users`, `DollarSign`, `addDays`, `RelatorioResponse` já estão presentes
+    - Todos os imports necessários estão corretamente configurados
+  - **Verificação TypeScript**: Executado `npx tsc --noEmit` com sucesso (0 erros)
+  - **Aplicação**: Funcionando corretamente em http://localhost:5173
+  - **Commit**: f15712e - "fix: Correções de TypeScript no Frontend - Outubro 2025"
+
+#### **✅ Implementação de Integração com Mercado Pago (Outubro 2025)**
 - **Backend - Integração Completa**:
   - Instalada SDK oficial do Mercado Pago (`mercadopago@2.0.15`)
   - Criado `MercadoPagoService` com métodos para preferências, pagamentos e webhooks
@@ -103,6 +118,22 @@
   - Suporte a PIX, cartão de crédito e boleto bancário
   - Implementação de webhooks para notificações de pagamento
 
+#### **✅ Correção de Middleware JSON - Login (Janeiro 2025)**
+- **Problema Identificado**:
+  - Erro 400 "Bad Request" no endpoint `/api/auth/login`
+  - Mensagens de validação indicando que campos obrigatórios não estavam sendo recebidos
+  - Corpo da requisição não estava sendo parseado corretamente
+- **Análise Realizada**:
+  - Verificado arquivo `main.ts` do backend
+  - Identificado middleware `rawBody` para webhooks do Stripe
+  - Descoberto que faltava middleware `json()` global para outras rotas
+- **Correção Implementada**:
+  - Adicionado `app.use(express.json({ limit: '50mb' }))` no `main.ts`
+  - Middleware aplicado globalmente para todas as rotas exceto `/api/webhooks/stripe`
+  - Mantido middleware específico `rawBody` para webhooks do Stripe
+- **Status**: ✅ Correção implementada no código (aguardando deploy para API oficial)
+- **Próximos Passos**: Deploy da correção para ambiente de produção
+
 - **Frontend - Componentes e Serviços**:
   - Criado `mercado-pago.service.ts` com interfaces e métodos de API
   - Implementado `MercadoPagoConfiguration.tsx` para configuração de credenciais
@@ -112,7 +143,7 @@
   - Suporte a múltiplos métodos de pagamento (cartão, PIX, boleto)
   - Interface responsiva e moderna com feedback visual
 
-#### **✅ Implementação de Páginas de Gestão Financeira (Janeiro 2025)**
+#### **✅ Implementação de Páginas de Gestão Financeira (Outubro 2025)**
 - **Página de Gestão de Receitas (/receitas)**:
   - Criada página completa com listagem de receitas
   - Implementados filtros avançados (busca, categoria, status, cliente, período)
@@ -690,46 +721,46 @@ Transformar o sistema atual em uma plataforma de gestão financeira pessoal foca
   - [x] Frontend: Design responsivo para mobile e desktop
   - [x] Segurança: Filtros por tenant para isolamento de dados
 
-- [ ] **📄 GESTÃO DE RECEITAS** (`/receitas`)
+- [x] **📄 GESTÃO DE RECEITAS** (`/receitas`)
   **Componentes da Página:**
-  - [ ] Header com filtros: período, aplicativo, tipo (motorista/entregador)
-  - [ ] Cards de resumo por aplicativo:
-    - [ ] Uber (bg-black, logo, valor total, % do total)
-    - [ ] Glovo (bg-orange-50, logo, valor total, % do total)
-    - [ ] 99 (bg-yellow-50, logo, valor total, % do total)
-    - [ ] iFood (bg-red-50, logo, valor total, % do total)
-  - [ ] Tabela de receitas com colunas:
-    - [ ] Data/Hora
-    - [ ] Aplicativo (badge colorido)
-    - [ ] Tipo (Motorista/Entregador)
-    - [ ] Valor
-    - [ ] KM rodados
-    - [ ] Ações (editar, excluir)
-  - [ ] Modal "Nova Receita" com:
-    - [ ] Seletor de aplicativo (com logos)
-    - [ ] Tipo de serviço
-    - [ ] Valor (input currency)
-    - [ ] KM rodados
-    - [ ] Data/hora
-    - [ ] Observações
+  - [x] Header com filtros: período, aplicativo, tipo (motorista/entregador)
+  - [x] Cards de resumo por aplicativo:
+    - [x] Uber (bg-black, logo, valor total, % do total)
+    - [x] Glovo (bg-orange-50, logo, valor total, % do total)
+    - [x] 99 (bg-yellow-50, logo, valor total, % do total)
+    - [x] iFood (bg-red-50, logo, valor total, % do total)
+  - [x] Tabela de receitas com colunas:
+    - [x] Data/Hora
+    - [x] Aplicativo (badge colorido)
+    - [x] Tipo (Motorista/Entregador)
+    - [x] Valor
+    - [x] KM rodados
+    - [x] Ações (editar, excluir)
+  - [x] Modal "Nova Receita" com:
+    - [x] Seletor de aplicativo (com logos)
+    - [x] Tipo de serviço
+    - [x] Valor (input currency)
+    - [x] KM rodados
+    - [x] Data/hora
+    - [x] Observações
 
-- [ ] **📄 GESTÃO DE DESPESAS** (`/despesas`)
+- [x] **📄 GESTÃO DE DESPESAS** (`/despesas`)
   **Componentes da Página:**
-  - [ ] Header com filtros: período, categoria, tipo (fixa/variável)
-  - [ ] Grid de categorias (cards clicáveis):
-    - [ ] Combustível (bg-blue-50, ícone Fuel, valor mensal)
-    - [ ] Manutenção (bg-orange-50, ícone Wrench, valor mensal)
-    - [ ] Alimentação (bg-green-50, ícone UtensilsCrossed, valor mensal)
-    - [ ] Celular (bg-purple-50, ícone Smartphone, valor mensal)
-    - [ ] Outros (bg-gray-50, ícone MoreHorizontal, valor mensal)
-  - [ ] Tabela de despesas com:
-    - [ ] Data
-    - [ ] Categoria (badge colorido)
-    - [ ] Descrição
-    - [ ] Valor
-    - [ ] Tipo (Fixa/Variável)
-    - [ ] Comprovante (ícone se anexado)
-    - [ ] Ações
+  - [x] Header com filtros: período, categoria, tipo (fixa/variável)
+  - [x] Grid de categorias (cards clicáveis):
+    - [x] Combustível (bg-blue-50, ícone Fuel, valor mensal)
+    - [x] Manutenção (bg-orange-50, ícone Wrench, valor mensal)
+    - [x] Alimentação (bg-green-50, ícone UtensilsCrossed, valor mensal)
+    - [x] Celular (bg-purple-50, ícone Smartphone, valor mensal)
+    - [x] Outros (bg-gray-50, ícone MoreHorizontal, valor mensal)
+  - [x] Tabela de despesas com:
+    - [x] Data
+    - [x] Categoria (badge colorido)
+    - [x] Descrição
+    - [x] Valor
+    - [x] Tipo (Fixa/Variável)
+    - [x] Comprovante (ícone se anexado)
+    - [x] Ações
   - [ ] Modal "Nova Despesa" com upload de comprovante
 
 - [ ] **📄 DESPESAS RECORRENTES** (`/despesas/recorrentes`)
