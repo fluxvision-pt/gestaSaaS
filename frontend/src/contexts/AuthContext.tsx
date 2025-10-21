@@ -4,6 +4,7 @@ import type { AppUser, LoginRequest } from '@/types'
 
 interface AuthContextType {
   user: AppUser | null
+  token: string | null
   loading: boolean
   login: (credentials: LoginRequest) => Promise<void>
   logout: () => void
@@ -20,6 +21,7 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<AppUser | null>(null)
+  const [token, setToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   const isAuthenticated = !!user
@@ -28,9 +30,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Carrega usuário se houver token salvo
   useEffect(() => {
     const initAuth = async () => {
-      const token = localStorage.getItem('token')
+      const storedToken = localStorage.getItem('token')
 
-      if (token) {
+      if (storedToken) {
+        setToken(storedToken)
         try {
           const userData = await authService.getCurrentUser()
           setUser(userData)
@@ -39,6 +42,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           localStorage.removeItem('token')
           localStorage.removeItem('refreshToken')
           localStorage.removeItem('user')
+          setToken(null)
           console.log('Token inválido removido:', error)
         }
       }
@@ -77,6 +81,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Salva tokens
       localStorage.setItem('token', accessToken)
       if (refreshToken) localStorage.setItem('refreshToken', refreshToken)
+      setToken(accessToken)
 
       // Normaliza usuário para o shape do AppUser
       const userData: AppUser = {
@@ -106,6 +111,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     localStorage.removeItem('token')
     localStorage.removeItem('refreshToken')
     setUser(null)
+    setToken(null)
 
     // Chamar API de logout (opcional)
     authService.logout().catch(() => {
@@ -124,7 +130,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const rawUser =
         (response as any).usuario ?? (response as any).user
 
-      if (accessToken) localStorage.setItem('token', accessToken)
+      if (accessToken) {
+        localStorage.setItem('token', accessToken)
+        setToken(accessToken)
+      }
 
       const userData: AppUser = {
         id: String(rawUser.id),
@@ -150,6 +159,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const value: AuthContextType = {
     user,
+    token,
     loading,
     login,
     logout,

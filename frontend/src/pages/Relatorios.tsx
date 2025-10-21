@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -109,6 +110,8 @@ const templatesRelatorios: RelatorioTemplate[] = [
 ]
 
 export default function Relatorios() {
+  const navigate = useNavigate()
+  
   // Buscar dados reais
   const { data: subscriptions, loading: subscriptionsLoading } = useApi(() => subscriptionService.getSubscriptions())
   const { data: tenants, loading: tenantsLoading } = useApi(() => tenantService.getTenants())
@@ -284,13 +287,21 @@ export default function Relatorios() {
             Gere e gerencie relatórios personalizados
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Novo Relatório
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/relatorios/avancados')}
+          >
+            <FileBarChart className="mr-2 h-4 w-4" />
+            Relatórios Avançados
+          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Novo Relatório
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-4xl">
             <DialogHeader>
               <DialogTitle>Criar Novo Relatório</DialogTitle>
@@ -630,6 +641,7 @@ export default function Relatorios() {
           </div>
         </CardContent>
       </Card>
+    </div>
     </div>
   )
 }

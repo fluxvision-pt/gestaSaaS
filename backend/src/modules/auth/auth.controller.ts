@@ -21,6 +21,7 @@ import { Roles } from './decorators/roles.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { SuperAdminOnly } from './decorators/super-admin-only.decorator';
 import { Usuario } from '../usuarios/entities/usuario.entity';
 
 @ApiTags('Autenticação')
@@ -199,8 +200,7 @@ export class AuthController {
     return this.authService.verifyEmail(token);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('super_admin')
+  @SuperAdminOnly()
   @Post('impersonate/:tenantId')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Impersonar um tenant (apenas super admin)' })

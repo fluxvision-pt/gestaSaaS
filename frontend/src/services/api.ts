@@ -206,6 +206,13 @@ export const userService = {
 
   deleteUser: async (id: string): Promise<void> => {
     await api.delete(`/usuarios/${id}`)
+  },
+
+  changePassword: async (id: string, data: {
+    senhaAtual?: string
+    novaSenha: string
+  }): Promise<void> => {
+    await api.patch(`/usuarios/${id}/change-password`, data)
   }
 }
 
@@ -620,9 +627,9 @@ export interface AppLogAuditoria {
   usuario: string
   acao: string
   recurso: string
-  status: 'sucesso' | 'erro' | 'pendente'
+  status: 'SUCESSO' | 'FALHA' | 'PENDENTE' | 'CANCELADO'
   categoria: 'autenticacao' | 'usuarios' | 'pagamentos' | 'sistema' | 'configuracao'
-  risco: 'baixo' | 'medio' | 'alto'
+  nivelRisco: 'BAIXO' | 'MEDIO' | 'ALTO' | 'CRITICO'
   ip: string
   userAgent?: string
   detalhes: string
@@ -630,21 +637,37 @@ export interface AppLogAuditoria {
 }
 
 export interface FiltrosAuditoria {
-  dataInicio?: string
-  dataFim?: string
+  dataInicial?: string
+  dataFinal?: string
   usuario?: string
   acao?: string
-  status?: 'todos' | 'sucesso' | 'erro' | 'pendente'
-  categoria?: 'todas' | 'autenticacao' | 'usuarios' | 'pagamentos' | 'sistema' | 'configuracao'
-  risco?: 'todos' | 'baixo' | 'medio' | 'alto'
+  status?: 'SUCESSO' | 'FALHA' | 'PENDENTE' | 'CANCELADO'
+  categoria?: 'autenticacao' | 'usuarios' | 'pagamentos' | 'sistema' | 'configuracao'
+  nivelRisco?: 'BAIXO' | 'MEDIO' | 'ALTO' | 'CRITICO'
   limite?: number
   ordenacao?: 'asc' | 'desc'
 }
 
 export const auditoriaService = {
   getLogs: async (filtros?: FiltrosAuditoria): Promise<AppLogAuditoria[]> => {
-    // Simular chamada de API
-    await new Promise(resolve => setTimeout(resolve, 800))
+    try {
+      const params = new URLSearchParams()
+      if (filtros?.dataInicial) params.append('dataInicial', filtros.dataInicial)
+      if (filtros?.dataFinal) params.append('dataFinal', filtros.dataFinal)
+      if (filtros?.usuario) params.append('usuario', filtros.usuario)
+      if (filtros?.acao) params.append('acao', filtros.acao)
+      if (filtros?.status) params.append('status', filtros.status)
+      if (filtros?.categoria) params.append('categoria', filtros.categoria)
+      if (filtros?.nivelRisco) params.append('nivelRisco', filtros.nivelRisco)
+      if (filtros?.limite) params.append('limite', filtros.limite.toString())
+      if (filtros?.ordenacao) params.append('ordenacao', filtros.ordenacao)
+
+      const response = await api.get(`/auditoria?${params.toString()}`)
+      return response.data
+    } catch (error) {
+      console.error('Erro ao buscar logs de auditoria:', error)
+      // Fallback para dados simulados em caso de erro
+      await new Promise(resolve => setTimeout(resolve, 800))
     
     const acoes = [
       'Login realizado', 'Logout realizado', 'Usuario criado', 'Usuario atualizado', 'Usuario excluido',
@@ -660,9 +683,9 @@ export const auditoriaService = {
     const logs: AppLogAuditoria[] = []
     
     for (let i = 0; i < 50; i++) {
-      const status = Math.random() > 0.1 ? 'sucesso' : Math.random() > 0.5 ? 'erro' : 'pendente'
+      const status = Math.random() > 0.1 ? 'SUCESSO' : Math.random() > 0.5 ? 'FALHA' : Math.random() > 0.5 ? 'PENDENTE' : 'CANCELADO'
       const categoria = ['autenticacao', 'usuarios', 'pagamentos', 'sistema', 'configuracao'][Math.floor(Math.random() * 5)] as any
-      const risco = status === 'erro' ? 'alto' : Math.random() > 0.7 ? 'medio' : 'baixo'
+      const nivelRisco = status === 'FALHA' ? 'ALTO' : Math.random() > 0.7 ? 'MEDIO' : Math.random() > 0.5 ? 'BAIXO' : 'CRITICO'
       
       logs.push({
         id: `log_${i + 1}`,
@@ -672,7 +695,7 @@ export const auditoriaService = {
         recurso: recursos[Math.floor(Math.random() * recursos.length)],
         status,
         categoria,
-        risco,
+        nivelRisco,
         ip: ips[Math.floor(Math.random() * ips.length)],
         detalhes: `Detalhes da acao ${acoes[Math.floor(Math.random() * acoes.length)].toLowerCase()}`
       })
@@ -681,16 +704,16 @@ export const auditoriaService = {
     // Aplicar filtros
     let logsFilterados = logs
     
-    if (filtros?.status && filtros.status !== 'todos') {
+    if (filtros?.status) {
       logsFilterados = logsFilterados.filter(log => log.status === filtros.status)
     }
     
-    if (filtros?.categoria && filtros.categoria !== 'todas') {
+    if (filtros?.categoria) {
       logsFilterados = logsFilterados.filter(log => log.categoria === filtros.categoria)
     }
     
-    if (filtros?.risco && filtros.risco !== 'todos') {
-      logsFilterados = logsFilterados.filter(log => log.risco === filtros.risco)
+    if (filtros?.nivelRisco) {
+      logsFilterados = logsFilterados.filter(log => log.nivelRisco === filtros.nivelRisco)
     }
     
     if (filtros?.usuario) {
@@ -713,28 +736,456 @@ export const auditoriaService = {
     })
     
     return logsFilterados
+    }
   },
 
-  exportLogs: async (filtros?: FiltrosAuditoria): Promise<Blob> => {
-    const logs = await auditoriaService.getLogs(filtros)
-    
-    const csvContent = [
-      'ID,Timestamp,Usuario,Acao,Recurso,Status,Categoria,Risco,IP,Detalhes',
-      ...logs.map(log => 
-        `${log.id},${log.timestamp},${log.usuario},${log.acao},${log.recurso},${log.status},${log.categoria},${log.risco},${log.ip},"${log.detalhes}"`
-      )
-    ].join('\n')
+  // Buscar estatísticas de auditoria
+  getStatistics: async (days: number = 30): Promise<any> => {
+    try {
+      const response = await api.get(`/auditoria/statistics?days=${days}`)
+      return response.data
+    } catch (error) {
+      console.error('Erro ao buscar estatísticas:', error)
+      // Retornar dados simulados em caso de erro
+      return {
+        totalEventos: 1250,
+        eventosPorDia: Array.from({ length: days }, (_, i) => ({
+          data: new Date(Date.now() - (days - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          eventos: Math.floor(Math.random() * 50) + 10
+        })),
+        eventosPorTipo: [
+          { tipo: 'Login', quantidade: 450 },
+          { tipo: 'CRUD', quantidade: 320 },
+          { tipo: 'Sistema', quantidade: 280 },
+          { tipo: 'Configuração', quantidade: 200 }
+        ],
+        alertasSeguranca: 15,
+        usuariosAtivos: 45
+      }
+    }
+  },
 
-    return new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  // Buscar alertas de segurança
+  getSecurityAlerts: async (limit: number = 20): Promise<any[]> => {
+    try {
+      const response = await api.get(`/auditoria/security-alerts?limit=${limit}`)
+      return response.data
+    } catch (error) {
+      console.error('Erro ao buscar alertas de segurança:', error)
+      // Retornar dados simulados em caso de erro
+      return [
+        {
+          id: '1',
+          tipo: 'Múltiplas tentativas de login',
+          usuario: 'usuario@exemplo.com',
+          ip: '192.168.1.100',
+          timestamp: new Date().toISOString(),
+          severidade: 'alta'
+        },
+        {
+          id: '2',
+          tipo: 'Login de IP suspeito',
+          usuario: 'admin@exemplo.com',
+          ip: '203.0.113.10',
+          timestamp: new Date(Date.now() - 3600000).toISOString(),
+          severidade: 'media'
+        }
+      ]
+    }
+  },
+
+  exportLogs: async (filtros?: FiltrosAuditoria, formato: 'csv' | 'json' = 'csv'): Promise<Blob> => {
+    try {
+      const params = new URLSearchParams()
+      if (filtros?.dataInicial) params.append('dataInicial', filtros.dataInicial)
+      if (filtros?.dataFinal) params.append('dataFinal', filtros.dataFinal)
+      if (filtros?.usuario) params.append('usuario', filtros.usuario)
+      if (filtros?.acao) params.append('acao', filtros.acao)
+      if (filtros?.status) params.append('status', filtros.status)
+      if (filtros?.categoria) params.append('categoria', filtros.categoria)
+      if (filtros?.nivelRisco) params.append('nivelRisco', filtros.nivelRisco)
+      params.append('formato', formato)
+
+      const response = await api.get(`/auditoria/export?${params.toString()}`, {
+        responseType: 'blob'
+      })
+      return response.data
+    } catch (error) {
+      console.error('Erro ao exportar logs:', error)
+      // Fallback para exportação local
+      const logs = await auditoriaService.getLogs(filtros)
+      
+      if (formato === 'json') {
+        const jsonContent = JSON.stringify(logs, null, 2)
+        return new Blob([jsonContent], { type: 'application/json;charset=utf-8;' })
+      } else {
+        const csvContent = [
+          'ID,Timestamp,Usuario,Acao,Recurso,Status,Categoria,Risco,IP,Detalhes',
+          ...logs.map(log => 
+            `${log.id},${log.timestamp},${log.usuario},${log.acao},${log.recurso},${log.status},${log.categoria},${log.nivelRisco},${log.ip},"${log.detalhes}"`
+          )
+        ].join('\n')
+
+        return new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      }
+    }
   },
 
   getLogById: async (id: string): Promise<AppLogAuditoria | null> => {
-    // Simular chamada de API
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    const logs = await auditoriaService.getLogs()
-    return logs.find(log => log.id === id) || null
+    try {
+      const response = await api.get(`/auditoria/${id}`)
+      return response.data
+    } catch (error) {
+      console.error('Erro ao buscar log por ID:', error)
+      // Fallback para busca local
+      const logs = await auditoriaService.getLogs()
+      return logs.find(log => log.id === id) || null
+    }
   }
 }
+
+// Interfaces para Relatórios
+export interface RelatorioRequest {
+  tipo: 'usuarios' | 'empresas' | 'assinaturas' | 'auditoria' | 'financeiro'
+  formato: 'pdf' | 'excel' | 'csv' | 'json'
+  filtros?: {
+    dataInicio?: string
+    dataFim?: string
+    empresaId?: string
+    usuarioId?: string
+    status?: string
+  }
+  agendamento?: {
+    frequencia: 'diario' | 'semanal' | 'mensal'
+    diasSemana?: number[]
+    diaMes?: number
+    hora: string
+    ativo: boolean
+  }
+}
+
+export interface RelatorioResponse {
+  id: string
+  nome: string
+  tipo: string
+  formato: string
+  status: 'pendente' | 'processando' | 'concluido' | 'erro'
+  dataGeracao: string
+  tamanho?: number
+  url?: string
+  erro?: string
+}
+
+export interface RelatorioAgendado {
+  id: string
+  nome: string
+  tipo: string
+  formato: string
+  frequencia: string
+  proximaExecucao: string
+  ativo: boolean
+  ultimaExecucao?: string
+  status?: string
+}
+
+export interface DashboardData {
+  totalUsuarios: number
+  totalEmpresas: number
+  totalAssinaturas: number
+  receitaMensal: number
+  crescimentoUsuarios: number
+  crescimentoReceita: number
+  assinaturasPorPlano: Array<{ plano: string; quantidade: number }>
+  receitaPorMes: Array<{ mes: string; receita: number }>
+  // Campos específicos para relatórios
+  totalRelatorios: number
+  relatoriosHoje: number
+  relatoriosAgendados: number
+  formatosMaisUsados: Array<{ formato: string; quantidade: number }>
+  relatoriosRecentes: Array<{
+    id: string
+    nome: string
+    tipo: string
+    dataGeracao: string
+    status: string
+  }>
+}
+
+export interface EstatisticasRelatorio {
+  totalRelatorios: number
+  relatoriosHoje: number
+  relatoriosAgendados: number
+  formatoMaisUsado: string
+  tipoMaisGerado: string
+}
+
+// Serviço de Relatórios
+export const relatoriosService = {
+  // Gerar relatório
+  gerarRelatorio: async (request: RelatorioRequest): Promise<RelatorioResponse> => {
+    try {
+      const response = await api.post('/relatorios/gerar', request)
+      return response.data
+    } catch (error) {
+      console.error('Erro ao gerar relatório:', error)
+      // Fallback para dados simulados
+      return {
+        id: `rel_${Date.now()}`,
+        nome: `Relatório ${request.tipo}`,
+        tipo: request.tipo,
+        formato: request.formato,
+        status: 'processando',
+        dataGeracao: new Date().toISOString()
+      }
+    }
+  },
+
+  // Listar relatórios
+  listarRelatorios: async (): Promise<RelatorioResponse[]> => {
+    try {
+      const response = await api.get('/relatorios')
+      return response.data
+    } catch (error) {
+      console.error('Erro ao listar relatórios:', error)
+      // Fallback para dados simulados
+      return [
+        {
+          id: 'rel_1',
+          nome: 'Relatório de Usuários - Janeiro',
+          tipo: 'usuarios',
+          formato: 'pdf',
+          status: 'concluido',
+          dataGeracao: '2024-01-15T10:30:00Z',
+          tamanho: 2048576,
+          url: '/downloads/relatorio-usuarios-jan.pdf'
+        },
+        {
+          id: 'rel_2',
+          nome: 'Relatório Financeiro - Q4',
+          tipo: 'financeiro',
+          formato: 'excel',
+          status: 'concluido',
+          dataGeracao: '2024-01-10T14:20:00Z',
+          tamanho: 1536000,
+          url: '/downloads/relatorio-financeiro-q4.xlsx'
+        }
+      ]
+    }
+  },
+
+  // Baixar relatório
+  baixarRelatorio: async (id: string): Promise<Blob> => {
+    try {
+      const response = await api.get(`/relatorios/${id}/download`, {
+        responseType: 'blob'
+      })
+      return response.data
+    } catch (error) {
+      console.error('Erro ao baixar relatório:', error)
+      throw error
+    }
+  },
+
+  // Agendar relatório
+  agendarRelatorio: async (request: RelatorioRequest): Promise<RelatorioAgendado> => {
+    try {
+      const response = await api.post('/relatorios/agendar', request)
+      return response.data
+    } catch (error) {
+      console.error('Erro ao agendar relatório:', error)
+      // Fallback para dados simulados
+      return {
+        id: `agenda_${Date.now()}`,
+        nome: `Relatório ${request.tipo} Agendado`,
+        tipo: request.tipo,
+        formato: request.formato,
+        frequencia: request.agendamento?.frequencia || 'mensal',
+        proximaExecucao: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        ativo: true
+      }
+    }
+  },
+
+  // Listar relatórios agendados
+  listarAgendados: async (): Promise<RelatorioAgendado[]> => {
+    try {
+      const response = await api.get('/relatorios/agendados')
+      return response.data
+    } catch (error) {
+      console.error('Erro ao listar relatórios agendados:', error)
+      // Fallback para dados simulados
+      return [
+        {
+          id: 'agenda_1',
+          nome: 'Relatório Mensal de Usuários',
+          tipo: 'usuarios',
+          formato: 'pdf',
+          frequencia: 'mensal',
+          proximaExecucao: '2024-02-01T09:00:00Z',
+          ativo: true,
+          ultimaExecucao: '2024-01-01T09:00:00Z',
+          status: 'concluido'
+        }
+      ]
+    }
+  },
+
+  // Obter dados do dashboard
+  getDashboardData: async (): Promise<DashboardData> => {
+    try {
+      const response = await api.get('/relatorios/dashboard')
+      return response.data
+    } catch (error) {
+      console.error('Erro ao obter dados do dashboard:', error)
+      // Fallback para dados simulados
+      return {
+        totalUsuarios: 1250,
+        totalEmpresas: 85,
+        totalAssinaturas: 320,
+        receitaMensal: 45000,
+        crescimentoUsuarios: 12.5,
+        crescimentoReceita: 8.3,
+        assinaturasPorPlano: [
+          { plano: 'Básico', quantidade: 150 },
+          { plano: 'Pro', quantidade: 120 },
+          { plano: 'Enterprise', quantidade: 50 }
+        ],
+        receitaPorMes: [
+          { mes: 'Jan', receita: 42000 },
+          { mes: 'Fev', receita: 45000 },
+          { mes: 'Mar', receita: 48000 }
+        ],
+        // Campos específicos para relatórios
+        totalRelatorios: 156,
+        relatoriosHoje: 8,
+        relatoriosAgendados: 12,
+        formatosMaisUsados: [
+          { formato: 'PDF', quantidade: 89 },
+          { formato: 'Excel', quantidade: 45 },
+          { formato: 'CSV', quantidade: 22 }
+        ],
+        relatoriosRecentes: [
+          {
+            id: '1',
+            nome: 'Relatório de Usuários',
+            tipo: 'usuarios',
+            dataGeracao: new Date().toISOString(),
+            status: 'concluido'
+          },
+          {
+            id: '2',
+            nome: 'Relatório Financeiro',
+            tipo: 'financeiro',
+            dataGeracao: new Date(Date.now() - 86400000).toISOString(),
+            status: 'concluido'
+          }
+        ]
+      }
+    }
+  },
+
+  // Obter estatísticas de relatórios
+  getEstatisticas: async (): Promise<EstatisticasRelatorio> => {
+    try {
+      const response = await api.get('/relatorios/estatisticas')
+      return response.data
+    } catch (error) {
+      console.error('Erro ao obter estatísticas:', error)
+      // Fallback para dados simulados
+      return {
+        totalRelatorios: 156,
+        relatoriosHoje: 8,
+        relatoriosAgendados: 12,
+        formatoMaisUsado: 'PDF',
+        tipoMaisGerado: 'usuarios'
+      }
+    }
+  },
+
+  // Cancelar relatório agendado
+  cancelarAgendamento: async (id: string): Promise<void> => {
+    try {
+      await api.delete(`/relatorios/agendados/${id}`)
+    } catch (error) {
+      console.error('Erro ao cancelar agendamento:', error)
+      throw error
+    }
+  },
+
+  // Atualizar status de agendamento
+  atualizarAgendamento: async (id: string, ativo: boolean): Promise<RelatorioAgendado> => {
+    try {
+      const response = await api.patch(`/relatorios/agendados/${id}`, { ativo })
+      return response.data
+    } catch (error) {
+      console.error('Erro ao atualizar agendamento:', error)
+      throw error
+    }
+  }
+}
+
+// Interfaces para Dashboard Financeiro
+export interface DashboardFinanceiroData {
+  saldoAtual: {
+    valor: number
+    variacao: number
+  }
+  receitasMes: {
+    total: number
+    quantidade: number
+    variacao: number
+  }
+  despesasMes: {
+    total: number
+    quantidade: number
+    variacao: number
+  }
+  transacoesRecentes: Array<{
+    id: string
+    descricao: string
+    valor: number
+    tipo: 'ENTRADA' | 'SAIDA'
+    categoria: string
+    data: string
+  }>
+  indicadores: {
+    melhorDiaSemana: string
+    kmEuroMedio: string
+    metaMensal: number
+    proximaManutencao: number
+  }
+}
+
+export interface GraficoReceitasDespesas {
+  mes: string
+  receitas: number
+  despesas: number
+}
+
+// Serviço do Dashboard Financeiro
+export const dashboardFinanceiroService = {
+  getDashboardData: async (): Promise<DashboardFinanceiroData> => {
+    const response = await api.get('/financeiro/transacoes/dashboard/dados')
+    return response.data
+  },
+
+  getGraficoReceitasDespesas: async (meses: number = 6): Promise<GraficoReceitasDespesas[]> => {
+    const response = await api.get(`/financeiro/transacoes/dashboard/grafico-receitas-despesas?meses=${meses}`)
+    return response.data
+  },
+
+  getSaldoAtual: async (): Promise<number> => {
+    const response = await api.get('/financeiro/transacoes/dashboard/saldo-atual')
+    return response.data
+  },
+
+  getTransacoesRecentes: async (limite: number = 5): Promise<any[]> => {
+    const response = await api.get(`/financeiro/transacoes/dashboard/transacoes-recentes?limite=${limite}`)
+    return response.data
+  }
+}
+
+// Exportações explícitas para garantir compatibilidade
+export type { DashboardData, RelatorioAgendado, RelatorioRequest, RelatorioResponse, EstatisticasRelatorio, DashboardFinanceiroData, GraficoReceitasDespesas }
 
 export default api

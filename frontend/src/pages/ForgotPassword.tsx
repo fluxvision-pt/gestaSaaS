@@ -4,66 +4,114 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Car, Mail, ArrowLeft, CheckCircle } from 'lucide-react'
+import { Car, Mail, ArrowLeft, CheckCircle, ChevronRight, Loader2 } from 'lucide-react'
 import { LanguageSelector } from '@/components/LanguageSelector'
 import { authService } from '@/services/api'
+import { toast } from 'sonner'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
-  const [error, setError] = useState('')
+  const [emailError, setEmailError] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [countdown, setCountdown] = useState(0)
   const { t } = useTranslation()
+
+  // Validação de email em tempo real
+  const validateEmail = (email: string) => {
+    if (!email) {
+      setEmailError('')
+      return false
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      setEmailError('Digite um email válido')
+      return false
+    }
+    setEmailError('')
+    return true
+  }
+
+  // Timer de reenvio
+  const startCountdown = () => {
+    setCountdown(60)
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
+    
+    if (!validateEmail(email)) {
+      toast.error('Digite um email válido')
+      return
+    }
+
     setLoading(true)
 
     try {
       const response = await authService.forgotPassword({ email })
       setSuccess(true)
+      startCountdown()
+      toast.success('Instruções enviadas! Verifique seu email.')
     } catch (error: any) {
       console.error('Erro na recuperação de senha:', error)
-      setError(error.response?.data?.message || 'Erro ao solicitar recuperação de senha. Tente novamente.')
+      toast.error(error.response?.data?.message || 'Erro ao solicitar recuperação de senha. Tente novamente.')
     } finally {
       setLoading(false)
     }
   }
 
+  const handleResend = () => {
+    setSuccess(false)
+    setEmail('')
+    setEmailError('')
+  }
+
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50 flex items-center justify-center p-4">
         <div className="flex justify-end absolute top-4 right-4">
           <LanguageSelector />
         </div>
         
-        <Card className="w-full max-w-md shadow-xl">
+        <Card className="w-full max-w-md shadow-xl border-0 bg-white/80 backdrop-blur-sm animate-in zoom-in duration-500">
           <CardContent className="pt-6">
             <div className="text-center space-y-4">
-              <CheckCircle className="h-16 w-16 text-green-600 mx-auto" />
-              <h2 className="text-2xl font-bold text-gray-900">Email enviado!</h2>
-              <p className="text-gray-600">
-                Se o email existir em nossa base, você receberá instruções para redefinir sua senha.
-              </p>
-              <p className="text-sm text-gray-500">
-                Verifique sua caixa de entrada e também a pasta de spam.
-              </p>
-              <div className="space-y-2">
+              <div className="animate-in zoom-in duration-700 delay-200">
+                <CheckCircle className="h-16 w-16 text-emerald-600 mx-auto" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 animate-in slide-in-from-bottom duration-500 delay-300">
+                Email enviado!
+              </h2>
+              <div className="space-y-2 animate-in slide-in-from-bottom duration-500 delay-400">
+                <p className="text-gray-600">
+                  Se o email <strong>{email}</strong> existir em nossa base, você receberá instruções para redefinir sua senha.
+                </p>
+                <p className="text-sm text-gray-500">
+                  Verifique sua caixa de entrada e também a pasta de spam.
+                </p>
+              </div>
+              <div className="space-y-2 animate-in slide-in-from-bottom duration-500 delay-500">
                 <Link to="/login">
-                  <Button className="w-full">
+                  <Button className="w-full bg-emerald-500 hover:bg-emerald-600">
                     Voltar para Login
                   </Button>
                 </Link>
                 <Button 
                   variant="outline" 
-                  className="w-full"
-                  onClick={() => {
-                    setSuccess(false)
-                    setEmail('')
-                  }}
+                  className="w-full border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white"
+                  onClick={handleResend}
+                  disabled={countdown > 0}
                 >
-                  Enviar novamente
+                  {countdown > 0 ? `Reenviar em ${countdown}s` : 'Enviar novamente'}
                 </Button>
               </div>
             </div>
@@ -74,81 +122,126 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
-      {/* Header com seletor de idioma */}
-      <div className="flex justify-end p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+      <div className="flex justify-end absolute top-4 right-4">
         <LanguageSelector />
       </div>
       
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          <Card className="shadow-xl">
-            <CardHeader className="space-y-1">
-              <div className="flex items-center justify-center mb-4">
-                <Car className="h-8 w-8 text-blue-600 mr-2" />
-                <span className="text-2xl font-bold text-gray-900">GestaSaaS</span>
+      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
+        <Card className="w-full max-w-md mx-auto shadow-xl border-0 bg-white/80 backdrop-blur-sm animate-in zoom-in duration-500">
+          <CardContent className="pt-6">
+            <div className="space-y-6">
+              <div className="text-center space-y-2 animate-in slide-in-from-top duration-500 delay-200">
+                <Car className="h-12 w-12 text-blue-600 mx-auto" />
+                <h1 className="text-2xl font-bold text-gray-900">Recuperar Senha</h1>
+                <p className="text-gray-600">
+                  Digite seu email para receber instruções de recuperação
+                </p>
               </div>
-              <CardTitle className="text-2xl text-center">Recuperar Senha</CardTitle>
-              <CardDescription className="text-center">
-                Digite seu email para receber instruções de recuperação
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                    {error}
-                  </div>
-                )}
-                
+
+              <form onSubmit={handleSubmit} className="space-y-4 animate-in slide-in-from-bottom duration-500 delay-300">
                 <div className="space-y-2">
                   <label htmlFor="email" className="text-sm font-medium text-gray-700">
                     Email
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input
                       id="email"
                       type="email"
-                      placeholder="Digite seu email"
+                      placeholder="seu@email.com"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        setEmail(e.target.value)
+                        if (emailError) setEmailError('')
+                      }}
+                      onBlur={() => validateEmail(email)}
+                      className={`pl-10 transition-all duration-200 ${
+                        emailError 
+                          ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                          : email && !emailError 
+                            ? 'border-green-500 focus:border-green-500 focus:ring-green-500'
+                            : ''
+                      }`}
                       required
-                      autoComplete="email"
-                      className="w-full pl-10"
                     />
+                    {email && !emailError && (
+                      <CheckCircle className="absolute right-3 top-3 h-4 w-4 text-green-500" />
+                    )}
                   </div>
+                  {emailError && (
+                    <p className="text-red-600 text-sm animate-in slide-in-from-left duration-300">
+                      {emailError}
+                    </p>
+                  )}
                 </div>
 
                 <Button 
                   type="submit" 
-                  className="w-full" 
-                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 transform hover:scale-[1.02]" 
+                  disabled={loading || !!emailError || !email}
                 >
-                  {loading ? 'Enviando...' : 'Enviar Instruções'}
+                  {loading ? (
+                    <div className="flex items-center space-x-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Enviando...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <Mail className="h-4 w-4" />
+                      <span>Enviar Instruções</span>
+                      <ChevronRight className="h-4 w-4" />
+                    </div>
+                  )}
                 </Button>
               </form>
 
-              <div className="mt-6 text-center">
+              <div className="text-center space-y-2 animate-in slide-in-from-bottom duration-500 delay-400">
                 <Link 
                   to="/login" 
-                  className="inline-flex items-center text-sm text-blue-600 hover:text-blue-500 font-medium"
+                  className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 transition-colors duration-200"
                 >
                   <ArrowLeft className="h-4 w-4 mr-1" />
                   Voltar para Login
                 </Link>
-              </div>
-
-              <div className="mt-4 text-center">
-                <p className="text-sm text-gray-600">
+                <div className="text-sm text-gray-600">
                   Não tem uma conta?{' '}
-                  <Link to="/register" className="text-blue-600 hover:text-blue-500 font-medium">
-                    Criar conta
+                  <Link to="/register" className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">
+                    Cadastre-se
                   </Link>
-                </p>
+                </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="hidden lg:block space-y-8 animate-in slide-in-from-right duration-700 delay-500">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-bold text-gray-900">
+              Recupere o acesso ao seu GestaSaaS
+            </h2>
+            <p className="text-lg text-gray-600">
+              Não se preocupe, isso acontece com todos nós. Digite seu email e enviaremos um link para redefinir sua senha.
+            </p>
+          </div>
+
+          <div className="grid gap-6">
+            <div className="flex items-center space-x-4 p-4 bg-white/70 backdrop-blur-sm rounded-lg shadow-sm border border-white/20 hover:bg-white/80 transition-all duration-200">
+              <Mail className="h-8 w-8 text-blue-600" />
+              <div>
+                <h3 className="font-semibold text-gray-900">Verificação por Email</h3>
+                <p className="text-sm text-gray-600">Processo seguro e rápido</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-4 p-4 bg-white/70 backdrop-blur-sm rounded-lg shadow-sm border border-white/20 hover:bg-white/80 transition-all duration-200">
+              <CheckCircle className="h-8 w-8 text-green-600" />
+              <div>
+                <h3 className="font-semibold text-gray-900">Segurança Garantida</h3>
+                <p className="text-sm text-gray-600">Seus dados estão protegidos</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

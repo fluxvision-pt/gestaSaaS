@@ -6,7 +6,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
-import Dashboard from './pages/Dashboard'
+import DashboardFinanceiro from './pages/DashboardFinanceiro'
 import Usuarios from './pages/Usuarios'
 import Empresas from './pages/Empresas'
 import Planos from './pages/Planos'
@@ -15,10 +15,15 @@ import Pagamentos from './pages/Pagamentos'
 import Financeiro from './pages/Financeiro'
 import Km from './pages/Km'
 import Relatorios from './pages/Relatorios'
+import RelatoriosAvancados from './pages/RelatoriosAvancados'
 import Configuracoes from './pages/Configuracoes'
+import Profile from './pages/Profile'
 import Auditoria from './pages/Auditoria'
+import AuditoriaLogs from './pages/Auditoria/AuditoriaLogs'
+import SecurityDashboard from './pages/Auditoria/SecurityDashboard'
 import { AdminDashboard, TenantManagement, SystemSettings } from './pages/admin'
 import MainLayout from './components/layout/MainLayout'
+import { AdminRoute } from './components/guards/AdminRoute'
 
 // Componente para rotas protegidas
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -89,7 +94,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }>
           <Route index element={<Navigate to="/dashboard" />} />
-          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="dashboard" element={<DashboardFinanceiro />} />
           <Route path="usuarios" element={<Usuarios />} />
           <Route path="empresas" element={<Empresas />} />
           <Route path="planos" element={<Planos />} />
@@ -98,13 +103,29 @@ function AppRoutes() {
           <Route path="financeiro" element={<Financeiro />} />
           <Route path="km" element={<Km />} />
           <Route path="relatorios" element={<Relatorios />} />
+          <Route path="relatorios/avancados" element={<RelatoriosAvancados />} />
           <Route path="configuracoes" element={<Configuracoes />} />
+          <Route path="perfil" element={<Profile />} />
           <Route path="auditoria" element={<Auditoria />} />
+          <Route path="auditoria/logs" element={<AuditoriaLogs />} />
+          <Route path="auditoria/security" element={<SecurityDashboard />} />
           
           {/* Rotas do painel admin (super admin) */}
-          <Route path="admin" element={<AdminDashboard />} />
-          <Route path="admin/tenants" element={<TenantManagement />} />
-          <Route path="admin/settings" element={<SystemSettings />} />
+          <Route path="admin" element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          } />
+          <Route path="admin/tenants" element={
+            <AdminRoute>
+              <TenantManagement />
+            </AdminRoute>
+          } />
+          <Route path="admin/settings" element={
+            <AdminRoute>
+              <SystemSettings />
+            </AdminRoute>
+          } />
         </Route>
         
         {/* Rota padrão */}

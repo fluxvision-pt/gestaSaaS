@@ -17,30 +17,42 @@ import {
   X,
   LogOut,
   User,
-  Shield
+  Shield,
+  HelpCircle
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { LanguageSelector } from '@/components/LanguageSelector'
+import OnboardingTour from '@/components/onboarding/OnboardingTour'
+import { useOnboarding } from '@/hooks/useOnboarding'
+import NotificationBadge from '@/components/notifications/NotificationBadge'
 
 export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const location = useLocation()
   const { user, logout } = useAuth()
   const { t } = useTranslation()
+  const { 
+    isOnboardingOpen, 
+    isOnboardingCompleted, 
+    startOnboarding, 
+    closeOnboarding, 
+    completeOnboarding 
+  } = useOnboarding()
 
   const navigation = [
-    { name: t('navigation.dashboard'), href: '/dashboard', icon: LayoutDashboard },
-    { name: t('navigation.users'), href: '/usuarios', icon: Users },
-    { name: 'Empresas', href: '/empresas', icon: Building2 },
-    { name: t('navigation.plans'), href: '/planos', icon: CreditCard },
-    { name: t('navigation.subscriptions'), href: '/assinaturas', icon: FileText },
-    { name: 'Pagamentos', href: '/pagamentos', icon: DollarSign },
-    { name: 'Financeiro', href: '/financeiro', icon: DollarSign },
-    { name: 'KM Tracking', href: '/km', icon: MapPin },
-    { name: 'Relatórios', href: '/relatorios', icon: BarChart3 },
-    { name: t('navigation.settings'), href: '/configuracoes', icon: Settings },
-    { name: 'Auditoria', href: '/auditoria', icon: History },
+    { name: t('navigation.dashboard'), href: '/dashboard', icon: LayoutDashboard, dataTour: 'dashboard' },
+    { name: t('navigation.users'), href: '/usuarios', icon: Users, dataTour: 'users' },
+    { name: 'Empresas', href: '/empresas', icon: Building2, dataTour: 'companies' },
+    { name: t('navigation.plans'), href: '/planos', icon: CreditCard, dataTour: 'plans' },
+    { name: t('navigation.subscriptions'), href: '/assinaturas', icon: FileText, dataTour: 'subscriptions' },
+    { name: 'Pagamentos', href: '/pagamentos', icon: DollarSign, dataTour: 'payments' },
+    { name: 'Financeiro', href: '/financeiro', icon: DollarSign, dataTour: 'financial' },
+    { name: 'KM Tracking', href: '/km', icon: MapPin, dataTour: 'km' },
+    { name: 'Relatórios', href: '/relatorios', icon: BarChart3, dataTour: 'reports' },
+    { name: t('navigation.settings'), href: '/configuracoes', icon: Settings, dataTour: 'settings' },
+    { name: 'Perfil', href: '/perfil', icon: User, dataTour: 'profile' },
+    { name: 'Auditoria', href: '/auditoria', icon: History, dataTour: 'audit' },
   ]
 
   // Navegação específica para Super Admin
@@ -89,6 +101,7 @@ export default function MainLayout() {
                 <Link
                   key={item.name}
                   to={item.href}
+                  data-tour={item.dataTour}
                   className={cn(
                     "group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200",
                     isActive
@@ -172,6 +185,16 @@ export default function MainLayout() {
             
             <div className="flex items-center space-x-3">
               <LanguageSelector />
+              <NotificationBadge />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={startOnboarding}
+                className="text-muted-foreground hover:text-foreground"
+                title="Iniciar tour do sistema"
+              >
+                <HelpCircle className="h-4 w-4" />
+              </Button>
               {user && (
                 <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-accent/50">
                   <User className="h-4 w-4 text-muted-foreground" />
@@ -193,6 +216,13 @@ export default function MainLayout() {
           </div>
         </main>
       </div>
+
+      {/* Onboarding Tour */}
+      <OnboardingTour
+        isOpen={isOnboardingOpen}
+        onClose={closeOnboarding}
+        onComplete={completeOnboarding}
+      />
     </div>
   )
 }

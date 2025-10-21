@@ -11,7 +11,7 @@ import { Assinatura, StatusAssinatura } from '../assinaturas/entities/assinatura
 import { Transacao } from '../financeiro/entities/transacao.entity';
 import { Pagamento } from '../pagamentos/entities/pagamento.entity';
 import { KmDiario } from '../km/entities/km-diario.entity';
-import { Auditoria } from '../auditoria/entities/auditoria.entity';
+import { Auditoria, TipoAcao, StatusAuditoria } from '../auditoria/entities/auditoria.entity';
 import { Configuracao } from '../configuracoes/entities/configuracao.entity';
 
 // DTOs
@@ -130,7 +130,7 @@ export class AdminService {
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const errors24h = await this.auditoriaRepository.count({
       where: {
-        acao: 'ERROR',
+        status: StatusAuditoria.FALHA,
         criadoEm: MoreThan(oneDayAgo),
       },
     });
@@ -231,7 +231,7 @@ export class AdminService {
 
     // Registrar auditoria
     await this.registrarAuditoria(
-      'IMPERSONATE',
+      TipoAcao.LOGIN,
       adminId,
       null,
       `Impersonação do usuário ${usuario.email}`,
@@ -271,7 +271,7 @@ export class AdminService {
         await this.tenantRepository.update(tenantId, { status: newStatus });
         
         await this.registrarAuditoria(
-          'BULK_TENANT_ACTION',
+          TipoAcao.UPDATE,
           adminId,
           tenantId,
           `Ação em massa: ${dto.action}`,
@@ -312,7 +312,7 @@ export class AdminService {
         }
 
         await this.registrarAuditoria(
-          'BULK_USER_ACTION',
+          TipoAcao.UPDATE,
           adminId,
           usuario.tenantId,
           `Ação em massa: ${dto.action}`,
@@ -337,7 +337,7 @@ export class AdminService {
     await this.tenantRepository.update(tenantId, { status: dto.status });
 
     await this.registrarAuditoria(
-      'UPDATE_TENANT_STATUS',
+      TipoAcao.UPDATE,
       adminId,
       tenantId,
       `Status alterado para ${dto.status}`,
@@ -365,7 +365,7 @@ export class AdminService {
     const savedUser = await this.usuarioRepository.save(superAdmin);
 
     await this.registrarAuditoria(
-      'CREATE_SUPER_ADMIN',
+      TipoAcao.CREATE,
       adminId,
       null,
       `Super admin criado: ${dto.email}`,
@@ -402,7 +402,7 @@ export class AdminService {
     const savedConfig = await this.configuracaoRepository.save(config);
 
     await this.registrarAuditoria(
-      'UPDATE_SYSTEM_CONFIG',
+      TipoAcao.CONFIG_CHANGE,
       adminId,
       null,
       `Configuração ${dto.chave} atualizada`,
@@ -490,7 +490,7 @@ export class AdminService {
   }
 
   private async registrarAuditoria(
-    acao: string,
+    acao: TipoAcao,
     usuarioId: string,
     tenantId: string | null,
     descricao: string,
@@ -499,12 +499,10 @@ export class AdminService {
     const auditoria = this.auditoriaRepository.create({
       acao,
       tenantId,
+      usuarioId,
+      descricao,
       tabela: 'admin_actions',
-      dados: {
-        usuarioId,
-        descricao,
-        detalhes: detalhes || null,
-      },
+      metadados: detalhes || null,
     });
 
     await this.auditoriaRepository.save(auditoria);

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -39,12 +40,17 @@ import {
   XCircle,
   Clock,
   FileText,
-  Loader2
+  Loader2,
+  BarChart3,
+  List,
+  ArrowRight
 } from 'lucide-react'
 import { auditoriaService, type AppLogAuditoria, type FiltrosAuditoria } from '@/services/api'
 import { useApi } from '@/hooks/useApi'
 
 export default function Auditoria() {
+  const navigate = useNavigate()
+  
   // Estados para filtros
   const [filtros, setFiltros] = useState<FiltrosAuditoria>({})
   
@@ -84,7 +90,7 @@ export default function Auditoria() {
     }
 
     if (riscoFilter !== 'todos') {
-      filtered = filtered.filter(log => log.risco === riscoFilter)
+      filtered = filtered.filter(log => log.nivelRisco === riscoFilter)
     }
 
     setFilteredLogs(filtered)
@@ -94,9 +100,9 @@ export default function Auditoria() {
   useEffect(() => {
     const novosFiltros: FiltrosAuditoria = {}
     
-    if (statusFilter !== 'todos') novosFiltros.status = statusFilter as "pendente" | "sucesso" | "erro"
+    if (statusFilter !== 'todos') novosFiltros.status = statusFilter as "SUCESSO" | "FALHA" | "PENDENTE" | "CANCELADO"
     if (categoriaFilter !== 'todas') novosFiltros.categoria = categoriaFilter as "autenticacao" | "usuarios" | "pagamentos" | "sistema" | "configuracao"
-    if (riscoFilter !== 'todos') novosFiltros.risco = riscoFilter as "baixo" | "medio" | "alto"
+    if (riscoFilter !== 'todos') novosFiltros.nivelRisco = riscoFilter as "BAIXO" | "MEDIO" | "ALTO"
     if (searchTerm) {
       novosFiltros.usuario = searchTerm
       novosFiltros.acao = searchTerm
@@ -112,29 +118,33 @@ export default function Auditoria() {
 
   const isLoading = logsLoading
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: 'SUCESSO' | 'FALHA' | 'PENDENTE' | 'CANCELADO' | undefined) => {
     switch (status) {
-      case 'sucesso':
+      case 'SUCESSO':
         return <Badge variant="default" className="bg-green-100 text-green-800"><CheckCircle className="w-3 h-3 mr-1" />Sucesso</Badge>
-      case 'falha':
+      case 'FALHA':
         return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" />Falha</Badge>
-      case 'pendente':
+      case 'PENDENTE':
         return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />Pendente</Badge>
+      case 'CANCELADO':
+        return <Badge variant="outline"><XCircle className="w-3 h-3 mr-1" />Cancelado</Badge>
       default:
-        return <Badge variant="outline">{status}</Badge>
+        return <Badge variant="outline">{status || 'Desconhecido'}</Badge>
     }
   }
 
-  const getRiscoBadge = (risco: string) => {
+  const getRiscoBadge = (risco: 'BAIXO' | 'MEDIO' | 'ALTO' | 'CRITICO' | undefined) => {
     switch (risco) {
-      case 'baixo':
+      case 'BAIXO':
         return <Badge variant="outline" className="text-green-600 border-green-600">Baixo</Badge>
-      case 'medio':
+      case 'MEDIO':
         return <Badge variant="outline" className="text-yellow-600 border-yellow-600">Médio</Badge>
-      case 'alto':
+      case 'ALTO':
         return <Badge variant="outline" className="text-red-600 border-red-600">Alto</Badge>
+      case 'CRITICO':
+        return <Badge variant="outline" className="text-red-800 border-red-800">Crítico</Badge>
       default:
-        return <Badge variant="outline">{risco}</Badge>
+        return <Badge variant="outline">{risco || 'Desconhecido'}</Badge>
     }
   }
 
@@ -180,9 +190,9 @@ export default function Auditoria() {
   const getLogStats = () => {
     const logsArray = logs || []
     const total = logsArray.length
-    const sucessos = logsArray.filter(log => log.status === 'sucesso').length
-    const falhas = logsArray.filter(log => log.status === 'erro').length
-    const riscoAlto = logsArray.filter(log => log.risco === 'alto').length
+    const sucessos = logsArray.filter(log => log.status === 'SUCESSO').length
+    const falhas = logsArray.filter(log => log.status === 'FALHA').length
+    const riscoAlto = logsArray.filter(log => log.nivelRisco === 'ALTO').length
 
     return { total, sucessos, falhas, riscoAlto }
   }
@@ -207,6 +217,47 @@ export default function Auditoria() {
           )}
           {isExporting ? 'Exportando...' : 'Exportar Logs'}
         </Button>
+      </div>
+
+      {/* Cards de Navegação */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/auditoria/logs')}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="bg-blue-100 p-3 rounded-lg">
+                  <List className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">Logs de Auditoria</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Visualize e gerencie todos os logs de auditoria do sistema
+                  </p>
+                </div>
+              </div>
+              <ArrowRight className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/auditoria/security')}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="bg-red-100 p-3 rounded-lg">
+                  <BarChart3 className="h-6 w-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">Dashboard de Segurança</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Monitore estatísticas e alertas de segurança em tempo real
+                  </p>
+                </div>
+              </div>
+              <ArrowRight className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Estatísticas */}
@@ -418,7 +469,7 @@ export default function Auditoria() {
                   </TableCell>
                   <TableCell>{log.recurso}</TableCell>
                   <TableCell>{getStatusBadge(log.status)}</TableCell>
-                  <TableCell>{getRiscoBadge(log.risco)}</TableCell>
+                  <TableCell>{getRiscoBadge(log.nivelRisco)}</TableCell>
                   <TableCell className="font-mono text-sm">{log.ip}</TableCell>
                   <TableCell>
                     <Dialog>
@@ -468,7 +519,7 @@ export default function Auditoria() {
                               </div>
                               <div>
                                 <Label className="text-sm font-medium">Nível de Risco</Label>
-                                <div className="mt-1">{getRiscoBadge(selectedLog.risco)}</div>
+                                <div className="mt-1">{getRiscoBadge(selectedLog.nivelRisco)}</div>
                               </div>
                               <div>
                                 <Label className="text-sm font-medium">Endereço IP</Label>

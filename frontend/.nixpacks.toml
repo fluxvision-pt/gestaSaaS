@@ -1,8 +1,8 @@
 # nixpacks.toml — configuração limpa e otimizada para Vite + EasyPanel
 
 [phases.setup]
-# Usa Node 20 estável
-nixPkgs = ["nodejs_20"]
+# Usa Node 22 estável
+nixPkgs = ["nodejs_22"]
 aptPkgs = []
 
 [phases.install]

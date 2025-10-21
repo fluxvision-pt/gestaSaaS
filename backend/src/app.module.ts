@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 
 // Importa Debug no navegador
 import { DebugModule } from './debug/debug.module';
@@ -17,13 +18,17 @@ import { PagamentosModule } from './modules/pagamentos/pagamentos.module';
 import { FinanceiroModule } from './modules/financeiro/financeiro.module';
 import { KmModule } from './modules/km/km.module';
 import { RelatoriosModule } from './modules/relatorios/relatorios.module';
+import { RelatoriosModule as NewRelatoriosModule } from './relatorios/relatorios.module';
 import { ConfiguracoesModule } from './modules/configuracoes/configuracoes.module';
 import { AuditoriaModule } from './modules/auditoria/auditoria.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { BackupModule } from './modules/backup/backup.module';
 import { HealthModule } from './health/health.module';
 
-// Guards
+// Guards e Interceptors
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
+import { AuditInterceptor } from './modules/auditoria/interceptors/audit.interceptor';
 
 // Entidades
 import { Tenant } from './modules/tenancy/entities/tenant.entity';
@@ -40,6 +45,8 @@ import { KmDiario } from './modules/km/entities/km-diario.entity';
 import { Configuracao } from './modules/configuracoes/entities/configuracao.entity';
 import { Auditoria } from './modules/auditoria/entities/auditoria.entity';
 import { TokenRecuperacao } from './modules/auth/entities/token-recuperacao.entity';
+import { Notification } from './modules/notifications/entities/notification.entity';
+import { Backup } from './modules/backup/entities/backup.entity';
 
 @Module({
   imports: [
@@ -73,6 +80,8 @@ import { TokenRecuperacao } from './modules/auth/entities/token-recuperacao.enti
             Configuracao,
             Auditoria,
             TokenRecuperacao,
+            Notification,
+            Backup,
           ],
           synchronize: true,
           logging: configService.get('NODE_ENV') === 'development',
@@ -111,6 +120,9 @@ import { TokenRecuperacao } from './modules/auth/entities/token-recuperacao.enti
       ],
     }),
 
+    // Schedule para tarefas agendadas
+    ScheduleModule.forRoot(),
+
     // Módulos da aplicação
     HealthModule,
     AuthModule,
@@ -122,15 +134,23 @@ import { TokenRecuperacao } from './modules/auth/entities/token-recuperacao.enti
     FinanceiroModule,
     KmModule,
     RelatoriosModule,
+    NewRelatoriosModule,
     ConfiguracoesModule,
     AuditoriaModule,
     AdminModule,
+    NotificationsModule,
+    BackupModule,
   ],
   providers: [
     // Guard global para JWT
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    // Interceptor global para auditoria
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditInterceptor,
     },
   ],
 })

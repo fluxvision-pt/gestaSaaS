@@ -6,32 +6,29 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Building2, 
   Users, 
-  DollarSign, 
-  Calendar,
+  DollarSign,
   Search,
   Filter, 
-  MoreHorizontal,
   Edit,
   Trash2,
   Eye,
-  UserPlus,
   Settings,
   Activity,
   AlertTriangle,
   CheckCircle,
   XCircle,
-  Download,
-  Upload
+  Download
 } from 'lucide-react';
 import { useApi } from '@/hooks/useApi';
 import { toast } from 'sonner';
 import { adminApi, type TenantDetails } from '@/services/adminApi';
+import { planService, type AppPlan } from '@/services/api';
 
 interface TenantFilters {
   search: string;
@@ -55,13 +52,14 @@ export default function TenantManagement() {
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
 
   const { data: tenantsData, loading: tenantsLoading, refetch: refetchTenants } = useApi<TenantDetails[]>(() => adminApi.getAllTenants());
+  const { data: planosData, loading: planosLoading } = useApi<AppPlan[]>(() => planService.getPlans());
 
   useEffect(() => {
     if (tenantsData) {
       setTenants(tenantsData);
     }
-    setLoading(tenantsLoading);
-  }, [tenantsData, tenantsLoading]);
+    setLoading(tenantsLoading || planosLoading);
+  }, [tenantsData, tenantsLoading, planosLoading]);
 
   const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat('pt-BR', {

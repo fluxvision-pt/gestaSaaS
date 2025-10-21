@@ -14,10 +14,7 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
 import { AdminService } from './admin.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
-import { PerfilUsuario } from '../usuarios/entities/usuario.entity';
+import { SuperAdminOnly } from '../auth/decorators/super-admin-only.decorator';
 
 import {
   DashboardStatsDto,
@@ -35,10 +32,8 @@ import {
 } from './dto';
 
 @ApiTags('Admin')
-@ApiBearerAuth()
 @Controller('admin')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(PerfilUsuario.SUPER_ADMIN)
+@SuperAdminOnly()
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 

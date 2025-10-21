@@ -23,6 +23,13 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Usuario } from './entities/usuario.entity';
 
+// Importar decorators de autorização por módulos
+import { 
+  UsuariosModuleAccess, 
+  ModuleWithLimit 
+} from '../planos/decorators/module-access.decorator';
+import { ModuloSistema, RecursoModulo } from '../planos/interfaces/plano-modulos.interface';
+
 @ApiTags('Usuários')
 @Controller('usuarios')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -31,11 +38,11 @@ export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
 
   @Post()
+  @ModuleWithLimit(ModuloSistema.USUARIOS, RecursoModulo.USUARIOS_LIMITE, 'Criar novo usuário')
   @Roles('super_admin', 'cliente_admin')
-  @ApiOperation({ summary: 'Criar novo usuário' })
   @ApiResponse({ status: 201, description: 'Usuário criado com sucesso' })
   @ApiResponse({ status: 409, description: 'Email já existe' })
-  @ApiResponse({ status: 403, description: 'Acesso negado' })
+  @ApiResponse({ status: 403, description: 'Acesso negado ou limite de usuários atingido' })
   create(
     @Body() createUsuarioDto: CreateUsuarioDto,
     @CurrentUser() currentUser: Usuario,
@@ -44,20 +51,20 @@ export class UsuariosController {
   }
 
   @Get()
+  @UsuariosModuleAccess('Listar usuários')
   @Roles('super_admin', 'cliente_admin')
-  @ApiOperation({ summary: 'Listar usuários' })
   @ApiResponse({ status: 200, description: 'Lista de usuários retornada com sucesso' })
-  @ApiResponse({ status: 403, description: 'Acesso negado' })
+  @ApiResponse({ status: 403, description: 'Acesso negado ou módulo não disponível no plano' })
   findAll(@CurrentUser() currentUser: Usuario) {
     return this.usuariosService.findAll(currentUser);
   }
 
   @Get(':id')
+  @UsuariosModuleAccess('Buscar usuário por ID')
   @Roles('super_admin', 'cliente_admin', 'cliente_usuario')
-  @ApiOperation({ summary: 'Buscar usuário por ID' })
   @ApiResponse({ status: 200, description: 'Usuário encontrado com sucesso' })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
-  @ApiResponse({ status: 403, description: 'Acesso negado' })
+  @ApiResponse({ status: 403, description: 'Acesso negado ou módulo não disponível no plano' })
   findOne(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() currentUser: Usuario,
@@ -66,12 +73,12 @@ export class UsuariosController {
   }
 
   @Patch(':id')
+  @UsuariosModuleAccess('Atualizar usuário')
   @Roles('super_admin', 'cliente_admin', 'cliente_usuario')
-  @ApiOperation({ summary: 'Atualizar usuário' })
   @ApiResponse({ status: 200, description: 'Usuário atualizado com sucesso' })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
   @ApiResponse({ status: 409, description: 'Email já existe' })
-  @ApiResponse({ status: 403, description: 'Acesso negado' })
+  @ApiResponse({ status: 403, description: 'Acesso negado ou módulo não disponível no plano' })
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUsuarioDto: UpdateUsuarioDto,
@@ -81,11 +88,11 @@ export class UsuariosController {
   }
 
   @Delete(':id')
+  @UsuariosModuleAccess('Excluir usuário')
   @Roles('super_admin', 'cliente_admin')
-  @ApiOperation({ summary: 'Excluir usuário' })
   @ApiResponse({ status: 200, description: 'Usuário excluído com sucesso' })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
-  @ApiResponse({ status: 403, description: 'Acesso negado' })
+  @ApiResponse({ status: 403, description: 'Acesso negado ou módulo não disponível no plano' })
   remove(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() currentUser: Usuario,
