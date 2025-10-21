@@ -10,6 +10,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Tenant } from '../../tenancy/entities/tenant.entity';
 import { Usuario } from '../../usuarios/entities/usuario.entity';
+import { DB_TYPES } from '../../../database/database-types.helper';
 
 export enum TipoTransacao {
   ENTRADA = 'entrada',

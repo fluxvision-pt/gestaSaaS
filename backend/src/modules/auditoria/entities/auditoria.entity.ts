@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Tenant } from '../../tenancy/entities/tenant.entity';
+import { DB_TYPES } from '../../../database/database-types.helper';
 
 export enum TipoAcao {
   CREATE = 'CREATE',

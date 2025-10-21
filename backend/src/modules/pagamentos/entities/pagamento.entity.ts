@@ -10,6 +10,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Assinatura } from '../../assinaturas/entities/assinatura.entity';
 import { Gateway } from './gateway.entity';
+import { DB_TYPES } from '../../../database/database-types.helper';
 
 export enum StatusPagamento {
   PENDENTE = 'pendente',

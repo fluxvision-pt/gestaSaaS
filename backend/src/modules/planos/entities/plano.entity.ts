@@ -9,6 +9,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { PlanoRecurso } from './plano-recurso.entity';
 import { Assinatura } from '../../assinaturas/entities/assinatura.entity';
+import { DB_TYPES } from '../../../database/database-types.helper';
 
 export enum StatusPlano {
   ATIVO = 'ativo',

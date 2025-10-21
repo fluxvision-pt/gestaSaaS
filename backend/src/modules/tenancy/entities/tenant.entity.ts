@@ -13,6 +13,7 @@ import { Transacao } from '../../financeiro/entities/transacao.entity';
 import { KmDiario } from '../../km/entities/km-diario.entity';
 import { Configuracao } from '../../configuracoes/entities/configuracao.entity';
 import { Auditoria } from '../../auditoria/entities/auditoria.entity';
+import { DB_TYPES } from '../../../database/database-types.helper';
 
 export enum StatusTenant {
   ATIVO = 'ativo',

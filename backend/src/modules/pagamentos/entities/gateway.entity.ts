@@ -9,6 +9,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { CredencialGateway } from './credencial-gateway.entity';
 import { Pagamento } from './pagamento.entity';
+import { DB_TYPES } from '../../../database/database-types.helper';
 
 export enum TipoGateway {
   ONLINE = 'online',

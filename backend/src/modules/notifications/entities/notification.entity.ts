@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Usuario } from '../../usuarios/entities/usuario.entity';
+import { DB_TYPES } from '../../../database/database-types.helper';
 
 export enum TipoNotificacao {
   INFO = 'info',

@@ -29,6 +29,8 @@ import { LanguageSelector } from '@/components/LanguageSelector'
 import OnboardingTour from '@/components/onboarding/OnboardingTour'
 import { useOnboarding } from '@/hooks/useOnboarding'
 import NotificationBadge from '@/components/notifications/NotificationBadge'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { PWAPrompt } from '@/components/pwa/PWAPrompt'
 
 export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -192,6 +194,7 @@ export default function MainLayout() {
             
             <div className="flex items-center space-x-3">
               <LanguageSelector />
+              <ThemeToggle />
               <NotificationBadge />
               <Button 
                 variant="ghost" 
@@ -230,6 +233,9 @@ export default function MainLayout() {
         onClose={closeOnboarding}
         onComplete={completeOnboarding}
       />
+
+      {/* PWA Prompt */}
+      <PWAPrompt />
     </div>
   )
 }

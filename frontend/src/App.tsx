@@ -1,42 +1,62 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import VerifyAccount from './pages/VerifyAccount'
-import ChoosePlan from './pages/ChoosePlan'
-import Payment from './pages/Payment'
-import Welcome from './pages/Welcome'
-import ForgotPassword from './pages/ForgotPassword'
-import ResetPassword from './pages/ResetPassword'
-import DashboardFinanceiro from './pages/DashboardFinanceiro'
-import Usuarios from './pages/Usuarios'
-import Empresas from './pages/Empresas'
-import Planos from './pages/Planos'
-import Assinaturas from './pages/Assinaturas'
-import Pagamentos from './pages/Pagamentos'
-import Gateways from './pages/Gateways'
-import Financeiro from './pages/Financeiro'
-import Receitas from './pages/Receitas'
-import Despesas from './pages/Despesas'
-import Km from './pages/Km'
-import Veiculos from './pages/Veiculos'
-import Manutencoes from './pages/Manutencoes'
-import ControleCombustivel from './pages/ControleCombustivel'
-import AnaliseRentabilidade from './pages/AnaliseRentabilidade'
-import Metas from './pages/Metas'
-import Conquistas from './pages/Conquistas'
-import Relatorios from './pages/Relatorios'
-import RelatoriosAvancados from './pages/RelatoriosAvancados'
-import Configuracoes from './pages/Configuracoes'
-import Profile from './pages/Profile'
-import Auditoria from './pages/Auditoria'
-import AuditoriaLogs from './pages/Auditoria/AuditoriaLogs'
-import SecurityDashboard from './pages/Auditoria/SecurityDashboard'
-import { AdminDashboard, TenantManagement, SystemSettings, UserManagement, PlanManagement } from './pages/admin'
+import { ThemeProvider } from './contexts/ThemeContext'
 import MainLayout from './components/layout/MainLayout'
 import { AdminRoute } from './components/guards/AdminRoute'
+
+// Componente de loading
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+  </div>
+)
+
+// Lazy loading das páginas públicas
+const Login = React.lazy(() => import('./pages/Login'))
+const Register = React.lazy(() => import('./pages/Register'))
+const VerifyAccount = React.lazy(() => import('./pages/VerifyAccount'))
+const ChoosePlan = React.lazy(() => import('./pages/ChoosePlan'))
+const Payment = React.lazy(() => import('./pages/Payment'))
+const Welcome = React.lazy(() => import('./pages/Welcome'))
+const ForgotPassword = React.lazy(() => import('./pages/ForgotPassword'))
+const ResetPassword = React.lazy(() => import('./pages/ResetPassword'))
+
+// Lazy loading das páginas principais
+const Dashboard = React.lazy(() => import('./pages/Dashboard'))
+const DashboardFinanceiro = React.lazy(() => import('./pages/DashboardFinanceiro'))
+const Usuarios = React.lazy(() => import('./pages/Usuarios'))
+const Empresas = React.lazy(() => import('./pages/Empresas'))
+const Planos = React.lazy(() => import('./pages/Planos'))
+const Assinaturas = React.lazy(() => import('./pages/Assinaturas'))
+const Pagamentos = React.lazy(() => import('./pages/Pagamentos'))
+const Gateways = React.lazy(() => import('./pages/Gateways'))
+const Financeiro = React.lazy(() => import('./pages/Financeiro'))
+const Receitas = React.lazy(() => import('./pages/Receitas'))
+const Despesas = React.lazy(() => import('./pages/Despesas'))
+const Km = React.lazy(() => import('./pages/Km'))
+const Veiculos = React.lazy(() => import('./pages/Veiculos'))
+const Manutencoes = React.lazy(() => import('./pages/Manutencoes'))
+const ControleCombustivel = React.lazy(() => import('./pages/ControleCombustivel'))
+const AnaliseRentabilidade = React.lazy(() => import('./pages/AnaliseRentabilidade'))
+const Metas = React.lazy(() => import('./pages/Metas'))
+const Conquistas = React.lazy(() => import('./pages/Conquistas'))
+const Indicacoes = React.lazy(() => import('./pages/Indicacoes'))
+const Relatorios = React.lazy(() => import('./pages/Relatorios'))
+const RelatoriosAvancados = React.lazy(() => import('./pages/RelatoriosAvancados'))
+const Configuracoes = React.lazy(() => import('./pages/Configuracoes'))
+const Profile = React.lazy(() => import('./pages/Profile'))
+const Auditoria = React.lazy(() => import('./pages/Auditoria'))
+const AuditoriaLogs = React.lazy(() => import('./pages/Auditoria/AuditoriaLogs'))
+const SecurityDashboard = React.lazy(() => import('./pages/Auditoria/SecurityDashboard'))
+
+// Lazy loading das páginas de admin
+const AdminDashboard = React.lazy(() => import('./pages/admin/AdminDashboard'))
+const TenantManagement = React.lazy(() => import('./pages/admin/TenantManagement'))
+const SystemSettings = React.lazy(() => import('./pages/admin/SystemSettings'))
+const UserManagement = React.lazy(() => import('./pages/admin/UserManagement'))
+const PlanManagement = React.lazy(() => import('./pages/admin/PlanManagement'))
 
 // Componente para rotas protegidas
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -81,102 +101,217 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 function AppRoutes() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Rotas públicas */}
-        <Route path="/login" element={
-          <PublicRoute>
-            <Login />
-          </PublicRoute>
-        } />
-        <Route path="/register" element={
-          <PublicRoute>
-            <Register />
-          </PublicRoute>
-        } />
-        <Route path="/verify-account/:token" element={<VerifyAccount />} />
-        <Route path="/choose-plan" element={<ChoosePlan />} />
-        <Route path="/payment" element={<Payment />} />
-        <Route path="/welcome" element={<Welcome />} />
-        <Route path="/forgot-password" element={
-          <PublicRoute>
-            <ForgotPassword />
-          </PublicRoute>
-        } />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        
-        {/* Rotas protegidas */}
-        <Route path="/" element={
-          <ProtectedRoute>
-            <MainLayout />
-          </ProtectedRoute>
-        }>
-          <Route index element={<Navigate to="/dashboard" />} />
-          <Route path="dashboard" element={<DashboardFinanceiro />} />
-          <Route path="usuarios" element={<Usuarios />} />
-          <Route path="empresas" element={<Empresas />} />
-          <Route path="planos" element={<Planos />} />
-          <Route path="assinaturas" element={<Assinaturas />} />
-          <Route path="pagamentos" element={<Pagamentos />} />
-          <Route path="gateways" element={<Gateways />} />
-          <Route path="financeiro" element={<Financeiro />} />
-          <Route path="receitas" element={<Receitas />} />
-          <Route path="despesas" element={<Despesas />} />
-          <Route path="km" element={<Km />} />
-          <Route path="veiculos" element={<Veiculos />} />
-          <Route path="veiculos/:id/manutencoes" element={<Manutencoes />} />
-          <Route path="veiculos/:id/combustivel" element={<ControleCombustivel />} />
-          <Route path="veiculos/:id/rentabilidade" element={<AnaliseRentabilidade />} />
-          <Route path="metas" element={<Metas />} />
-          <Route path="conquistas" element={<Conquistas />} />
-          <Route path="relatorios" element={<Relatorios />} />
-          <Route path="relatorios/avancados" element={<RelatoriosAvancados />} />
-          <Route path="configuracoes" element={<Configuracoes />} />
-          <Route path="perfil" element={<Profile />} />
-          <Route path="auditoria" element={<Auditoria />} />
-          <Route path="auditoria/logs" element={<AuditoriaLogs />} />
-          <Route path="auditoria/security" element={<SecurityDashboard />} />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          {/* Rotas públicas */}
+          <Route path="/login" element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          } />
+          <Route path="/register" element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          } />
+          <Route path="/verify-account/:token" element={<VerifyAccount />} />
+          <Route path="/choose-plan" element={<ChoosePlan />} />
+          <Route path="/payment" element={<Payment />} />
+          <Route path="/welcome" element={<Welcome />} />
+          <Route path="/forgot-password" element={
+            <PublicRoute>
+              <ForgotPassword />
+            </PublicRoute>
+          } />
+          <Route path="/reset-password" element={<ResetPassword />} />
           
-          {/* Rotas do painel admin (super admin) */}
-          <Route path="admin" element={
-            <AdminRoute>
-              <AdminDashboard />
-            </AdminRoute>
-          } />
-          <Route path="admin/tenants" element={
-            <AdminRoute>
-              <TenantManagement />
-            </AdminRoute>
-          } />
-          <Route path="admin/settings" element={
-            <AdminRoute>
-              <SystemSettings />
-            </AdminRoute>
-          } />
-          <Route path="admin/users" element={
-            <AdminRoute>
-              <UserManagement />
-            </AdminRoute>
-          } />
-          <Route path="admin/plans" element={
-            <AdminRoute>
-              <PlanManagement />
-            </AdminRoute>
-          } />
-        </Route>
-        
-        {/* Rota padrão */}
-        <Route path="*" element={<Navigate to="/dashboard" />} />
-      </Routes>
+          {/* Rotas protegidas */}
+          <Route path="/" element={
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          }>
+            <Route index element={<Navigate to="/dashboard" />} />
+            <Route path="dashboard" element={
+              <Suspense fallback={<PageLoader />}>
+                <DashboardFinanceiro />
+              </Suspense>
+            } />
+            <Route path="usuarios" element={
+              <Suspense fallback={<PageLoader />}>
+                <Usuarios />
+              </Suspense>
+            } />
+            <Route path="empresas" element={
+              <Suspense fallback={<PageLoader />}>
+                <Empresas />
+              </Suspense>
+            } />
+            <Route path="planos" element={
+              <Suspense fallback={<PageLoader />}>
+                <Planos />
+              </Suspense>
+            } />
+            <Route path="assinaturas" element={
+              <Suspense fallback={<PageLoader />}>
+                <Assinaturas />
+              </Suspense>
+            } />
+            <Route path="pagamentos" element={
+              <Suspense fallback={<PageLoader />}>
+                <Pagamentos />
+              </Suspense>
+            } />
+            <Route path="gateways" element={
+              <Suspense fallback={<PageLoader />}>
+                <Gateways />
+              </Suspense>
+            } />
+            <Route path="financeiro" element={
+              <Suspense fallback={<PageLoader />}>
+                <Financeiro />
+              </Suspense>
+            } />
+            <Route path="receitas" element={
+              <Suspense fallback={<PageLoader />}>
+                <Receitas />
+              </Suspense>
+            } />
+            <Route path="despesas" element={
+              <Suspense fallback={<PageLoader />}>
+                <Despesas />
+              </Suspense>
+            } />
+            <Route path="km" element={
+              <Suspense fallback={<PageLoader />}>
+                <Km />
+              </Suspense>
+            } />
+            <Route path="veiculos" element={
+              <Suspense fallback={<PageLoader />}>
+                <Veiculos />
+              </Suspense>
+            } />
+            <Route path="veiculos/:id/manutencoes" element={
+              <Suspense fallback={<PageLoader />}>
+                <Manutencoes />
+              </Suspense>
+            } />
+            <Route path="veiculos/:id/combustivel" element={
+              <Suspense fallback={<PageLoader />}>
+                <ControleCombustivel />
+              </Suspense>
+            } />
+            <Route path="veiculos/:id/rentabilidade" element={
+              <Suspense fallback={<PageLoader />}>
+                <AnaliseRentabilidade />
+              </Suspense>
+            } />
+            <Route path="metas" element={
+              <Suspense fallback={<PageLoader />}>
+                <Metas />
+              </Suspense>
+            } />
+            <Route path="conquistas" element={
+              <Suspense fallback={<PageLoader />}>
+                <Conquistas />
+              </Suspense>
+            } />
+            <Route path="indicacoes" element={
+              <Suspense fallback={<PageLoader />}>
+                <Indicacoes />
+              </Suspense>
+            } />
+            <Route path="relatorios" element={
+              <Suspense fallback={<PageLoader />}>
+                <Relatorios />
+              </Suspense>
+            } />
+            <Route path="relatorios/avancados" element={
+              <Suspense fallback={<PageLoader />}>
+                <RelatoriosAvancados />
+              </Suspense>
+            } />
+            <Route path="configuracoes" element={
+              <Suspense fallback={<PageLoader />}>
+                <Configuracoes />
+              </Suspense>
+            } />
+            <Route path="perfil" element={
+              <Suspense fallback={<PageLoader />}>
+                <Profile />
+              </Suspense>
+            } />
+            <Route path="auditoria" element={
+              <Suspense fallback={<PageLoader />}>
+                <Auditoria />
+              </Suspense>
+            } />
+            <Route path="auditoria/logs" element={
+              <Suspense fallback={<PageLoader />}>
+                <AuditoriaLogs />
+              </Suspense>
+            } />
+            <Route path="auditoria/security" element={
+              <Suspense fallback={<PageLoader />}>
+                <SecurityDashboard />
+              </Suspense>
+            } />
+            
+            {/* Rotas do painel admin (super admin) */}
+            <Route path="admin" element={
+              <AdminRoute>
+                <Suspense fallback={<PageLoader />}>
+                  <AdminDashboard />
+                </Suspense>
+              </AdminRoute>
+            } />
+            <Route path="admin/tenants" element={
+              <AdminRoute>
+                <Suspense fallback={<PageLoader />}>
+                  <TenantManagement />
+                </Suspense>
+              </AdminRoute>
+            } />
+            <Route path="admin/settings" element={
+              <AdminRoute>
+                <Suspense fallback={<PageLoader />}>
+                  <SystemSettings />
+                </Suspense>
+              </AdminRoute>
+            } />
+            <Route path="admin/users" element={
+              <AdminRoute>
+                <Suspense fallback={<PageLoader />}>
+                  <UserManagement />
+                </Suspense>
+              </AdminRoute>
+            } />
+            <Route path="admin/plans" element={
+              <AdminRoute>
+                <Suspense fallback={<PageLoader />}>
+                  <PlanManagement />
+                </Suspense>
+              </AdminRoute>
+            } />
+          </Route>
+          
+          {/* Rota padrão */}
+          <Route path="*" element={<Navigate to="/dashboard" />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   )
 }
 
 function App() {
   return (
-    <AuthProvider>
-      <AppRoutes />
-      <Toaster />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppRoutes />
+        <Toaster />
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
 

@@ -8,30 +8,36 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
 
 import { 
   Settings, 
-  Database, 
-  Mail, 
-  Shield, 
   Globe, 
-  Palette,
-  Bell,
-  Key,
-  Server,
-  Monitor,
-  Users,
-  DollarSign,
-  FileText,
+  Mail, 
+  CreditCard,
+  MapPin,
+  Shield,
   Save,
   RefreshCw,
   AlertTriangle,
   CheckCircle,
-  Info
+  Info,
+  Upload,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { useApi } from '@/hooks/useApi';
 import { toast } from 'sonner';
-import { adminApi, type SystemConfig } from '@/services/adminApi';
+import { adminApi } from '@/services/adminApi';
+
+interface SystemConfig {
+  id: string;
+  chave: string;
+  valor: string;
+  descricao?: string;
+  categoria?: string;
+  tipo?: 'string' | 'number' | 'boolean' | 'json' | 'password';
+}
 
 interface ConfigSection {
   title: string;
@@ -45,8 +51,9 @@ export default function SystemSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [changes, setChanges] = useState<{ [key: string]: any }>({});
+  const [showPasswords, setShowPasswords] = useState<{ [key: string]: boolean }>({});
 
-  const { data: configData, loading: configLoading, refetch: refetchConfig } = useApi<SystemConfig[]>(() => adminApi.getSystemConfigs());
+  const { data: configData, loading: configLoading, refetch: refetchConfig } = useApi<SystemConfig[]>(() => adminApi.getSystemConfigurations());
 
   useEffect(() => {
     if (configData) {
@@ -55,10 +62,10 @@ export default function SystemSettings() {
     setLoading(configLoading);
   }, [configData, configLoading]);
 
-  const handleConfigChange = (configId: string, value: any) => {
+  const handleConfigChange = (configKey: string, value: any) => {
     setChanges(prev => ({
       ...prev,
-      [configId]: value
+      [configKey]: value
     }));
   };
 
@@ -70,24 +77,17 @@ export default function SystemSettings() {
 
     setSaving(true);
     try {
-      const response = await fetch('/api/admin/system/configurations', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ changes })
-      });
-
-      if (response.ok) {
-        toast.success("As configurações foram atualizadas com sucesso.");
-        setChanges({});
-        refetchConfig();
-      } else {
-        throw new Error('Erro ao salvar configurações');
+      // Salvar cada configuração individualmente
+      for (const [chave, valor] of Object.entries(changes)) {
+        await adminApi.updateSystemConfiguration({ chave, valor: String(valor) });
       }
+
+      toast.success("As configurações foram atualizadas com sucesso.");
+      setChanges({});
+      refetchConfig();
     } catch (error) {
       toast.error("Não foi possível salvar as configurações.");
+      console.error('Erro ao salvar configurações:', error);
     } finally {
       setSaving(false);
     }
@@ -99,273 +99,291 @@ export default function SystemSettings() {
   };
 
   const getConfigValue = (config: SystemConfig) => {
-    if (changes[config.id] !== undefined) {
-      return changes[config.id];
+    if (changes[config.chave] !== undefined) {
+      return changes[config.chave];
     }
     
-    switch (config.type) {
+    switch (config.tipo || 'string') {
       case 'boolean':
-        return config.value === 'true';
+        return config.valor === 'true';
       case 'number':
-        return Number(config.value);
+        return Number(config.valor);
       case 'json':
         try {
-          return JSON.parse(config.value);
+          return JSON.parse(config.valor);
         } catch {
-          return config.value;
+          return config.valor;
         }
       default:
-        return config.value;
+        return config.valor;
     }
+  };
+
+  const togglePasswordVisibility = (configKey: string) => {
+    setShowPasswords(prev => ({
+      ...prev,
+      [configKey]: !prev[configKey]
+    }));
   };
 
   const renderConfigInput = (config: SystemConfig) => {
     const value = getConfigValue(config);
-
-    switch (config.type) {
+    const isPassword = config.tipo === 'password' || config.chave.toLowerCase().includes('password') || config.chave.toLowerCase().includes('secret') || config.chave.toLowerCase().includes('key');
+    
+    switch (config.tipo || 'string') {
       case 'boolean':
         return (
           <div className="flex items-center space-x-2">
             <Switch
               checked={value}
-              onCheckedChange={(checked) => handleConfigChange(config.id, checked)}
+              onCheckedChange={(checked) => handleConfigChange(config.chave, checked)}
             />
-            <Label>{value ? 'Ativado' : 'Desativado'}</Label>
+            <Badge variant={value ? "default" : "secondary"}>
+              {value ? "Ativo" : "Inativo"}
+            </Badge>
           </div>
         );
-
+      
       case 'number':
         return (
           <Input
             type="number"
             value={value}
-            onChange={(e) => handleConfigChange(config.id, Number(e.target.value))}
+            onChange={(e) => handleConfigChange(config.chave, Number(e.target.value))}
+            className="max-w-xs"
           />
         );
-
+      
       case 'json':
         return (
           <Textarea
             value={typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
-            onChange={(e) => {
-              try {
-                const parsed = JSON.parse(e.target.value);
-                handleConfigChange(config.id, parsed);
-              } catch {
-                handleConfigChange(config.id, e.target.value);
-              }
-            }}
-            rows={4}
+            onChange={(e) => handleConfigChange(config.chave, e.target.value)}
             className="font-mono text-sm"
+            rows={4}
           />
         );
-
+      
       default:
-        if (config.key.includes('password') || config.key.includes('secret') || config.key.includes('key')) {
+        if (isPassword) {
           return (
-            <Input
-              type="password"
-              value={value}
-              onChange={(e) => handleConfigChange(config.id, e.target.value)}
-            />
+            <div className="flex items-center space-x-2 max-w-md">
+              <Input
+                type={showPasswords[config.chave] ? "text" : "password"}
+                value={value}
+                onChange={(e) => handleConfigChange(config.chave, e.target.value)}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => togglePasswordVisibility(config.chave)}
+              >
+                {showPasswords[config.chave] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
+            </div>
           );
         }
         
-        if (config.description && config.description.length > 100) {
-          return (
-            <Textarea
-              value={value}
-              onChange={(e) => handleConfigChange(config.id, e.target.value)}
-              rows={3}
-            />
-          );
-        }
-
         return (
           <Input
+            type="text"
             value={value}
-            onChange={(e) => handleConfigChange(config.id, e.target.value)}
+            onChange={(e) => handleConfigChange(config.chave, e.target.value)}
+            className="max-w-md"
           />
         );
     }
   };
 
   const groupConfigsByCategory = (): ConfigSection[] => {
-    const grouped = configurations.reduce((acc, config) => {
-      if (!acc[config.category]) {
-        acc[config.category] = [];
-      }
-      acc[config.category].push(config);
-      return acc;
-    }, {} as { [key: string]: SystemConfig[] });
-
     const sections: ConfigSection[] = [
       {
         title: 'Geral',
-        description: 'Configurações gerais do sistema',
+        description: 'Configurações gerais da aplicação',
         icon: <Settings className="h-5 w-5" />,
-        configs: grouped['geral'] || []
+        configs: configurations.filter(config => 
+          config.chave.includes('app_') || 
+          config.chave.includes('default_') ||
+          config.chave.includes('timezone') ||
+          config.chave.includes('max_')
+        )
       },
       {
-        title: 'Banco de Dados',
-        description: 'Configurações de conexão e performance do banco',
-        icon: <Database className="h-5 w-5" />,
-        configs: grouped['database'] || []
+        title: 'Pagamentos',
+        description: 'Configurações de gateways de pagamento',
+        icon: <CreditCard className="h-5 w-5" />,
+        configs: configurations.filter(config => 
+          config.chave.includes('stripe') || 
+          config.chave.includes('mercadopago') ||
+          config.chave.includes('pix') ||
+          config.chave.includes('boleto')
+        )
       },
       {
         title: 'Email',
         description: 'Configurações de envio de emails',
         icon: <Mail className="h-5 w-5" />,
-        configs: grouped['email'] || []
+        configs: configurations.filter(config => 
+          config.chave.includes('smtp') || 
+          config.chave.includes('email')
+        )
+      },
+      {
+        title: 'Localização',
+        description: 'Configurações de localização e idioma',
+        icon: <MapPin className="h-5 w-5" />,
+        configs: configurations.filter(config => 
+          config.chave.includes('country') || 
+          config.chave.includes('currency') ||
+          config.chave.includes('language') ||
+          config.chave.includes('timezone')
+        )
       },
       {
         title: 'Segurança',
         description: 'Configurações de segurança e autenticação',
         icon: <Shield className="h-5 w-5" />,
-        configs: grouped['security'] || []
-      },
-      {
-        title: 'API',
-        description: 'Configurações da API e integrações',
-        icon: <Globe className="h-5 w-5" />,
-        configs: grouped['api'] || []
-      },
-      {
-        title: 'Interface',
-        description: 'Configurações de aparência e tema',
-        icon: <Palette className="h-5 w-5" />,
-        configs: grouped['ui'] || []
+        configs: configurations.filter(config => 
+          config.chave.includes('password') || 
+          config.chave.includes('session') ||
+          config.chave.includes('login') ||
+          config.chave.includes('2fa') ||
+          config.chave.includes('verification')
+        )
       },
       {
         title: 'Notificações',
         description: 'Configurações de notificações do sistema',
-        icon: <Bell className="h-5 w-5" />,
-        configs: grouped['notifications'] || []
-      },
-      {
-        title: 'Pagamentos',
-        description: 'Configurações de gateway de pagamento',
-        icon: <DollarSign className="h-5 w-5" />,
-        configs: grouped['payments'] || []
+        icon: <Globe className="h-5 w-5" />,
+        configs: configurations.filter(config => 
+          config.chave.includes('notification') || 
+          config.chave.includes('push') ||
+          config.chave.includes('sms')
+        )
       }
     ];
 
     return sections.filter(section => section.configs.length > 0);
   };
 
+  const hasChanges = Object.keys(changes).length > 0;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="text-center">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>Carregando configurações...</p>
+        </div>
       </div>
     );
   }
 
   const sections = groupConfigsByCategory();
-  const hasChanges = Object.keys(changes).length > 0;
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Configurações do Sistema</h1>
           <p className="text-muted-foreground">
-            Gerencie as configurações globais do sistema
+            Gerencie as configurações globais da plataforma
           </p>
         </div>
+        
         <div className="flex items-center space-x-2">
           {hasChanges && (
-            <>
-              <Button variant="outline" onClick={handleResetChanges}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Descartar
-              </Button>
-              <Button onClick={handleSaveChanges} disabled={saving}>
-                <Save className="h-4 w-4 mr-2" />
-                {saving ? 'Salvando...' : 'Salvar Alterações'}
-              </Button>
-            </>
+            <Button 
+              variant="outline" 
+              onClick={handleResetChanges}
+              disabled={saving}
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Descartar
+            </Button>
           )}
+          
+          <Button 
+            onClick={handleSaveChanges}
+            disabled={!hasChanges || saving}
+            className="bg-emerald-600 hover:bg-emerald-700"
+          >
+            {saving ? (
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-4 w-4" />
+            )}
+            {saving ? 'Salvando...' : 'Salvar Alterações'}
+          </Button>
         </div>
       </div>
 
-      {/* Changes Alert */}
+      {/* Status de alterações */}
       {hasChanges && (
-        <Card className="border-yellow-200 bg-yellow-50">
-          <CardContent className="pt-6">
+        <Card className="border-amber-200 bg-amber-50">
+          <CardContent className="pt-4">
             <div className="flex items-center space-x-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-600" />
-              <div>
-                <p className="font-medium text-yellow-800">
-                  Você tem {Object.keys(changes).length} alteração(ões) não salva(s)
-                </p>
-                <p className="text-sm text-yellow-700">
-                  Lembre-se de salvar suas alterações antes de sair da página.
-                </p>
-              </div>
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <span className="text-sm text-amber-800">
+                Você tem {Object.keys(changes).length} alteração(ões) não salva(s)
+              </span>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Configuration Sections */}
-      <Tabs defaultValue={sections[0]?.title.toLowerCase()} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
-          {sections.slice(0, 8).map((section) => (
-            <TabsTrigger key={section.title} value={section.title.toLowerCase()}>
+      {/* Tabs de configurações */}
+      <Tabs defaultValue={sections[0]?.title.toLowerCase() || 'geral'} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-6">
+          {sections.map((section) => (
+            <TabsTrigger 
+              key={section.title.toLowerCase()} 
+              value={section.title.toLowerCase()}
+              className="flex items-center gap-2"
+            >
               {section.icon}
-              <span className="ml-2 hidden sm:inline">{section.title}</span>
+              <span className="hidden sm:inline">{section.title}</span>
             </TabsTrigger>
           ))}
         </TabsList>
 
         {sections.map((section) => (
-          <TabsContent key={section.title} value={section.title.toLowerCase()}>
+          <TabsContent key={section.title.toLowerCase()} value={section.title.toLowerCase()}>
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+                <CardTitle className="flex items-center gap-2">
                   {section.icon}
-                  <span>{section.title}</span>
+                  {section.title}
                 </CardTitle>
                 <CardDescription>{section.description}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {section.configs.map((config, index) => (
-                  <div key={config.id}>
-                    <div className="space-y-2">
+                  <div key={config.chave}>
+                    <div className="flex flex-col space-y-2">
                       <div className="flex items-center justify-between">
-                        <Label htmlFor={config.id} className="text-sm font-medium">
-                          {config.key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                        </Label>
-                        <div className="flex items-center space-x-2">
-                          {changes[config.id] !== undefined && (
-                            <Badge variant="outline" className="text-xs">
-                              Alterado
-                            </Badge>
-                          )}
-                          {config.isPublic && (
-                            <Badge variant="secondary" className="text-xs">
-                              Público
-                            </Badge>
+                        <div className="space-y-1">
+                          <Label className="text-sm font-medium">
+                            {config.chave.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </Label>
+                          {config.descricao && (
+                            <p className="text-xs text-muted-foreground">
+                              {config.descricao}
+                            </p>
                           )}
                         </div>
+                        {changes[config.chave] !== undefined && (
+                          <Badge variant="outline" className="text-xs">
+                            Modificado
+                          </Badge>
+                        )}
                       </div>
-                      
-                      {config.description && (
-                        <p className="text-sm text-muted-foreground">
-                          {config.description}
-                        </p>
-                      )}
-                      
-                      <div className="max-w-md">
-                        {renderConfigInput(config)}
-                      </div>
+                      {renderConfigInput(config)}
                     </div>
-                    
-                    {index < section.configs.length - 1 && (
-                      <div className="mt-6 border-t border-gray-200" />
-                    )}
+                    {index < section.configs.length - 1 && <Separator />}
                   </div>
                 ))}
               </CardContent>
@@ -374,45 +392,18 @@ export default function SystemSettings() {
         ))}
       </Tabs>
 
-      {/* System Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Info className="h-5 w-5" />
-            <span>Informações do Sistema</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div>
-              <Label className="text-sm font-medium">Versão do Sistema</Label>
-              <p className="text-sm text-muted-foreground">v1.0.0</p>
-            </div>
-            <div>
-              <Label className="text-sm font-medium">Ambiente</Label>
-              <p className="text-sm text-muted-foreground">Produção</p>
-            </div>
-            <div>
-              <Label className="text-sm font-medium">Última Atualização</Label>
-              <p className="text-sm text-muted-foreground">
-                {new Date().toLocaleDateString('pt-BR')}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Warning */}
-      <Card className="border-red-200 bg-red-50">
-        <CardContent className="pt-6">
+      {/* Footer com informações */}
+      <Card className="border-blue-200 bg-blue-50">
+        <CardContent className="pt-4">
           <div className="flex items-start space-x-2">
-            <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
-            <div>
-              <p className="font-medium text-red-800">Atenção</p>
-              <p className="text-sm text-red-700">
-                Alterações nas configurações do sistema podem afetar o funcionamento da aplicação. 
-                Certifique-se de entender o impacto antes de fazer modificações.
-              </p>
+            <Info className="h-4 w-4 text-blue-600 mt-0.5" />
+            <div className="text-sm text-blue-800">
+              <p className="font-medium">Importante:</p>
+              <ul className="mt-1 space-y-1 text-xs">
+                <li>• As alterações afetam todo o sistema globalmente</li>
+                <li>• Algumas configurações podem exigir reinicialização do sistema</li>
+                <li>• Mantenha backup das configurações importantes</li>
+              </ul>
             </div>
           </div>
         </CardContent>

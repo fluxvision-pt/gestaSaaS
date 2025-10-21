@@ -114,7 +114,7 @@ async function createSuperAdmins() {
           'Eltton Santos',
           'santos.eltton@gmail.com',
           '+351967247471',
-          '$2a$12$kdeIL5BxI1Uz.gt6f.lc6efZryWdDF89QwBJIpOpaliEpYyOV5jY.',
+          '$2a$12$zMazrB8m.cwU2G1/AmrpVejHMtJoYQRjt6AwcZdXN09AhPfRL6pZu',
           'super_admin',
           'pt-BR',
           'BRL',

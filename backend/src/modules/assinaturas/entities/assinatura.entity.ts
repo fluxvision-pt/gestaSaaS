@@ -12,6 +12,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Tenant } from '../../tenancy/entities/tenant.entity';
 import { Plano } from '../../planos/entities/plano.entity';
 import { Pagamento } from '../../pagamentos/entities/pagamento.entity';
+import { DB_TYPES } from '../../../database/database-types.helper';
 
 export enum CicloAssinatura {
   MENSAL = 'mensal',

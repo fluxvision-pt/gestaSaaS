@@ -44,12 +44,11 @@ export interface TenantStats {
 
 export interface SystemConfig {
   id: string
-  key: string
-  value: string
-  type: 'string' | 'number' | 'boolean' | 'json'
-  category: string
-  description?: string
-  isPublic: boolean
+  chave: string
+  valor: string
+  descricao?: string
+  categoria?: string
+  tipo?: 'string' | 'number' | 'boolean' | 'json' | 'password'
 }
 
 
@@ -111,17 +110,11 @@ export const adminApi = {
     api.post(`/admin/tenants/${tenantId}/impersonate`).then(res => res.data),
 
   // System Configuration
-  getSystemConfigs: (): Promise<SystemConfig[]> =>
-    api.get('/admin/system/configs').then(res => res.data),
+  getSystemConfigurations: (): Promise<SystemConfig[]> =>
+    api.get('/admin/system/configurations').then(res => res.data),
 
-  updateSystemConfig: (configId: string, value: string): Promise<void> =>
-    api.patch(`/admin/system/configs/${configId}`, { value }),
-
-  createSystemConfig: (config: Omit<SystemConfig, 'id'>): Promise<SystemConfig> =>
-    api.post('/admin/system/configs', config).then(res => res.data),
-
-  deleteSystemConfig: (configId: string): Promise<void> =>
-    api.delete(`/admin/system/configs/${configId}`),
+  updateSystemConfiguration: (config: { chave: string; valor: string }): Promise<SystemConfig> =>
+    api.post('/admin/system/configurations', config).then(res => res.data),
 
   // Audit Logs
   getAuditLogs: (params?: {

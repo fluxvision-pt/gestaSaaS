@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { DB_TYPES } from '../../../database/database-types.helper';
 
 export enum TipoBackup {
   COMPLETO = 'completo',

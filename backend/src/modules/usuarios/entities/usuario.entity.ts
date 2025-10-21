@@ -14,6 +14,7 @@ import { Exclude } from 'class-transformer';
 import { Tenant } from '../../tenancy/entities/tenant.entity';
 import { Transacao } from '../../financeiro/entities/transacao.entity';
 import { KmDiario } from '../../km/entities/km-diario.entity';
+import { DB_TYPES } from '../../../database/database-types.helper';
 
 export enum PerfilUsuario {
   SUPER_ADMIN = 'super_admin',
