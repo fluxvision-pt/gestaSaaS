@@ -191,16 +191,14 @@ export class AuthService {
 
     // Criar tenant automaticamente para o novo usuário
     const tenant = this.tenantRepository.create({
-      nome: `${nome} - Empresa`, // Nome padrão baseado no nome do usuário
+      nomeFantasia: `${nome} - Empresa`, // Nome padrão baseado no nome do usuário
       email: email,
       documento: '', // Documento vazio inicialmente, pode ser preenchido depois
-      telefone: telefoneE164 || '',
+      telefoneE164: telefoneE164 || '',
       status: StatusTenant.ATIVO,
-      configuracoes: {
-        idioma: 'pt-BR',
-        moeda: 'BRL',
-        fuso_horario: 'America/Sao_Paulo'
-      }
+      idiomaPreferido: 'pt-BR',
+      moedaPreferida: 'BRL',
+      codPais: 'BR'
     });
 
     const savedTenant = await this.tenantRepository.save(tenant);
