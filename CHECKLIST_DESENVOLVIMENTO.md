@@ -761,7 +761,7 @@ Transformar o sistema atual em uma plataforma de gestão financeira pessoal foca
     - [x] Tipo (Fixa/Variável)
     - [x] Comprovante (ícone se anexado)
     - [x] Ações
-  - [ ] Modal "Nova Despesa" com upload de comprovante
+  - [x] Modal "Nova Despesa" com upload de comprovante
 
 - [ ] **📄 DESPESAS RECORRENTES** (`/despesas/recorrentes`)
   **Componentes da Página:**
